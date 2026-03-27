@@ -1,0 +1,22 @@
+{
+  "appId": "com.iceedge.app",
+  "appName": "RinkBuddy",
+  "webDir": "www",
+  "server": {
+    "allowNavigation": ["*"]
+  },
+  "plugins": {
+    "Camera": {
+      "permissions": ["camera"]
+    }
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0b1120",
+    "preferredContentMode": "mobile"
+  },
+  "android": {
+    "backgroundColor": "#0b1120",
+    "allowMixedContent": true
+  }
+}

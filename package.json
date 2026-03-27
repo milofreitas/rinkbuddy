@@ -1,0 +1,31 @@
+{
+  "name": "rinkbuddy",
+  "version": "1.0.0",
+  "description": "RinkBuddy — Skating Performance Analyzer",
+  "main": "serve.js",
+  "scripts": {
+    "serve": "node serve.js",
+    "cap:sync": "npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "cap:build": "npx cap sync && echo 'Ready! Open in Xcode/Android Studio to build.'"
+  },
+  "keywords": [
+    "skating",
+    "ice",
+    "performance",
+    "hockey",
+    "figure-skating"
+  ],
+  "author": "Murilo",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/camera": "^8.0.2",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/ios": "^8.3.0",
+    "@capacitor/preferences": "^8.0.1"
+  }
+}

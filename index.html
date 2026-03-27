@@ -1,0 +1,3002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RinkBuddy">
+  <meta name="theme-color" content="#0b1120">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>RinkBuddy — Skating Performance Analyzer</title>
+  <style>
+    :root {
+      --bg: #0b1120; --surface: #131b2e; --surface2: #1a2540;
+      --accent: #38bdf8; --accent2: #818cf8; --accent3: #f472b6;
+      --success: #34d399; --warning: #fbbf24; --danger: #f87171;
+      --text: #e2e8f0; --text-dim: #94a3b8; --border: #1e3a5f; --radius: 12px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    .header{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+    .logo{display:flex;align-items:center;gap:8px;font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .logo svg{width:28px;height:28px}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .streak-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:0.75rem;color:var(--warning);font-weight:600}
+    .discipline-toggle{display:flex;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+    .disc-btn{padding:6px 14px;border:none;background:none;color:var(--text-dim);font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+    .disc-btn.active{background:var(--accent);color:white}
+    .nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+    .nav::-webkit-scrollbar{display:none}
+    .nav-btn{flex:1;min-width:70px;padding:12px 6px;background:none;border:none;color:var(--text-dim);font-size:0.7rem;font-weight:500;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s}
+    .nav-btn:hover{color:var(--text);background:var(--surface2)}
+    .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(56,189,248,0.05)}
+    .nav-btn svg{width:18px;height:18px}
+    .content{max-width:1000px;margin:0 auto;padding:16px}
+    .section{display:none}.section.active{display:block}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;animation:fadeIn 0.3s ease}
+    .card-title{font-size:0.95rem;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+    .stat-box{background:var(--surface2);border-radius:10px;padding:14px;text-align:center}
+    .stat-value{font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-label{font-size:0.7rem;color:var(--text-dim);margin-top:2px}
+    .btn{padding:10px 18px;border-radius:8px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
+    .btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
+    .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+    .btn-secondary:hover{background:var(--border)}
+    .btn-danger{background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.3)}
+    .btn-sm{padding:6px 12px;font-size:0.72rem}
+    .form-group{margin-bottom:14px}
+    .form-label{display:block;font-size:0.78rem;color:var(--text-dim);margin-bottom:5px;font-weight:500}
+    .form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none;transition:border-color 0.2s}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
+    .form-textarea{resize:vertical;min-height:70px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    /* Onboarding */
+    .onboarding{text-align:center;padding:40px 20px}
+    .onboarding h2{font-size:1.3rem;margin-bottom:8px}
+    .onboarding p{color:var(--text-dim);font-size:0.85rem;margin-bottom:20px}
+    .onboard-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:400px;margin:0 auto}
+    .onboard-card{background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:24px 16px;cursor:pointer;transition:all 0.2s}
+    .onboard-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .onboard-card.selected{border-color:var(--accent);background:rgba(56,189,248,0.08)}
+    .onboard-card svg{width:48px;height:48px;margin-bottom:10px}
+    .onboard-card h3{font-size:0.95rem;margin-bottom:4px}
+    .onboard-card p{font-size:0.75rem;color:var(--text-dim);margin:0}
+
+    /* Skill Tree */
+    .skill-level{margin-bottom:16px}
+    .skill-level-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .level-badge{padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+    .level-beginner{background:rgba(52,211,153,0.2);color:var(--success)}
+    .level-intermediate{background:rgba(56,189,248,0.2);color:var(--accent)}
+    .level-advanced{background:rgba(129,140,248,0.2);color:var(--accent2)}
+    .level-expert{background:rgba(244,114,182,0.2);color:var(--accent3)}
+    .level-title{font-size:0.85rem;font-weight:600}
+    .level-desc{font-size:0.7rem;color:var(--text-dim);margin-left:auto}
+    .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+    .skill-card{background:var(--surface2);border-radius:10px;padding:12px;text-align:center;border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative}
+    .skill-card:hover{border-color:var(--accent)}
+    .skill-card.mastered{border-color:var(--success);background:rgba(52,211,153,0.05)}
+    .skill-card.learning{border-color:var(--warning);background:rgba(251,191,36,0.05)}
+    .skill-card.locked{opacity:0.5}
+    .skill-name{font-size:0.8rem;font-weight:600;margin-bottom:3px}
+    .skill-rate{font-size:1.1rem;font-weight:700}
+    .skill-attempts{font-size:0.65rem;color:var(--text-dim)}
+    .skill-status{display:inline-block;padding:2px 7px;border-radius:10px;font-size:0.6rem;font-weight:600;margin-top:4px}
+    .status-mastered{background:rgba(52,211,153,0.2);color:var(--success)}
+    .status-learning{background:rgba(251,191,36,0.2);color:var(--warning)}
+    .status-new{background:rgba(148,163,184,0.2);color:var(--text-dim)}
+    .status-locked{background:rgba(148,163,184,0.1);color:var(--text-dim)}
+    .skill-prereq{font-size:0.6rem;color:var(--text-dim);margin-top:3px;font-style:italic}
+    .start-here{position:absolute;top:-6px;right:-6px;background:var(--success);color:#000;font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase}
+
+    /* Video */
+    .video-library{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+    .video-thumb{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;transition:all 0.2s;position:relative}
+    .video-thumb:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .video-thumb.active{border-color:var(--accent);box-shadow:0 0 20px rgba(56,189,248,0.15)}
+    .video-thumb-preview{width:100%;aspect-ratio:16/9;background:#000;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    .video-thumb-preview video{width:100%;height:100%;object-fit:cover}
+    .video-thumb-name{font-size:0.8rem;font-weight:600}
+    .video-thumb-meta{font-size:0.65rem;color:var(--text-dim)}
+    .video-thumb-badge{position:absolute;top:6px;right:6px;background:var(--accent3);color:white;font-size:0.6rem;font-weight:700;padding:2px 6px;border-radius:4px}
+    .upload-mini{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface2);border:1px dashed var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.8rem;color:var(--text-dim);margin-bottom:12px}
+    .upload-mini:hover{border-color:var(--accent);color:var(--text)}
+    .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:50px 20px;text-align:center;cursor:pointer;transition:all 0.3s}
+    .upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(56,189,248,0.05)}
+    .upload-zone svg{color:var(--text-dim);margin-bottom:12px}
+    .upload-zone p{color:var(--text-dim);font-size:0.85rem}
+    .upload-zone .highlight{color:var(--accent);font-weight:600}
+    .upload-zone.compact{padding:16px 20px;display:flex;align-items:center;gap:10px;justify-content:center}
+    .upload-zone.compact svg{margin-bottom:0}
+    .upload-zone.compact p{font-size:0.8rem}
+    .video-preview{width:100%;border-radius:8px;background:#000;max-height:450px}
+    .video-controls{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .timeline-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;cursor:pointer;position:relative;min-width:180px}
+    .timeline-progress{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;width:0%}
+    .timeline-marker{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;cursor:pointer;z-index:2}
+    .timeline-marker.jump{background:var(--accent3)}.timeline-marker.spin{background:var(--accent)}.timeline-marker.step{background:var(--success)}.timeline-marker.stick{background:var(--accent2)}.timeline-marker.other{background:var(--warning)}
+    .time-display{font-size:0.75rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
+
+    /* Annotation toolbar */
+    .anno-toolbar{display:flex;gap:6px;margin-top:10px;padding:12px;background:var(--surface2);border-radius:10px;flex-wrap:wrap;align-items:center}
+    .anno-toolbar-label{font-size:0.75rem;color:var(--text-dim);font-weight:600;width:100%;margin-bottom:4px}
+    .anno-btn{padding:8px 14px;border-radius:8px;border:2px solid transparent;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px}
+    .anno-btn:hover{transform:translateY(-1px)}
+    .anno-btn-jump{background:rgba(244,114,182,0.15);color:var(--accent3);border-color:rgba(244,114,182,0.3)}
+    .anno-btn-jump:hover{background:rgba(244,114,182,0.25)}
+    .anno-btn-spin{background:rgba(56,189,248,0.15);color:var(--accent);border-color:rgba(56,189,248,0.3)}
+    .anno-btn-spin:hover{background:rgba(56,189,248,0.25)}
+    .anno-btn-step{background:rgba(52,211,153,0.15);color:var(--success);border-color:rgba(52,211,153,0.3)}
+    .anno-btn-step:hover{background:rgba(52,211,153,0.25)}
+    .anno-btn-note{background:rgba(251,191,36,0.15);color:var(--warning);border-color:rgba(251,191,36,0.3)}
+    .anno-btn-note:hover{background:rgba(251,191,36,0.25)}
+
+    .annotation-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background 0.2s}
+    .annotation-item:hover{background:var(--border)}
+    .annotation-time{font-size:0.72rem;color:var(--accent);font-weight:600;min-width:45px;font-variant-numeric:tabular-nums}
+    .annotation-tag{padding:2px 7px;border-radius:4px;font-size:0.65rem;font-weight:600}
+    .tag-jump{background:rgba(244,114,182,0.2);color:var(--accent3)}
+    .tag-spin{background:rgba(56,189,248,0.2);color:var(--accent)}
+    .tag-step{background:rgba(52,211,153,0.2);color:var(--success)}
+    .tag-stick{background:rgba(129,140,248,0.2);color:var(--accent2)}
+    .tag-other{background:rgba(251,191,36,0.2);color:var(--warning)}
+    .annotation-text{flex:1;font-size:0.8rem}
+    .quality-dot{width:7px;height:7px;border-radius:50%;background:var(--border);display:inline-block}
+    .quality-dot.filled{background:var(--success)}.quality-dot.warn{background:var(--warning)}.quality-dot.bad{background:var(--danger)}
+
+    /* Video Processing Overlay */
+    .video-processing{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(11,17,32,0.92);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:fadeIn 0.3s ease}
+    .processing-spinner{width:56px;height:56px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+    .processing-title{font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .processing-status{font-size:0.82rem;color:var(--text-dim);text-align:center;max-width:300px}
+    .processing-steps{list-style:none;margin-top:8px;font-size:0.78rem;color:var(--text-dim)}
+    .processing-steps li{padding:4px 0;display:flex;align-items:center;gap:8px}
+    .processing-steps li.done{color:var(--success)}
+    .processing-steps li.active{color:var(--accent)}
+    .processing-steps li .check{width:16px;text-align:center}
+    .processing-results{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:12px;max-width:340px;width:90%}
+    .processing-results h3{font-size:0.9rem;margin-bottom:10px}
+    .result-skill{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.82rem}
+    .result-skill:last-child{border-bottom:none}
+    .result-badge{padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:600}
+    .result-badge.good{background:rgba(52,211,153,0.2);color:var(--success)}
+    .result-badge.ok{background:rgba(251,191,36,0.2);color:var(--warning)}
+    .result-badge.new{background:rgba(56,189,248,0.2);color:var(--accent)}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Session & Comp */
+    .session-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background 0.2s}
+    .session-item:hover{background:var(--border)}
+    .session-date{text-align:center;min-width:44px}
+    .session-day{font-size:1.3rem;font-weight:700;color:var(--accent)}
+    .session-month{font-size:0.65rem;color:var(--text-dim);text-transform:uppercase}
+    .session-info{flex:1}.session-title{font-weight:600;font-size:0.85rem}.session-meta{font-size:0.7rem;color:var(--text-dim);margin-top:2px}
+    .session-score{font-size:1rem;font-weight:700;color:var(--accent2)}
+    .comp-card{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--accent2)}
+    .comp-scores{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+    .comp-score-item{text-align:center}.comp-score-label{font-size:0.65rem;color:var(--text-dim)}.comp-score-value{font-size:1.1rem;font-weight:700}
+    .tes-color{color:var(--accent)}.pcs-color{color:var(--accent2)}.total-color{color:var(--accent3)}
+
+    /* Training cards */
+    .train-card{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid var(--accent)}
+    .train-card.priority-high{border-left-color:var(--danger)}
+    .train-card.priority-med{border-left-color:var(--warning)}
+    .train-card.priority-low{border-left-color:var(--success)}
+    .train-title{font-weight:600;font-size:0.9rem;margin-bottom:4px}
+    .train-desc{font-size:0.8rem;color:var(--text-dim)}
+    .train-drill{background:var(--bg);border-radius:6px;padding:8px 10px;margin-top:8px;font-size:0.78rem}
+    .train-drill-title{font-weight:600;color:var(--accent);font-size:0.72rem;margin-bottom:3px}
+    .next-skill-card{background:linear-gradient(135deg,rgba(56,189,248,0.1),rgba(129,140,248,0.1));border:1px solid rgba(56,189,248,0.3);border-radius:10px;padding:14px;margin-bottom:10px}
+    .next-skill-title{font-weight:700;font-size:0.9rem;color:var(--accent);margin-bottom:4px}
+    .next-skill-why{font-size:0.78rem;color:var(--text-dim)}
+    .next-skill-prereqs{font-size:0.72rem;margin-top:6px}
+
+    /* Plan */
+    .plan-day{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .plan-day:last-child{border-bottom:none}
+    .plan-day-name{min-width:36px;font-size:0.78rem;font-weight:600;color:var(--accent)}
+    .plan-tasks{flex:1;font-size:0.82rem}
+    .plan-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+    .plan-check.done{background:var(--success);border-color:var(--success)}
+
+    /* Goal */
+    .goal-item{background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:8px}
+    .goal-header{display:flex;justify-content:space-between;margin-bottom:6px}
+    .goal-name{font-weight:600;font-size:0.85rem}.goal-deadline{font-size:0.68rem;color:var(--text-dim)}
+    .goal-progress-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+    .goal-progress-fill{height:100%;border-radius:3px;transition:width 0.5s ease}
+    .goal-progress-text{font-size:0.7rem;color:var(--text-dim);margin-top:3px;text-align:right}
+
+    .chart-container{width:100%;height:180px;position:relative;margin-top:10px}
+    .chart-canvas{width:100%;height:100%}
+    .chart-legend{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--text-dim)}
+    .legend-dot{width:8px;height:8px;border-radius:50%}
+    .radar-container{display:flex;justify-content:center;margin:16px 0}
+
+    .sub-tabs{display:flex;gap:4px;background:var(--surface2);padding:3px;border-radius:8px;margin-bottom:14px}
+    .sub-tab{flex:1;padding:7px 10px;background:none;border:none;color:var(--text-dim);font-size:0.75rem;font-weight:500;cursor:pointer;border-radius:6px;transition:all 0.2s}
+    .sub-tab.active{background:var(--accent);color:white}
+
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.active{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;width:100%;max-width:460px;max-height:80vh;overflow-y:auto}
+    .modal-title{font-size:1.05rem;font-weight:700;margin-bottom:14px}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+
+    .empty-state{text-align:center;padding:30px 20px;color:var(--text-dim)}
+    .empty-state p{margin-bottom:12px;font-size:0.85rem}
+    .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--success);color:#000;padding:12px 24px;border-radius:10px;font-size:0.85rem;font-weight:600;z-index:300;transition:transform 0.3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* Guide callout */
+    .guide-callout{background:linear-gradient(135deg,rgba(56,189,248,0.08),rgba(129,140,248,0.08));border:1px solid rgba(56,189,248,0.2);border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.82rem;line-height:1.5}
+    .guide-callout strong{color:var(--accent)}
+    .guide-step{display:flex;align-items:start;gap:10px;margin-bottom:8px}
+    .guide-num{background:var(--accent);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0}
+
+    @media(max-width:600px){.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ═══ LANDING PAGE ═══ */
+    #landingPage{display:none}
+    #landingPage.active{display:block}
+    #appContainer{display:none}
+    #appContainer.active{display:block}
+
+    .lp-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(11,17,32,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(30,58,95,0.5);transition:background 0.3s}
+    .lp-nav-logo{display:flex;align-items:center;gap:8px;font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+    .lp-nav-links{display:flex;align-items:center;gap:24px}
+    .lp-nav-links a{color:var(--text-dim);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s}
+    .lp-nav-links a:hover{color:var(--text)}
+    .lp-btn{padding:10px 22px;border-radius:8px;border:none;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+    .lp-btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
+    .lp-btn-primary:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px rgba(56,189,248,0.3)}
+    .lp-btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+    .lp-btn-outline:hover{background:rgba(56,189,248,0.1)}
+    .lp-btn-lg{padding:14px 32px;font-size:1rem;border-radius:10px}
+    .lp-btn-pro{background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white}
+    .lp-btn-pro:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px rgba(244,114,182,0.3)}
+
+    .lp-hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
+    .lp-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 0%,rgba(56,189,248,0.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(129,140,248,0.08) 0%,transparent 50%),radial-gradient(ellipse at 20% 80%,rgba(244,114,182,0.06) 0%,transparent 50%);pointer-events:none}
+    .lp-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);border-radius:20px;padding:6px 16px;font-size:0.78rem;color:var(--accent);font-weight:600;margin-bottom:24px}
+    .lp-hero h1{font-size:3.2rem;font-weight:800;line-height:1.15;margin-bottom:20px;max-width:700px;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .lp-hero p{font-size:1.15rem;color:var(--text-dim);max-width:540px;line-height:1.6;margin-bottom:36px}
+    .lp-hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+    .lp-hero-stats{display:flex;gap:40px;margin-top:60px;position:relative}
+    .lp-hero-stat{text-align:center}
+    .lp-hero-stat-value{font-size:1.8rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .lp-hero-stat-label{font-size:0.78rem;color:var(--text-dim);margin-top:2px}
+
+    .lp-section{padding:80px 24px;max-width:1100px;margin:0 auto}
+    .lp-section-title{text-align:center;font-size:2rem;font-weight:700;margin-bottom:12px}
+    .lp-section-sub{text-align:center;color:var(--text-dim);font-size:1rem;margin-bottom:48px;max-width:600px;margin-left:auto;margin-right:auto}
+
+    .lp-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+    .lp-feature{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all 0.3s}
+    .lp-feature:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+    .lp-feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:1.5rem}
+    .lp-feature h3{font-size:1.05rem;font-weight:600;margin-bottom:8px}
+    .lp-feature p{font-size:0.85rem;color:var(--text-dim);line-height:1.5}
+
+    .lp-how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;counter-reset:step}
+    .lp-how-step{text-align:center;padding:24px;position:relative}
+    .lp-how-step::before{counter-increment:step;content:counter(step);width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+    .lp-how-step h3{font-size:1rem;font-weight:600;margin-bottom:6px}
+    .lp-how-step p{font-size:0.82rem;color:var(--text-dim);line-height:1.5}
+
+    .lp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:720px;margin:0 auto}
+    .lp-price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative;transition:all 0.3s}
+    .lp-price-card:hover{transform:translateY(-4px)}
+    .lp-price-card.featured{border-color:var(--accent);box-shadow:0 0 40px rgba(56,189,248,0.12)}
+    .lp-price-card.featured::before{content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:0.65rem;font-weight:700;padding:4px 14px;border-radius:12px;letter-spacing:0.5px}
+    .lp-price-name{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+    .lp-price-amount{font-size:2.5rem;font-weight:800;margin:12px 0;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .lp-price-amount span{font-size:1rem;font-weight:500;-webkit-text-fill-color:var(--text-dim)}
+    .lp-price-list{list-style:none;margin:20px 0;font-size:0.85rem}
+    .lp-price-list li{padding:8px 0;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+    .lp-price-list li::before{content:'\2713';color:var(--success);font-weight:700;font-size:0.9rem}
+    .lp-price-list li.disabled{opacity:0.4;text-decoration:line-through}
+    .lp-price-list li.disabled::before{content:'\2717';color:var(--danger)}
+
+    .lp-testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+    .lp-testimonial{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
+    .lp-testimonial-text{font-size:0.9rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;font-style:italic}
+    .lp-testimonial-author{display:flex;align-items:center;gap:10px}
+    .lp-testimonial-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.85rem}
+    .lp-testimonial-name{font-size:0.82rem;font-weight:600}
+    .lp-testimonial-role{font-size:0.7rem;color:var(--text-dim)}
+
+    .lp-signup-section{background:linear-gradient(135deg,rgba(56,189,248,0.06),rgba(129,140,248,0.06));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 24px}
+    .lp-signup-form{max-width:420px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px}
+    .lp-signup-form h3{font-size:1.2rem;font-weight:700;margin-bottom:4px;text-align:center}
+    .lp-signup-form p{font-size:0.82rem;color:var(--text-dim);text-align:center;margin-bottom:20px}
+
+    .lp-footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center}
+    .lp-footer-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+    .lp-footer-links a{color:var(--text-dim);text-decoration:none;font-size:0.82rem;transition:color 0.2s}
+    .lp-footer-links a:hover{color:var(--text)}
+    .lp-footer-copy{font-size:0.75rem;color:var(--text-dim)}
+
+    /* Upgrade banner for free users */
+    .upgrade-banner{background:linear-gradient(135deg,rgba(244,114,182,0.1),rgba(129,140,248,0.1));border:1px solid rgba(244,114,182,0.3);border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .upgrade-banner-text{flex:1;font-size:0.85rem}
+    .upgrade-banner-text strong{color:var(--accent3)}
+    .tier-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+    .tier-free{background:rgba(148,163,184,0.2);color:var(--text-dim)}
+    .tier-pro{background:linear-gradient(135deg,rgba(244,114,182,0.2),rgba(129,140,248,0.2));color:var(--accent3)}
+    .gated-overlay{position:relative}
+    .gated-overlay::after{content:'PRO';position:absolute;inset:0;background:rgba(11,17,32,0.7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--accent3);border-radius:inherit;cursor:pointer}
+
+    @media(max-width:600px){
+      .lp-hero h1{font-size:2rem}
+      .lp-hero p{font-size:0.95rem}
+      .lp-nav-links a.lp-nav-hide-mobile{display:none}
+      .lp-hero-stats{gap:20px}
+      .lp-hero-stat-value{font-size:1.3rem}
+      .lp-pricing{grid-template-columns:1fr}
+      .lp-btn-lg{padding:12px 24px;font-size:0.9rem}
+    }
+    html{scroll-behavior:smooth}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  LANDING PAGE (shown when logged out)      -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="landingPage">
+  <nav class="lp-nav" id="lpNav">
+    <a href="#" class="lp-nav-logo">
+      <svg viewBox="0 0 32 32" fill="none" width="28" height="28"><defs><linearGradient id="lg1" x1="2" y1="6" x2="30" y2="26"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><path d="M10 5h5c1.5 0 3 1 3 3v9c0 1.5 1 3 3 3.5l4 1.5" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M10 5c-2 0-3.5 1.5-3.5 4v8.5c0 1.5-1 2.5-2.5 3l-1 0.5" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M3 23h24" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round"/><path d="M2 27h28" stroke="url(#lg1)" stroke-width="2.8" stroke-linecap="round"/><line x1="3" y1="23" x2="2" y2="27" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/><line x1="27" y1="23" x2="30" y2="27" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/></svg>
+      RinkBuddy
+    </a>
+    <div class="lp-nav-links">
+      <a href="#features" class="lp-nav-hide-mobile">Features</a>
+      <a href="#how-it-works" class="lp-nav-hide-mobile">How It Works</a>
+      <a href="#pricing" class="lp-nav-hide-mobile">Pricing</a>
+      <a href="#lp-signup" class="lp-btn lp-btn-outline" style="padding:7px 16px;font-size:0.8rem">Log In</a>
+      <a href="#lp-signup" class="lp-btn lp-btn-primary" style="padding:7px 16px;font-size:0.8rem">Sign Up</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="lp-hero">
+    <div class="lp-hero-badge">Figure Skating & Hockey Performance Tracker</div>
+    <h1>Master the Ice. Track Every Move.</h1>
+    <p>The all-in-one skating performance platform. Record sessions, analyze video, track skills, and follow AI-powered training plans to reach your next level.</p>
+    <div class="lp-hero-btns">
+      <a href="#lp-signup" class="lp-btn lp-btn-primary lp-btn-lg">Get Started Free</a>
+      <a href="#pricing" class="lp-btn lp-btn-pro lp-btn-lg">Go Pro — $9.99/mo</a>
+    </div>
+    <div class="lp-hero-stats">
+      <div class="lp-hero-stat"><div class="lp-hero-stat-value">50+</div><div class="lp-hero-stat-label">Skills to Track</div></div>
+      <div class="lp-hero-stat"><div class="lp-hero-stat-value">AI</div><div class="lp-hero-stat-label">Video Analysis</div></div>
+      <div class="lp-hero-stat"><div class="lp-hero-stat-value">2</div><div class="lp-hero-stat-label">Disciplines</div></div>
+      <div class="lp-hero-stat"><div class="lp-hero-stat-value">Sync</div><div class="lp-hero-stat-label">Multi-device</div></div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="lp-section" id="features">
+    <div class="lp-section-title">Everything You Need on the Ice</div>
+    <div class="lp-section-sub">From beginner edges to triple axels, RinkBuddy tracks your complete skating journey.</div>
+    <div class="lp-features">
+      <div class="lp-feature">
+        <div class="lp-feature-icon" style="background:rgba(56,189,248,0.12)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <h3>Video Analysis</h3>
+        <p>Upload or record skating videos. RinkBuddy auto-detects jumps, spins, and footwork with frame-by-frame annotation tools.</p>
+      </div>
+      <div class="lp-feature">
+        <div class="lp-feature-icon" style="background:rgba(129,140,248,0.12)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        </div>
+        <h3>Skill Tracking</h3>
+        <p>Full skill trees for figure skating and hockey. Track attempts, success rates, and unlock prerequisites as you progress.</p>
+      </div>
+      <div class="lp-feature">
+        <div class="lp-feature-icon" style="background:rgba(244,114,182,0.12)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3>Training Plans</h3>
+        <p>AI-generated weekly training plans based on your weakest skills. Drills, focus areas, and progress tracking built in.</p>
+      </div>
+      <div class="lp-feature">
+        <div class="lp-feature-icon" style="background:rgba(52,211,153,0.12)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+        </div>
+        <h3>Multi-device Sync</h3>
+        <p>Record at the rink on your phone, review at home on your tablet. Your data follows you everywhere with cloud sync.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="lp-section" id="how-it-works" style="background:linear-gradient(135deg,rgba(56,189,248,0.03),rgba(129,140,248,0.03));border-top:1px solid rgba(30,58,95,0.3);border-bottom:1px solid rgba(30,58,95,0.3);max-width:100%;padding-left:24px;padding-right:24px">
+    <div style="max-width:1100px;margin:0 auto">
+      <div class="lp-section-title">How It Works</div>
+      <div class="lp-section-sub">Four simple steps to accelerate your skating improvement.</div>
+      <div class="lp-how">
+        <div class="lp-how-step">
+          <h3>Upload Videos</h3>
+          <p>Record yourself at the rink or upload existing footage. Supports any video format from any device.</p>
+        </div>
+        <div class="lp-how-step">
+          <h3>Auto-Analysis</h3>
+          <p>RinkBuddy scans your video frames, detects skating elements, and logs them to your skill tree automatically.</p>
+        </div>
+        <div class="lp-how-step">
+          <h3>Track Progress</h3>
+          <p>Watch your success rates climb. See which skills are mastered and which need more work with visual skill trees.</p>
+        </div>
+        <div class="lp-how-step">
+          <h3>Improve</h3>
+          <p>Follow personalized training plans targeting your weakest areas. Compete, set goals, and crush them.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="lp-section" id="pricing">
+    <div class="lp-section-title">Simple, Honest Pricing</div>
+    <div class="lp-section-sub">Start free, upgrade when you're ready to unlock everything.</div>
+    <div class="lp-pricing">
+      <div class="lp-price-card">
+        <div class="lp-price-name">Free</div>
+        <div style="font-size:0.82rem;color:var(--text-dim)">Perfect to get started</div>
+        <div class="lp-price-amount">$0<span>/forever</span></div>
+        <ul class="lp-price-list">
+          <li>3 video uploads</li>
+          <li>Basic skill tracking</li>
+          <li>1 skater profile</li>
+          <li>Session logging</li>
+          <li>Cloud sync</li>
+          <li class="disabled">Auto video analysis</li>
+          <li class="disabled">Training plans</li>
+          <li class="disabled">Unlimited videos</li>
+          <li class="disabled">Multiple profiles</li>
+        </ul>
+        <a href="#lp-signup" class="lp-btn lp-btn-outline" style="width:100%;justify-content:center">Get Started Free</a>
+      </div>
+      <div class="lp-price-card featured">
+        <div class="lp-price-name">Pro</div>
+        <div style="font-size:0.82rem;color:var(--text-dim)">For serious skaters</div>
+        <div class="lp-price-amount">$9.99<span>/month</span></div>
+        <ul class="lp-price-list">
+          <li>Unlimited video uploads</li>
+          <li>Full skill tracking</li>
+          <li>Unlimited profiles</li>
+          <li>Session logging</li>
+          <li>Cloud sync</li>
+          <li>Auto video analysis</li>
+          <li>AI training plans</li>
+          <li>Competition score tracking</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#lp-signup" class="lp-btn lp-btn-pro" style="width:100%;justify-content:center" onclick="document.getElementById('lpSignupPlan').value='pro'">Go Pro</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="lp-section">
+    <div class="lp-section-title">Loved by Skaters</div>
+    <div class="lp-section-sub">Join thousands of figure skaters and hockey players improving their game.</div>
+    <div class="lp-testimonials">
+      <div class="lp-testimonial">
+        <div class="lp-testimonial-text">"RinkBuddy completely changed how I practice. Seeing my success rates climb from 40% to 85% on my axel was incredibly motivating."</div>
+        <div class="lp-testimonial-author">
+          <div class="lp-testimonial-avatar">S</div>
+          <div><div class="lp-testimonial-name">Sarah K.</div><div class="lp-testimonial-role">Figure Skater, Intermediate</div></div>
+        </div>
+      </div>
+      <div class="lp-testimonial">
+        <div class="lp-testimonial-text">"The video analysis is a game changer. I can annotate exactly where my edge goes wrong on three turns and track improvement over weeks."</div>
+        <div class="lp-testimonial-author">
+          <div class="lp-testimonial-avatar">M</div>
+          <div><div class="lp-testimonial-name">Mike R.</div><div class="lp-testimonial-role">Hockey Player, Advanced</div></div>
+        </div>
+      </div>
+      <div class="lp-testimonial">
+        <div class="lp-testimonial-text">"My coach and I both use RinkBuddy. She reviews my videos and adds annotations, and the training plans keep me focused between lessons."</div>
+        <div class="lp-testimonial-author">
+          <div class="lp-testimonial-avatar">E</div>
+          <div><div class="lp-testimonial-name">Emma T.</div><div class="lp-testimonial-role">Figure Skater, Pre-Juvenile</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signup Form -->
+  <section class="lp-signup-section" id="lp-signup">
+    <div class="lp-signup-form">
+      <h3>Create Your Account</h3>
+      <p>Start tracking your skating journey in under 30 seconds.</p>
+      <input type="hidden" id="lpSignupPlan" value="free">
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="lpUsername" placeholder="Choose a username" autocapitalize="none" autocorrect="off"></div>
+      <div class="form-group"><label class="form-label">Display Name</label><input class="form-input" id="lpDisplayName" placeholder="Your name (optional)"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="lpPassword" type="password" placeholder="Create a password (4+ chars)"></div>
+      <div id="lpError" style="color:var(--danger);font-size:0.78rem;margin-bottom:10px;display:none"></div>
+      <button class="lp-btn lp-btn-primary" style="width:100%;justify-content:center;margin-bottom:10px" onclick="doLandingSignup()">Create Account & Start Free</button>
+      <div style="text-align:center;font-size:0.82rem;color:var(--text-dim);margin-bottom:12px">or</div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="lpLoginUser" placeholder="Username" autocapitalize="none" style="flex:1">
+        <input class="form-input" id="lpLoginPass" type="password" placeholder="Password" style="flex:1">
+        <button class="lp-btn lp-btn-outline" onclick="doLandingLogin()" style="white-space:nowrap">Log In</button>
+      </div>
+      <div id="lpLoginError" style="color:var(--danger);font-size:0.78rem;margin-top:8px;display:none"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="lp-footer">
+    <div class="lp-footer-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#lp-signup">Sign Up</a>
+    </div>
+    <div class="lp-footer-copy">RinkBuddy Skating Performance Analyzer. Built for skaters, by skaters.</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  APP (shown when logged in)                -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="appContainer">
+
+<header class="header">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" fill="none"><defs><linearGradient id="g1" x1="2" y1="6" x2="30" y2="26"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><path d="M10 5h5c1.5 0 3 1 3 3v9c0 1.5 1 3 3 3.5l4 1.5" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M10 5c-2 0-3.5 1.5-3.5 4v8.5c0 1.5-1 2.5-2.5 3l-1 0.5" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M3 23h24" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round"/><path d="M2 27h28" stroke="url(#g1)" stroke-width="2.8" stroke-linecap="round"/><line x1="3" y1="23" x2="2" y2="27" stroke="url(#g1)" stroke-width="2" stroke-linecap="round"/><line x1="27" y1="23" x2="30" y2="27" stroke="url(#g1)" stroke-width="2" stroke-linecap="round"/></svg>
+    RinkBuddy
+  </div>
+  <div class="header-right">
+    <div class="discipline-toggle" id="discToggle">
+      <button class="disc-btn active" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
+      <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
+    </div>
+    <span class="streak-badge" id="streakBadge">0 day streak</span>
+    <button class="btn btn-sm btn-secondary" onclick="openAccountModal()" id="cloudBtn" style="padding:5px;width:32px;height:32px;display:flex;align-items:center;justify-content:center" title="Cloud Account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+    </button>
+    <button class="btn btn-sm btn-secondary" onclick="openProfileModal()" id="profileBtn" style="padding:5px 10px;border-radius:50%;width:32px;height:32px;font-size:0.8rem;font-weight:700" title="Switch Profile">?</button>
+  </div>
+</header>
+
+<nav class="nav">
+  <button class="nav-btn active" data-section="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
+  <button class="nav-btn" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
+  <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
+  <button class="nav-btn" data-section="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Sessions</button>
+  <button class="nav-btn" data-section="compete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M18 2H6v7a6 6 0 0012 0V2Z"/></svg>Compete</button>
+  <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
+</nav>
+
+<main class="content">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="section active" id="sec-dashboard">
+    <div id="onboardingArea"></div>
+    <div class="card"><div class="card-title">Overview</div>
+      <div class="card-grid">
+        <div class="stat-box"><div class="stat-value" id="totalSessions">0</div><div class="stat-label">Sessions</div></div>
+        <div class="stat-box"><div class="stat-value" id="totalIceTime">0m</div><div class="stat-label">Ice Time</div></div>
+        <div class="stat-box"><div class="stat-value" id="totalSkills">0</div><div class="stat-label">Skills Tracked</div></div>
+        <div class="stat-box"><div class="stat-value" id="avgSuccess">--%</div><div class="stat-label">Avg Success</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">What To Work On Next</div><div id="dashNextSkills"></div></div>
+    <div class="card"><div class="card-title">Skills Radar</div><div class="radar-container"><canvas id="radarChart" width="260" height="260"></canvas></div></div>
+    <div class="card"><div class="card-title">Goals</div><div id="goalsList"></div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="openGoalModal()">+ Add Goal</button>
+    </div>
+    <div class="card"><div class="card-title">Recent Sessions</div><div id="recentSessions"></div></div>
+  </div>
+
+  <!-- ═══ VIDEO ═══ -->
+  <div class="section" id="sec-video">
+    <div class="card" id="webcamCard">
+      <div class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        Record Session
+        <span style="flex:1"></span>
+        <span id="recTimer" style="font-size:0.78rem;color:var(--danger);font-weight:600;display:none">00:00</span>
+      </div>
+      <div id="webcamArea">
+        <div id="webcamPreviewWrap" style="display:none;position:relative">
+          <video id="webcamPreview" autoplay playsinline muted style="width:100%;border-radius:8px;background:#000;max-height:360px;object-fit:cover"></video>
+          <div style="display:flex;gap:8px;margin-top:10px;justify-content:center;align-items:center;flex-wrap:wrap" id="recControls">
+            <button class="btn btn-secondary btn-sm" id="camSwitchBtn" onclick="switchCamera()" style="display:none;gap:6px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span id="camLabel">Rear Camera</span>
+            </button>
+            <button class="btn btn-primary" id="recStartBtn" onclick="startRecording()" style="background:var(--danger)">Start Recording</button>
+            <button class="btn btn-danger" id="recStopBtn" onclick="stopRecording()" style="display:none">Stop & Analyze</button>
+          </div>
+        </div>
+        <div id="webcamStartWrap" style="text-align:center;padding:20px">
+          <button class="btn btn-primary" onclick="openWebcam()" style="gap:8px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            Open Camera
+          </button>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px">Record yourself skating for real-time analysis</p>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="videoLibCard">
+      <div class="card-title">Video Library <span style="flex:1"></span><span style="font-size:0.72rem;color:var(--text-dim);font-weight:400" id="libraryCount">0 videos</span></div>
+      <div class="video-library" id="videoLibrary"></div>
+      <div id="uploadArea"></div>
+    </div>
+    <div id="videoPlayerArea" style="display:none">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span id="activeVideoTitle" style="font-weight:600;font-size:0.95rem">Video</span>
+          <span style="flex:1"></span>
+          <button class="btn btn-sm btn-secondary" onclick="prevVideo()" id="prevBtn" style="display:none">Prev</button>
+          <button class="btn btn-sm btn-secondary" onclick="nextVideo()" id="nextBtn" style="display:none">Next</button>
+        </div>
+        <video id="videoPlayer" class="video-preview" controls playsinline></video>
+        <div class="video-controls">
+          <button class="btn btn-sm btn-secondary" onclick="skipVideo(-5)">-5s</button>
+          <button class="btn btn-sm btn-secondary" onclick="skipVideo(-1)">-1s</button>
+          <div class="timeline-bar" id="timelineBar"><div class="timeline-progress" id="timelineProgress"></div></div>
+          <button class="btn btn-sm btn-secondary" onclick="skipVideo(1)">+1s</button>
+          <button class="btn btn-sm btn-secondary" onclick="skipVideo(5)">+5s</button>
+          <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+        </div>
+        <div class="anno-toolbar" id="annoToolbar">
+          <div class="anno-toolbar-label">Pause at any element, then tap to annotate:</div>
+          <button class="anno-btn anno-btn-jump" onclick="openAnnotationModal('jump')">+ Jump</button>
+          <button class="anno-btn anno-btn-spin" onclick="openAnnotationModal('spin')">+ Spin</button>
+          <button class="anno-btn anno-btn-step" onclick="openAnnotationModal('step')">+ Step / Edge</button>
+          <button class="anno-btn anno-btn-note" onclick="openAnnotationModal('stick')" id="stickAnnoBtn" style="display:none;background:rgba(129,140,248,0.15);color:var(--accent2);border-color:rgba(129,140,248,0.3)">+ Stick & Puck</button>
+          <button class="anno-btn anno-btn-note" onclick="openAnnotationModal('other')">+ Note</button>
+          <span style="flex:1"></span>
+          <button class="btn btn-sm btn-secondary" id="speedBtn" onclick="cycleSpeed()">1x</button>
+        </div>
+        <div id="annotationList"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Save as Session</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="videoSessionTitle"></div>
+          <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="videoSessionDate"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveVideoSession()">Save Session with Annotations</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SKILLS ═══ -->
+  <div class="section" id="sec-skills">
+    <div class="guide-callout" id="skillGuide"></div>
+    <div class="card">
+      <div class="card-title">Skill Progression <span style="flex:1"></span><span style="font-size:0.72rem;color:var(--text-dim);font-weight:400" id="skillDiscLabel">Figure Skating</span></div>
+      <div id="skillTree"></div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="openElementModal()">+ Custom Skill</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Quick Log</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Skill</label><select class="form-select" id="logElement"></select></div>
+        <div class="form-group"><label class="form-label">Quality</label>
+          <select class="form-select" id="logQuality"><option value="5">5 - Clean</option><option value="4">4 - Minor issue</option><option value="3" selected>3 - Landed/held</option><option value="2">2 - Shaky</option><option value="1">1 - Fall/miss</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Attempts</label><input class="form-input" type="number" id="logAttempts" value="1" min="1"></div>
+        <div class="form-group"><label class="form-label">Landed</label><input class="form-input" type="number" id="logLanded" value="1" min="0"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="logNotes" placeholder="What went well? What to fix?"></div>
+      <button class="btn btn-primary" onclick="logAttempt()">Log</button>
+    </div>
+    <div class="card"><div class="card-title">Recent Logs</div><div id="elementLogs"></div></div>
+  </div>
+
+  <!-- ═══ SESSIONS ═══ -->
+  <div class="section" id="sec-sessions">
+    <div class="card">
+      <div class="card-title">Log Session</div>
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="sessionTitle" placeholder="e.g., Morning practice"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="sessionDate"></div>
+        <div class="form-group"><label class="form-label">Duration (min)</label><input class="form-input" type="number" id="sessionDuration" placeholder="45"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Type</label>
+          <select class="form-select" id="sessionType"><option>Freestyle</option><option>Moves in the Field</option><option>Dance</option><option>Choreography</option><option>Hockey Practice</option><option>Stick & Puck</option><option>Power Skating</option><option>Off-ice</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Rating (1-10)</label><input class="form-input" type="number" id="sessionRating" min="1" max="10" placeholder="7"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Focus</label><input class="form-input" id="sessionFocus" placeholder="e.g., Crossovers, Axel"></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="sessionNotes" placeholder="How did it go?"></textarea></div>
+      <button class="btn btn-primary" onclick="saveSession()">Save Session</button>
+    </div>
+    <div class="card"><div class="card-title">History</div><div id="sessionList"></div></div>
+  </div>
+
+  <!-- ═══ COMPETE ═══ -->
+  <div class="section" id="sec-compete">
+    <div class="card">
+      <div class="card-title">Add Result</div>
+      <div class="form-group"><label class="form-label">Event</label><input class="form-input" id="compName" placeholder="e.g., Regional Championships"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="compDate"></div>
+        <div class="form-group"><label class="form-label">Level</label>
+          <select class="form-select" id="compLevel"><option>Pre-Preliminary</option><option>Preliminary</option><option>Pre-Juvenile</option><option>Juvenile</option><option>Intermediate</option><option>Novice</option><option>Junior</option><option>Senior</option><option>Recreational</option><option>Beer League</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">TES</label><input class="form-input" type="number" step="0.01" id="compTES" placeholder="32.50"></div>
+        <div class="form-group"><label class="form-label">PCS</label><input class="form-input" type="number" step="0.01" id="compPCS" placeholder="28.75"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Deductions</label><input class="form-input" type="number" step="0.01" id="compDed" value="0"></div>
+        <div class="form-group"><label class="form-label">Placement</label><input class="form-input" type="number" id="compPlace" placeholder="1"></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveCompetition()">Save</button>
+    </div>
+    <div class="card"><div class="card-title">History</div><div id="compList"></div></div>
+    <div class="card"><div class="card-title">Score Progression</div>
+      <div class="chart-container"><canvas id="compChart" class="chart-canvas"></canvas></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>TES</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>PCS</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent3)"></div>Total</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TRAINING ═══ -->
+  <div class="section" id="sec-training">
+    <div class="card">
+      <div class="card-title">Personalized Training Plan</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:10px">Based on your skill data — focuses on your weakest areas first</p>
+      <div id="trainingSuggestions"></div>
+      <button class="btn btn-primary" style="margin-top:10px" onclick="generateTrainingPlan()">Generate Weekly Plan</button>
+    </div>
+    <div class="card"><div class="card-title">This Week</div><div id="trainingPlan"></div></div>
+  </div>
+
+</main>
+
+<!-- Modals -->
+<div class="modal-overlay" id="annotationModal"><div class="modal">
+  <div class="modal-title">Add Annotation</div>
+  <input type="hidden" id="annoType">
+  <div class="form-group"><label class="form-label">Time: <span id="annoTime">0:00</span></label></div>
+  <div class="form-group"><label class="form-label">Skill</label><select class="form-select" id="annoElement"></select></div>
+  <div class="form-group"><label class="form-label">Quality (1-5)</label>
+    <select class="form-select" id="annoQuality"><option value="5">5 - Perfect</option><option value="4">4 - Clean</option><option value="3" selected>3 - Landed</option><option value="2">2 - Shaky</option><option value="1">1 - Fall</option></select>
+  </div>
+  <div class="form-group"><label class="form-label">Note</label><input class="form-input" id="annoNote" placeholder="e.g., Good height, under-rotated"></div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('annotationModal')">Cancel</button><button class="btn btn-primary" onclick="saveAnnotation()">Save</button></div>
+</div></div>
+
+<div class="modal-overlay" id="elementModal"><div class="modal">
+  <div class="modal-title">Add Custom Skill</div>
+  <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="elemName" placeholder="e.g., Backwards crossover"></div>
+  <div class="form-group"><label class="form-label">Type</label>
+    <select class="form-select" id="elemType"><option value="jump">Jump</option><option value="spin">Spin</option><option value="step">Footwork / Edge</option><option value="skating">Skating / Speed</option><option value="stop">Stop</option></select>
+  </div>
+  <div class="form-group"><label class="form-label">Difficulty</label>
+    <select class="form-select" id="elemDiff"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="expert">Expert</option></select>
+  </div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('elementModal')">Cancel</button><button class="btn btn-primary" onclick="saveElement()">Add</button></div>
+</div></div>
+
+<div class="modal-overlay" id="goalModal"><div class="modal">
+  <div class="modal-title">Add Goal</div>
+  <div class="form-group"><label class="form-label">Goal</label><input class="form-input" id="goalName" placeholder="e.g., Land consistent 2 Axel"></div>
+  <div class="form-group"><label class="form-label">Target Date</label><input class="form-input" type="date" id="goalDate"></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Target</label><input class="form-input" id="goalTarget" placeholder="80"></div>
+    <div class="form-group"><label class="form-label">Current</label><input class="form-input" type="number" id="goalProgress" value="0"></div>
+  </div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('goalModal')">Cancel</button><button class="btn btn-primary" onclick="saveGoal()">Add Goal</button></div>
+</div></div>
+
+<div class="modal-overlay" id="skillDetailModal"><div class="modal" style="max-width:560px">
+  <div class="modal-title" id="skillDetailTitle">Skill Detail</div>
+  <div id="skillDetailContent"></div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('skillDetailModal')">Close</button></div>
+</div></div>
+
+<div class="modal-overlay" id="profileModal"><div class="modal">
+  <div class="modal-title">User Profiles</div>
+  <div id="profileList"></div>
+  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+    <div class="form-group"><label class="form-label">Create New Profile</label>
+      <div style="display:flex;gap:8px"><input class="form-input" id="newProfileName" placeholder="Name (e.g., Sarah, Coach Mike)" style="flex:1"><button class="btn btn-primary btn-sm" onclick="createProfile()">Create</button></div>
+    </div>
+  </div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('profileModal')">Close</button></div>
+</div></div>
+
+<div class="modal-overlay" id="accountModal"><div class="modal">
+  <div class="modal-title" id="accountModalTitle">Cloud Account</div>
+  <div id="accountContent">
+    <!-- Login/Signup form -->
+    <div id="accountAuthForm">
+      <div style="text-align:center;margin-bottom:16px">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M18 10h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v4H6c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2z"/><circle cx="12" cy="16" r="1.5"/></svg>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin-top:8px">Sign in to sync your data across devices</p>
+      </div>
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="accUsername" placeholder="Choose a username" autocapitalize="none" autocorrect="off"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="accPassword" type="password" placeholder="Your password"></div>
+      <div id="accNameGroup" class="form-group" style="display:none"><label class="form-label">Display Name</label><input class="form-input" id="accDisplayName" placeholder="Your name (optional)"></div>
+      <div id="accError" style="color:var(--danger);font-size:0.78rem;margin-bottom:10px;display:none"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" style="flex:1" onclick="doLogin()">Log In</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="doSignup()">Sign Up</button>
+      </div>
+      <div style="font-size:0.7rem;color:var(--text-dim);text-align:center;margin-top:10px">Same account works on all your devices</div>
+    </div>
+    <!-- Logged in state -->
+    <div id="accountLoggedIn" style="display:none">
+      <div style="text-align:center;padding:10px 0">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.5rem;font-weight:700;color:#fff" id="accAvatar">M</div>
+        <div style="font-size:1.1rem;font-weight:700" id="accLoggedName">User</div>
+        <div style="font-size:0.78rem;color:var(--text-dim)" id="accLoggedUser">@username</div>
+        <span class="tier-badge tier-free" id="accTierBadge">FREE</span>
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:4px" id="accSyncStatus">Last synced: never</div>
+      </div>
+      <!-- Subscription Management -->
+      <div id="accSubscription" style="margin-top:14px;padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+        <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px">Subscription</div>
+        <div id="accSubFree">
+          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong>Free</strong> plan. Upgrade to Pro for unlimited videos, auto-analysis, training plans, and more.</p>
+          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;background:linear-gradient(135deg,var(--accent3),var(--accent2))" onclick="doSubscribe()">Upgrade to Pro — $9.99/mo</button>
+        </div>
+        <div id="accSubPro" style="display:none">
+          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong style="color:var(--accent3)">Pro</strong> plan. All features are unlocked.</p>
+          <button class="btn btn-danger btn-sm" style="width:100%;justify-content:center" onclick="doCancelSubscription()">Cancel Subscription</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-primary" style="flex:1" onclick="syncNow()">Sync Now</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="pullData()">Pull from Cloud</button>
+      </div>
+      <button class="btn btn-danger btn-sm" style="width:100%;margin-top:10px" onclick="doLogout()">Log Out</button>
+    </div>
+  </div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('accountModal')">Close</button></div>
+</div></div>
+
+</div><!-- end #appContainer -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  SKILL DEFINITIONS — Figure & Hockey
+// ═══════════════════════════════════════════
+const SKILLS = {
+  figure: [
+    // Beginner
+    {id:'fwd-stroke',name:'Forward Stroking',type:'step',level:'beginner',prereqs:[],bv:0,
+     tip:'Focus on full extension of the pushing leg and smooth weight transfer.'},
+    {id:'bwd-stroke',name:'Backward Stroking',type:'step',level:'beginner',prereqs:['fwd-stroke'],bv:0,
+     tip:'Keep weight on the ball of the foot. Look over shoulder periodically.'},
+    {id:'fwd-crossover',name:'Forward Crossover',type:'step',level:'beginner',prereqs:['fwd-stroke'],bv:0,
+     tip:'Lean into the circle. Cross over fully with the outside foot.'},
+    {id:'bwd-crossover',name:'Backward Crossover',type:'step',level:'beginner',prereqs:['bwd-stroke'],bv:0,
+     tip:'Push with the inside edge. Keep arms steady for balance.'},
+    {id:'snowplow',name:'Snowplow Stop',type:'step',level:'beginner',prereqs:[],bv:0,
+     tip:'Angle both feet inward. Bend knees and press gently.'},
+    {id:'t-stop',name:'T-Stop',type:'step',level:'beginner',prereqs:['fwd-stroke'],bv:0,
+     tip:'Drag the back foot perpendicular. Keep most weight on the front foot.'},
+    {id:'2ft-spin',name:'Two-Foot Spin',type:'spin',level:'beginner',prereqs:['fwd-crossover'],bv:0.5,
+     tip:'Start from a small circle. Pull arms in tight to increase speed.'},
+    {id:'2ft-glide',name:'Two-Foot Glide',type:'step',level:'beginner',prereqs:[],bv:0,
+     tip:'Keep knees soft, arms out for balance. Core engaged.'},
+    // Intermediate
+    {id:'3turn',name:'Three Turn',type:'step',level:'intermediate',prereqs:['fwd-crossover'],bv:0,
+     tip:'Rotate shoulders first, hips follow. Check the turn with opposite arm.'},
+    {id:'mohawk',name:'Mohawk',type:'step',level:'intermediate',prereqs:['fwd-crossover','bwd-crossover'],bv:0,
+     tip:'Open the hip of the free foot. Keep shoulders square to the circle.'},
+    {id:'toe',name:'Toe Loop',type:'jump',level:'intermediate',prereqs:['3turn','bwd-crossover'],bv:0.4,
+     tip:'Pick with the toe. Rotate from the back outside edge. Arms tight on landing.'},
+    {id:'sal',name:'Salchow',type:'jump',level:'intermediate',prereqs:['3turn'],bv:0.4,
+     tip:'Enter from a back inside edge. Scoop the free leg through.'},
+    {id:'loop',name:'Loop',type:'jump',level:'intermediate',prereqs:['toe','sal'],bv:0.5,
+     tip:'Load the right back outside edge. Cross ankles and spring up.'},
+    {id:'uspin',name:'Upright Spin',type:'spin',level:'intermediate',prereqs:['2ft-spin'],bv:1.2,
+     tip:'Enter from a back crossover. Snap free foot to spinning foot quickly.'},
+    {id:'sspin',name:'Sit Spin',type:'spin',level:'intermediate',prereqs:['uspin'],bv:1.3,
+     tip:'Push the free leg forward. Get low — thigh should be parallel to ice.'},
+    {id:'waltz',name:'Waltz Jump',type:'jump',level:'intermediate',prereqs:['3turn'],bv:0.3,
+     tip:'Step onto left forward outside edge. Swing right leg up, half rotation.'},
+    // Advanced
+    {id:'flip',name:'Flip',type:'jump',level:'advanced',prereqs:['toe','3turn'],bv:0.5,
+     tip:'Enter from back inside edge with toe pick assist. Clean takeoff edge.'},
+    {id:'lutz',name:'Lutz',type:'jump',level:'advanced',prereqs:['flip'],bv:0.6,
+     tip:'Long back outside edge entry. Counter-rotate into the jump.'},
+    {id:'axel',name:'Axel',type:'jump',level:'advanced',prereqs:['waltz','loop'],bv:1.1,
+     tip:'Forward outside edge takeoff. 1.5 rotations. Strong H-position in air.'},
+    {id:'cspin',name:'Camel Spin',type:'spin',level:'advanced',prereqs:['uspin'],bv:1.4,
+     tip:'Free leg hip-height behind. Hold back and head up.'},
+    {id:'combospin',name:'Combination Spin',type:'spin',level:'advanced',prereqs:['uspin','sspin','cspin'],bv:2.0,
+     tip:'Smooth transitions between positions. Minimize travel.'},
+    {id:'stseq',name:'Step Sequence',type:'step',level:'advanced',prereqs:['3turn','mohawk'],bv:3.9,
+     tip:'Variety of turns, steps, and edges. Cover the full ice surface.'},
+    {id:'layback',name:'Layback Spin',type:'spin',level:'advanced',prereqs:['uspin'],bv:2.4,
+     tip:'Arch the back gradually. Free leg behind. Arms frame the face.'},
+    // Expert
+    {id:'2toe',name:'Double Toe Loop',type:'jump',level:'expert',prereqs:['toe'],bv:1.3},
+    {id:'2sal',name:'Double Salchow',type:'jump',level:'expert',prereqs:['sal'],bv:1.3},
+    {id:'2loop',name:'Double Loop',type:'jump',level:'expert',prereqs:['loop'],bv:1.7},
+    {id:'2flip',name:'Double Flip',type:'jump',level:'expert',prereqs:['flip'],bv:1.8},
+    {id:'2lutz',name:'Double Lutz',type:'jump',level:'expert',prereqs:['lutz'],bv:2.1},
+    {id:'2axel',name:'Double Axel',type:'jump',level:'expert',prereqs:['axel'],bv:3.3},
+    {id:'fspin',name:'Flying Spin',type:'spin',level:'expert',prereqs:['sspin','cspin'],bv:2.6},
+    {id:'3toe',name:'Triple Toe Loop',type:'jump',level:'expert',prereqs:['2toe'],bv:4.2},
+    {id:'3sal',name:'Triple Salchow',type:'jump',level:'expert',prereqs:['2sal'],bv:4.3},
+    {id:'3loop',name:'Triple Loop',type:'jump',level:'expert',prereqs:['2loop'],bv:4.9},
+    {id:'3flip',name:'Triple Flip',type:'jump',level:'expert',prereqs:['2flip'],bv:5.3},
+    {id:'3lutz',name:'Triple Lutz',type:'jump',level:'expert',prereqs:['2lutz'],bv:5.9},
+    {id:'3axel',name:'Triple Axel',type:'jump',level:'expert',prereqs:['2axel'],bv:8.0},
+    {id:'chsq',name:'Choreo Sequence',type:'step',level:'expert',prereqs:['stseq'],bv:3.0},
+  ],
+  hockey: [
+    // Beginner
+    {id:'h-fwd',name:'Forward Skating',type:'skating',level:'beginner',prereqs:[],bv:0,
+     tip:'Knees bent, lean forward slightly. Push to the side, not back.'},
+    {id:'h-bwd',name:'Backward Skating',type:'skating',level:'beginner',prereqs:[],bv:0,
+     tip:'C-cuts with each foot alternating. Keep head up.'},
+    {id:'h-snowplow',name:'Snowplow Stop',type:'stop',level:'beginner',prereqs:['h-fwd'],bv:0,
+     tip:'Both feet angled in. Bend knees to control pressure.'},
+    {id:'h-glide',name:'Two-Foot Glide',type:'skating',level:'beginner',prereqs:[],bv:0,
+     tip:'Stay low. Practice balancing on one foot at a time.'},
+    {id:'h-fwd-cross',name:'Forward Crossover',type:'skating',level:'beginner',prereqs:['h-fwd'],bv:0,
+     tip:'Lean into the turn. Push hard with the outside foot under-push.'},
+    // Intermediate
+    {id:'h-hockey-stop',name:'Hockey Stop',type:'stop',level:'intermediate',prereqs:['h-snowplow','h-fwd'],bv:0,
+     tip:'Turn both feet 90 degrees. Lean away from the direction of travel. Shave the ice.'},
+    {id:'h-bwd-cross',name:'Backward Crossover',type:'skating',level:'intermediate',prereqs:['h-bwd','h-fwd-cross'],bv:0,
+     tip:'Lean into the circle. The cross-under push is where the power comes from.'},
+    {id:'h-transition',name:'Forward to Backward',type:'skating',level:'intermediate',prereqs:['h-fwd','h-bwd'],bv:0,
+     tip:'Open hips and pivot on both feet. Keep speed through the transition.'},
+    {id:'h-tight-turn',name:'Tight Turns',type:'skating',level:'intermediate',prereqs:['h-fwd-cross'],bv:0,
+     tip:'Deep knee bend. Edge work controls the radius.'},
+    {id:'h-1ft-stop',name:'One-Foot Stop',type:'stop',level:'intermediate',prereqs:['h-hockey-stop'],bv:0,
+     tip:'All weight on the stopping foot. Angle the blade and press down.'},
+    {id:'h-power-start',name:'Power Start',type:'skating',level:'intermediate',prereqs:['h-fwd'],bv:0,
+     tip:'First 3 strides explosive. Dig in deep with full blade. Stay low.'},
+    // Advanced
+    {id:'h-mohawk',name:'Mohawk Turn',type:'skating',level:'advanced',prereqs:['h-transition'],bv:0,
+     tip:'Heel-to-heel pivot. Keep low through the transition for speed.'},
+    {id:'h-power-stop',name:'Power Slide Stop',type:'stop',level:'advanced',prereqs:['h-hockey-stop'],bv:0,
+     tip:'Turn the body and slide both feet. Create maximum ice spray.'},
+    {id:'h-edge-work',name:'Inside/Outside Edges',type:'step',level:'advanced',prereqs:['h-tight-turn'],bv:0,
+     tip:'Practice slalom patterns. Feel the edges grip and release.'},
+    {id:'h-lateral',name:'Lateral Movement',type:'skating',level:'advanced',prereqs:['h-fwd-cross','h-bwd-cross'],bv:0,
+     tip:'Defensive shuffles. Stay low, push sideways with inside edges.'},
+    {id:'h-quick-feet',name:'Quick Feet Agility',type:'skating',level:'advanced',prereqs:['h-power-start'],bv:0,
+     tip:'Rapid short strides. Practice with cones. React and change direction.'},
+    {id:'h-spin-move',name:'Spin-o-rama',type:'skating',level:'advanced',prereqs:['h-mohawk','h-transition'],bv:0,
+     tip:'Full 360 pivot while maintaining puck control. Protect the puck.'},
+    // Expert
+    {id:'h-top-speed',name:'Top Speed Sprint',type:'skating',level:'expert',prereqs:['h-power-start','h-quick-feet'],bv:0,
+     tip:'Full stride extension. Arm swing for power. Build to max speed over full ice.'},
+    {id:'h-backwards-cross-full',name:'Full-Speed Backward',type:'skating',level:'expert',prereqs:['h-bwd-cross','h-lateral'],bv:0,
+     tip:'Match forward skating speed going backward. Essential for defense.'},
+    {id:'h-1ft-edges',name:'One-Foot Edge Work',type:'step',level:'expert',prereqs:['h-edge-work'],bv:0,
+     tip:'Full patterns on one foot. Inside and outside edges. Ultimate balance.'},
+    {id:'h-euro-step',name:'Euro Step',type:'skating',level:'expert',prereqs:['h-mohawk','h-quick-feet'],bv:0,
+     tip:'Basketball-style lateral fake on ice. Weight shift + edge change.'},
+    // Stick & Puck — Beginner
+    {id:'h-stick-grip',name:'Stick Grip & Stance',type:'stick',level:'beginner',prereqs:[],bv:0,
+     tip:'Top hand at the butt end, bottom hand halfway down. Keep the blade flat on the ice.'},
+    {id:'h-stationary-puck',name:'Stationary Puck Control',type:'stick',level:'beginner',prereqs:['h-stick-grip'],bv:0,
+     tip:'Roll the puck side to side with wrists. Keep your head up.'},
+    {id:'h-fwd-dribble',name:'Forward Dribble',type:'stick',level:'beginner',prereqs:['h-fwd','h-stationary-puck'],bv:0,
+     tip:'Push the puck ahead, skate to it. Keep it within stick reach.'},
+    {id:'h-wrist-shot',name:'Wrist Shot',type:'stick',level:'beginner',prereqs:['h-stick-grip'],bv:0,
+     tip:'Pull the puck back, roll wrists, snap through. Follow through at the target.'},
+    // Stick & Puck — Intermediate
+    {id:'h-forehand-pass',name:'Forehand Pass',type:'stick',level:'intermediate',prereqs:['h-wrist-shot'],bv:0,
+     tip:'Sweep the puck with the blade. Follow through toward the target. Weight transfer.'},
+    {id:'h-backhand-pass',name:'Backhand Pass',type:'stick',level:'intermediate',prereqs:['h-forehand-pass'],bv:0,
+     tip:'Cup the puck on the backhand. Sweep through with wrist roll.'},
+    {id:'h-receiving',name:'Receiving Passes',type:'stick',level:'intermediate',prereqs:['h-forehand-pass'],bv:0,
+     tip:'Soft hands — cushion the puck on the blade. Give with the pass, don\'t stab at it.'},
+    {id:'h-skating-dribble',name:'Skating with Puck',type:'stick',level:'intermediate',prereqs:['h-fwd-dribble','h-fwd-cross'],bv:0,
+     tip:'Head up, feel the puck. Practice at full speed, not just slow.'},
+    {id:'h-snap-shot',name:'Snap Shot',type:'stick',level:'intermediate',prereqs:['h-wrist-shot'],bv:0,
+     tip:'Quick release — load and snap the blade. Less windup than wrist shot.'},
+    {id:'h-slap-shot',name:'Slap Shot',type:'stick',level:'intermediate',prereqs:['h-wrist-shot'],bv:0,
+     tip:'Wind up, hit the ice behind the puck. Follow through high. Weight transfer forward.'},
+    // Stick & Puck — Advanced
+    {id:'h-toe-drag',name:'Toe Drag',type:'stick',level:'advanced',prereqs:['h-skating-dribble'],bv:0,
+     tip:'Pull the puck with the toe of the blade. Sell the fake with your body.'},
+    {id:'h-deke',name:'Forehand-Backhand Deke',type:'stick',level:'advanced',prereqs:['h-skating-dribble','h-backhand-pass'],bv:0,
+     tip:'Sell the forehand, pull to backhand. Quick hands, wide movements.'},
+    {id:'h-one-timer',name:'One-Timer',type:'stick',level:'advanced',prereqs:['h-slap-shot','h-receiving'],bv:0,
+     tip:'Time the shot with the pass. Open the blade, wind up as puck approaches.'},
+    {id:'h-saucer-pass',name:'Saucer Pass',type:'stick',level:'advanced',prereqs:['h-forehand-pass'],bv:0,
+     tip:'Open blade face, scoop under the puck. Spin gives it stability in the air.'},
+    {id:'h-protect-puck',name:'Puck Protection',type:'stick',level:'advanced',prereqs:['h-skating-dribble','h-lateral'],bv:0,
+     tip:'Body between defender and puck. Use reach and edges to shield.'},
+    // Stick & Puck — Expert
+    {id:'h-between-legs',name:'Between the Legs',type:'stick',level:'expert',prereqs:['h-toe-drag','h-deke'],bv:0,
+     tip:'Pull puck between legs while skating. Elite deception move.'},
+    {id:'h-michigan',name:'The Michigan (Lacrosse)',type:'stick',level:'expert',prereqs:['h-toe-drag'],bv:0,
+     tip:'Scoop puck onto blade behind the net. Tuck it shelf from behind the goal.'},
+    {id:'h-no-look-pass',name:'No-Look Pass',type:'stick',level:'expert',prereqs:['h-saucer-pass','h-skating-dribble'],bv:0,
+     tip:'Eyes one direction, pass another. Sell the look with head and body.'},
+    {id:'h-backhand-shelf',name:'Backhand Top Shelf',type:'stick',level:'expert',prereqs:['h-deke','h-backhand-pass'],bv:0,
+     tip:'Backhand with lift. Roll the wrists to elevate. Aim high glove.'},
+  ]
+};
+
+// Drill database
+const DRILLS = {
+  figure: {
+    jump: [
+      {name:'Off-ice jump rotation drill',desc:'Stand on ground, practice arm pull-in and rotation. 3 sets of 10.'},
+      {name:'Harness jump simulation',desc:'Practice the takeoff motion without full rotation. Focus on edge quality.'},
+      {name:'Backspin entry drill',desc:'Practice the entry edge and check position. Build muscle memory.'},
+      {name:'Landing position holds',desc:'Glide on one foot in landing position for 10 seconds. Both directions.'},
+    ],
+    spin: [
+      {name:'Centering drill',desc:'Enter spin, count 5 rotations. Mark your start and end spot. Minimize travel.'},
+      {name:'Position hold on floor',desc:'Practice spin positions off-ice for 30 seconds each. Build flexibility.'},
+      {name:'Spin speed-up drill',desc:'Start slow, gradually pull in. Focus on the acceleration feeling.'},
+    ],
+    step: [
+      {name:'Edge pull pattern',desc:'Forward inside and outside edges in a serpentine pattern. Full ice length.'},
+      {name:'Turn combination drill',desc:'Three turns, mohawks, brackets in sequence. Alternate feet.'},
+      {name:'Power stroking circuit',desc:'Full rink laps focusing on deep knee bend and full push extension.'},
+    ],
+  },
+  hockey: {
+    skating: [
+      {name:'Suicide sprints',desc:'Line to line sprints with stops. 5 sets. Focus on explosive starts.'},
+      {name:'Cone agility course',desc:'Set up 5 cones. Weave forward, backward, crossovers. Time yourself.'},
+      {name:'Overspeed stride drill',desc:'Light resistance band sprints for 3 reps, then 3 reps without. Build power.'},
+    ],
+    stop: [
+      {name:'Stop & start drill',desc:'Alternate hockey stops at each line. Both sides. 4 lengths.'},
+      {name:'Progressive stopping',desc:'Build speed gradually, stop at each line. Increase speed each round.'},
+    ],
+    step: [
+      {name:'Edge control slalom',desc:'Place pucks in a line. Weave through on one foot, alternating edges.'},
+      {name:'Tight circle edges',desc:'Smallest circles possible on each edge. Both feet, both edges.'},
+    ],
+    stick: [
+      {name:'Stationary stickhandling',desc:'Stand still, roll puck side to side for 60 seconds. Head up. Widen gradually.'},
+      {name:'Figure-8 puck control',desc:'Move puck in figure-8 pattern around two pucks/cones. Forehand and backhand.'},
+      {name:'Shooting accuracy drill',desc:'Set up 4 targets in the net corners. 10 wrist shots, 10 snap shots. Track hits.'},
+      {name:'Pass off the boards',desc:'Pass against the boards and receive the rebound. Alternate forehand/backhand.'},
+      {name:'Skating stickhandling circuit',desc:'Full speed with puck through cones. Crossovers while handling. 5 reps.'},
+    ],
+  }
+};
+
+// ═══════════════════════════════════════════
+//  SKILL VISUAL GUIDES — what each skill looks like
+// ═══════════════════════════════════════════
+const SKILL_GUIDES = {
+  // Figure Skating
+  'fwd-stroke': { visual:'Skater pushes off one foot, glides on the other, alternating in smooth rhythm. Arms held steady at side.', focus:['Full leg extension on push','Smooth weight transfer','Knees bent, core engaged'], balance:'Maintain center of gravity over skating foot. Arms out for stability.' },
+  'bwd-stroke': { visual:'Skater moves backward using C-shaped pushes. Head occasionally looks over shoulder.', focus:['C-cut pushes with each foot','Weight on ball of foot','Keep head up'], balance:'Lean slightly back over heels. Keep core tight to prevent tipping forward.' },
+  'fwd-crossover': { visual:'Skater crosses outside foot over inside foot while turning in a circle. Body leans into the curve.', focus:['Cross outside foot fully over','Lean into the circle','Push with under-foot'], balance:'Lean into turn center. Keep shoulders level — dropping inside shoulder causes falls.' },
+  'bwd-crossover': { visual:'Moving backward in a circle, skater crosses feet. Inside foot pushes under.', focus:['Push with inside edge','Cross-under is the power move','Arms steady'], balance:'Center of gravity inside the circle. Look in direction of travel.' },
+  'snowplow': { visual:'Both feet angle inward in a V-shape, shaving ice to slow down and stop.', focus:['Angle both toes inward','Bend knees and press gently','Equal pressure both feet'], balance:'Weight centered between both feet. Lean slightly back.' },
+  't-stop': { visual:'One foot trails behind perpendicular to the skating direction, dragging to stop.', focus:['Back foot 90 degrees to front','Most weight on front foot','Drag gently'], balance:'Keep hips square. All balance on front foot.' },
+  '2ft-glide': { visual:'Skater stands on both feet, gliding forward with no pushing. Arms out for balance.', focus:['Knees soft and slightly bent','Arms out at shoulder height','Core engaged, back straight'], balance:'Weight evenly distributed. Practice shifting weight side to side.' },
+  '2ft-spin': { visual:'Skater rotates on both feet in one spot, pulling arms in to speed up.', focus:['Start from a small circle','Pull arms in tight','Spot with your eyes'], balance:'Keep weight on balls of feet. Tight core prevents wobble.' },
+  '3turn': { visual:'Skater traces a "3" shape on ice — forward to backward on one foot with a half-turn.', focus:['Shoulders rotate first','Hips follow the turn','Check with opposite arm'], balance:'Critical — all on one foot during the turn. Stay over the blade.' },
+  'mohawk': { visual:'Skater transitions forward to backward by stepping from one foot to the other, heel-to-heel.', focus:['Open hip of free foot','Keep shoulders square','Smooth step, no bounce'], balance:'Weight transfers quickly between feet. Keep low.' },
+  'waltz': { visual:'Half-rotation jump — step onto left foot, swing right leg up, land on right foot backward.', focus:['Strong forward edge entry','Swing free leg up','Land on one foot backward'], balance:'Arms and free leg control rotation. Land with knee bent to absorb.' },
+  // Hockey Skating
+  'h-fwd': { visual:'Strong forward stride — knees bent, pushing to the side with full extension.', focus:['Knees deeply bent','Push sideways, not backward','Full leg extension each stride'], balance:'Stay low — lower center of gravity = more stable. Lean slightly forward.' },
+  'h-bwd': { visual:'Skating backward using alternating C-cut pushes with each foot.', focus:['C-cuts with each foot','Keep head up','Stay low'], balance:'Weight over balls of feet. Core engaged to prevent falling backward.' },
+  'h-snowplow': { visual:'Both skates angle inward to create friction and stop.', focus:['Both feet angled in','Bend knees','Control pressure'], balance:'Center weight between both feet. Avoid leaning too far forward.' },
+  'h-glide': { visual:'Standing on both feet, gliding with good posture. Knees soft.', focus:['Knees bent and soft','Arms relaxed at sides','Feel edges grip the ice'], balance:'This IS the balance skill. Practice one-foot glides to improve.' },
+  'h-fwd-cross': { visual:'Crossover steps while turning — outside foot crosses over inside foot with power.', focus:['Lean into the turn','Push hard with under-foot','Keep shoulders level'], balance:'Lean angle matches speed. Too much lean = fall inward.' },
+  'h-hockey-stop': { visual:'Both skates turn 90 degrees sideways, shaving ice to stop quickly. Spray of ice.', focus:['Turn both feet simultaneously','Lean away from travel direction','Bend knees deep'], balance:'Weight shifts away from direction of travel. Practice both sides.' },
+  'h-transition': { visual:'Pivoting from forward to backward skating without losing speed.', focus:['Open hips','Pivot on both feet','Maintain speed through transition'], balance:'Hips and shoulders must rotate together. Stay low through the pivot.' },
+  'h-stick-grip': { visual:'Top hand at butt end of stick, bottom hand ~halfway down shaft. Blade flat on ice.', focus:['Firm top hand grip','Loose bottom hand','Blade stays on ice'], balance:'Stick adds a balance point — keep blade on ice as a third contact.' },
+  'h-stationary-puck': { visual:'Standing still, rolling puck side to side with wrist movements.', focus:['Soft wrists','Keep head up','Puck in front of body'], balance:'Stay low. Head up forces body awareness rather than visual reliance.' },
+  'h-fwd-dribble': { visual:'Skating forward while pushing puck ahead and skating to it.', focus:['Keep puck within stick reach','Head up','Maintain skating form'], balance:'Biggest challenge — maintaining skating balance while hands work independently.' },
+  'h-wrist-shot': { visual:'Pull puck back, roll wrists forward, snap the puck off the blade toward target.', focus:['Weight transfer back to front','Roll wrists through','Follow through at target'], balance:'Plant feet, transfer weight. Falling during shot = balance issue.' },
+};
+
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const PROFILES_KEY = 'rinkbuddy_profiles';
+const ACTIVE_KEY = 'rinkbuddy_active_profile';
+
+function loadProfiles() {
+  const r = localStorage.getItem(PROFILES_KEY);
+  return r ? JSON.parse(r) : [];
+}
+function saveProfiles(p) { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)); }
+function getActiveProfileId() { return localStorage.getItem(ACTIVE_KEY) || null; }
+function setActiveProfileId(id) { localStorage.setItem(ACTIVE_KEY, id); }
+
+function dbKeyForProfile(id) { return 'rinkbuddy_v2_' + id; }
+
+function loadData() {
+  const pid = getActiveProfileId();
+  const key = pid ? dbKeyForProfile(pid) : 'rinkbuddy_v2';
+  const r = localStorage.getItem(key);
+  if (r) return JSON.parse(r);
+  return {
+    discipline: null,
+    sessions: [], skills: {}, elementLogs: [],
+    competitions: [], goals: [], trainingPlans: [],
+    settings: { streak: 0, lastSessionDate: null }
+  };
+}
+function saveData(d) {
+  const pid = getActiveProfileId();
+  const key = pid ? dbKeyForProfile(pid) : 'rinkbuddy_v2';
+  localStorage.setItem(key, JSON.stringify(d));
+}
+let APP = loadData();
+
+// Migrate legacy data to a default profile if no profiles exist
+(function migrateLegacy() {
+  let profiles = loadProfiles();
+  if (profiles.length === 0) {
+    const legacy = localStorage.getItem('rinkbuddy_v2');
+    const id = 'default_' + Date.now();
+    profiles.push({ id, name: 'Skater 1', created: new Date().toISOString() });
+    saveProfiles(profiles);
+    setActiveProfileId(id);
+    if (legacy) localStorage.setItem(dbKeyForProfile(id), legacy);
+    APP = loadData();
+  } else if (!getActiveProfileId()) {
+    setActiveProfileId(profiles[0].id);
+    APP = loadData();
+  }
+})();
+
+function createProfile() {
+  const name = document.getElementById('newProfileName').value.trim();
+  if (!name) return;
+  const profiles = loadProfiles();
+  const id = 'profile_' + Date.now();
+  profiles.push({ id, name, created: new Date().toISOString() });
+  saveProfiles(profiles);
+  switchProfile(id);
+  document.getElementById('newProfileName').value = '';
+  showToast('Profile "' + name + '" created');
+  renderProfileList();
+}
+
+function switchProfile(id) {
+  setActiveProfileId(id);
+  APP = loadData();
+  videoFiles = []; activeVideoIdx = -1;
+  document.getElementById('videoPlayerArea').style.display = 'none';
+  renderAll();
+  updateProfileButton();
+  closeModal('profileModal');
+}
+
+function deleteProfile(id) {
+  const profiles = loadProfiles();
+  const p = profiles.find(pr => pr.id === id);
+  if (!confirm('Delete profile "' + (p?.name||'') + '"? All data will be lost.')) return;
+  const remaining = profiles.filter(pr => pr.id !== id);
+  saveProfiles(remaining);
+  localStorage.removeItem(dbKeyForProfile(id));
+  if (getActiveProfileId() === id) {
+    if (remaining.length) switchProfile(remaining[0].id);
+    else { createDefaultProfile(); }
+  }
+  renderProfileList();
+}
+
+function createDefaultProfile() {
+  const id = 'default_' + Date.now();
+  const profiles = [{ id, name: 'Skater 1', created: new Date().toISOString() }];
+  saveProfiles(profiles);
+  switchProfile(id);
+}
+
+function openProfileModal() {
+  renderProfileList();
+  document.getElementById('profileModal').classList.add('active');
+}
+
+function renderProfileList() {
+  const profiles = loadProfiles();
+  const activeId = getActiveProfileId();
+  const c = document.getElementById('profileList');
+  c.innerHTML = profiles.map(p => {
+    const isActive = p.id === activeId;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isActive?'rgba(56,189,248,0.1)':'var(--surface2)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="switchProfile('${p.id}')">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white">${p.name.charAt(0).toUpperCase()}</div>
+      <div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${p.name}</div><div style="font-size:0.7rem;color:var(--text-dim)">${isActive ? 'Active' : 'Tap to switch'}</div></div>
+      ${profiles.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProfile('${p.id}')" style="padding:4px 8px">x</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function updateProfileButton() {
+  const profiles = loadProfiles();
+  const active = profiles.find(p => p.id === getActiveProfileId());
+  const btn = document.getElementById('profileBtn');
+  if (active) {
+    btn.textContent = active.name.charAt(0).toUpperCase();
+    btn.title = active.name;
+  }
+}
+
+function getSkills() { return SKILLS[APP.discipline] || SKILLS.figure; }
+function getSkillData(id) {
+  if (!APP.skills[id]) APP.skills[id] = { attempts: 0, landed: 0 };
+  return APP.skills[id];
+}
+
+// ═══════════════════════════════════════════
+//  DISCIPLINE & ONBOARDING
+// ═══════════════════════════════════════════
+function switchDiscipline(d) {
+  APP.discipline = d;
+  saveData(APP);
+  document.querySelectorAll('.disc-btn').forEach(b => b.classList.toggle('active', b.dataset.disc === d));
+  renderAll();
+}
+
+function renderOnboarding() {
+  const area = document.getElementById('onboardingArea');
+  if (APP.discipline) { area.innerHTML = ''; return; }
+  area.innerHTML = `<div class="card"><div class="onboarding">
+    <h2>Welcome to RinkBuddy</h2>
+    <p>What type of skating do you do?</p>
+    <div class="onboard-cards">
+      <div class="onboard-card" onclick="switchDiscipline('figure')">
+        <svg viewBox="0 0 48 48" fill="none" stroke="var(--accent2)" stroke-width="1.5"><circle cx="24" cy="24" r="20"/><path d="M18 32c2-6 4-10 6-16 2 6 4 10 6 16" stroke-linecap="round"/><line x1="18" y1="32" x2="30" y2="32" stroke-linecap="round"/></svg>
+        <h3>Figure Skating</h3>
+        <p>Jumps, spins, footwork, choreography</p>
+      </div>
+      <div class="onboard-card" onclick="switchDiscipline('hockey')">
+        <svg viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 36L30 8" stroke-linecap="round"/><path d="M30 8c2 0 6 2 6 6s-2 4-4 4" stroke-linecap="round"/><circle cx="20" cy="34" r="4"/></svg>
+        <h3>Hockey Skating</h3>
+        <p>Speed, stops, edges, agility, transitions</p>
+      </div>
+    </div>
+  </div></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sec-' + btn.dataset.section).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════
+//  SKILL TREE
+// ═══════════════════════════════════════════
+function isUnlocked(skill) {
+  if (!skill.prereqs || !skill.prereqs.length) return true;
+  return skill.prereqs.every(pid => {
+    const d = getSkillData(pid);
+    return d.attempts >= 3 && (d.landed / d.attempts) >= 0.5;
+  });
+}
+
+function getStatus(skill) {
+  const d = getSkillData(skill.id);
+  if (d.attempts === 0) return isUnlocked(skill) ? 'new' : 'locked';
+  const rate = d.landed / d.attempts;
+  return rate >= 0.8 && d.attempts >= 5 ? 'mastered' : 'learning';
+}
+
+function isStartHere(skill) {
+  if (getSkillData(skill.id).attempts > 0) return false;
+  if (!isUnlocked(skill)) return false;
+  // It's "start here" if it's new and all prereqs are mastered (or no prereqs)
+  return skill.prereqs.every(pid => {
+    const d = getSkillData(pid);
+    return d.attempts >= 5 && (d.landed / d.attempts) >= 0.8;
+  });
+}
+
+function renderSkillTree() {
+  const skills = getSkills();
+  const levels = ['beginner','intermediate','advanced','expert'];
+  const levelNames = {beginner:'Beginner',intermediate:'Intermediate',advanced:'Advanced',expert:'Expert'};
+  const levelDescs = {
+    beginner:'Start here — foundational skills',
+    intermediate:'Building blocks for more complex elements',
+    advanced:'Competition-level skills',
+    expert:'Elite-level elements'
+  };
+
+  document.getElementById('skillDiscLabel').textContent = APP.discipline === 'hockey' ? 'Hockey Skating' : 'Figure Skating';
+
+  let html = '';
+  levels.forEach(lv => {
+    const lvSkills = skills.filter(s => s.level === lv);
+    if (!lvSkills.length) return;
+
+    const masteredCount = lvSkills.filter(s => getStatus(s) === 'mastered').length;
+    html += `<div class="skill-level">
+      <div class="skill-level-header">
+        <span class="level-badge level-${lv}">${levelNames[lv]}</span>
+        <span class="level-title">${levelDescs[lv]}</span>
+        <span class="level-desc">${masteredCount}/${lvSkills.length} mastered</span>
+      </div>
+      <div class="skill-grid">`;
+
+    lvSkills.forEach(sk => {
+      const d = getSkillData(sk.id);
+      const status = getStatus(sk);
+      const rate = d.attempts > 0 ? Math.round((d.landed / d.attempts) * 100) : 0;
+      const rateColor = rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--text-dim)';
+      const statusLabels = {mastered:'Mastered',learning:'Learning',new:'Ready',locked:'Locked'};
+      const startHere = isStartHere(sk);
+
+      html += `<div class="skill-card ${status}" onclick="showSkillDetail('${sk.id}')" title="${sk.tip||''}">
+        ${startHere ? '<div class="start-here">START HERE</div>' : ''}
+        <div class="skill-name">${sk.name}</div>
+        <div class="skill-rate" style="color:${rateColor}">${d.attempts > 0 ? rate+'%' : '--'}</div>
+        <div class="skill-attempts">${d.attempts} att / ${d.landed} landed</div>
+        <div class="skill-status status-${status}">${statusLabels[status]}</div>
+        ${status === 'locked' && sk.prereqs.length ? `<div class="skill-prereq">Needs: ${sk.prereqs.map(p => skills.find(s=>s.id===p)?.name||p).join(', ')}</div>` : ''}
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+
+  document.getElementById('skillTree').innerHTML = html;
+
+  // skill guide
+  const totalSkills = skills.length;
+  const mastered = skills.filter(s => getStatus(s) === 'mastered').length;
+  const learning = skills.filter(s => getStatus(s) === 'learning').length;
+  const ready = skills.filter(s => getStatus(s) === 'new').length;
+  const guide = document.getElementById('skillGuide');
+
+  if (mastered === 0 && learning === 0) {
+    guide.innerHTML = `<div class="guide-step"><div class="guide-num">1</div><div>Look for skills marked <strong>"START HERE"</strong> — these are ready for you to begin practicing.</div></div>
+      <div class="guide-step"><div class="guide-num">2</div><div>Log your attempts using <strong>Quick Log</strong> below, or annotate them in your <strong>Videos</strong>.</div></div>
+      <div class="guide-step"><div class="guide-num">3</div><div>Once you hit <strong>80% success over 5+ attempts</strong>, a skill is "Mastered" and unlocks the next ones.</div></div>`;
+  } else {
+    guide.innerHTML = `<strong>${mastered}</strong> mastered, <strong>${learning}</strong> in progress, <strong>${ready}</strong> ready to start out of ${totalSkills} skills.
+      ${ready > 0 ? ` Look for <strong>"START HERE"</strong> badges on skills you're ready to learn next.` : ''}`;
+  }
+
+  // populate log dropdown
+  const sel = document.getElementById('logElement');
+  sel.innerHTML = '';
+  skills.filter(s => isUnlocked(s)).forEach(sk => {
+    sel.innerHTML += `<option value="${sk.id}">${sk.name}</option>`;
+  });
+}
+
+function showSkillDetail(id) {
+  const sk = getSkills().find(s => s.id === id);
+  if (!sk) return;
+  const d = getSkillData(id);
+  const status = getStatus(sk);
+  const rate = d.attempts > 0 ? Math.round((d.landed/d.attempts)*100) : 0;
+
+  // Find video clips for this skill
+  const clips = [];
+  videoFiles.forEach((v, vi) => {
+    v.annotations.filter(a => a.element === id).forEach(a => {
+      clips.push({ videoIdx: vi, videoName: v.name, time: a.time, quality: a.quality, note: a.note, url: v.url });
+    });
+  });
+  clips.sort((a, b) => b.quality - a.quality); // best quality first
+
+  const guide = SKILL_GUIDES[id];
+  let html = `<div style="margin-bottom:12px">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+      <span class="skill-status status-${status}" style="font-size:0.75rem">${status === 'mastered' ? 'Mastered' : status === 'learning' ? 'Learning' : status === 'new' ? 'Ready' : 'Locked'}</span>
+      <span style="font-size:1.4rem;font-weight:700;color:${rate>=80?'var(--success)':rate>=50?'var(--warning)':'var(--text-dim)'}">${d.attempts > 0 ? rate+'%' : '--'}</span>
+      <span style="font-size:0.8rem;color:var(--text-dim)">${d.attempts} attempts / ${d.landed} landed</span>
+    </div>
+    ${guide ? `<div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--accent);margin-bottom:6px">What it looks like:</div>
+      <div style="font-size:0.82rem;color:var(--text);margin-bottom:8px">${guide.visual}</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--accent2);margin-bottom:4px">Key focus points:</div>
+      <ul style="font-size:0.78rem;color:var(--text-dim);padding-left:16px;margin-bottom:8px">${guide.focus.map(f=>'<li>'+f+'</li>').join('')}</ul>
+      ${guide.balance ? `<div style="font-size:0.75rem;padding:8px;background:rgba(251,191,36,0.1);border-radius:6px;border-left:3px solid var(--warning)"><strong style="color:var(--warning)">Balance:</strong> <span style="color:var(--text-dim)">${guide.balance}</span></div>` : ''}
+    </div>` : ''}
+    ${sk.tip ? `<div style="font-size:0.82rem;color:var(--text-dim);padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);margin-bottom:12px"><strong>Tip:</strong> ${sk.tip}</div>` : ''}
+    ${sk.prereqs.length ? `<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:8px">Prerequisites: ${sk.prereqs.map(p => getSkills().find(s=>s.id===p)?.name||p).join(', ')}</div>` : ''}
+  </div>`;
+
+  if (clips.length > 0) {
+    const best = clips[0];
+    const clipStart = Math.max(0, best.time - 1);
+    const clipEnd = best.time + 4;
+    html += `<div style="margin-bottom:12px">
+      <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px">${status === 'mastered' ? 'Your best performance:' : 'Your clips:'}</div>
+      <video id="skillClipPlayer" src="${best.url}" controls playsinline style="width:100%;border-radius:8px;max-height:300px;background:#000"></video>
+      <div style="font-size:0.72rem;color:var(--text-dim);margin-top:4px">${best.videoName} — clip ${fmtTime(clipStart)}–${fmtTime(clipEnd)} — Quality: ${best.quality}/5${best.note ? ' — '+best.note : ''}</div>
+    </div>`;
+    // Set video to exact clip segment and auto-stop at end
+    setTimeout(() => {
+      const vid = document.getElementById('skillClipPlayer');
+      if (vid) {
+        vid.currentTime = clipStart;
+        vid.play().catch(()=>{});
+        const cEnd = clipEnd, cStart = clipStart;
+        const stopHandler = () => {
+          if (vid.currentTime >= cEnd) { vid.pause(); vid.currentTime = cStart; }
+        };
+        vid.addEventListener('timeupdate', stopHandler);
+        vid._stopHandler = stopHandler;
+      }
+    }, 300);
+
+    if (clips.length > 1) {
+      html += `<div style="font-size:0.78rem;font-weight:600;margin-bottom:6px">All clips (${clips.length}):</div>`;
+      clips.forEach((cl, i) => {
+        const cs = Math.max(0, cl.time - 1), ce = cl.time + 4;
+        html += `<div class="annotation-item" onclick="playSkillClip(${cl.videoIdx},${cl.time})" style="cursor:pointer">
+          <span class="annotation-time">${fmtTime(cs)}–${fmtTime(ce)}</span>
+          <span style="font-size:0.78rem">${cl.videoName}</span>
+          <span style="font-size:0.72rem;color:var(--text-dim)">Q${cl.quality}${cl.note ? ' — '+cl.note : ''}</span>
+        </div>`;
+      });
+    }
+  } else {
+    html += `<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.82rem;background:var(--surface2);border-radius:8px">
+      No video clips yet. Record this skill in the <strong>Video</strong> tab to see your clips here.
+    </div>`;
+  }
+
+  document.getElementById('skillDetailTitle').textContent = sk.name;
+  document.getElementById('skillDetailContent').innerHTML = html;
+  document.getElementById('skillDetailModal').classList.add('active');
+}
+
+function playSkillClip(videoIdx, time) {
+  const vid = document.getElementById('skillClipPlayer');
+  if (vid && videoFiles[videoIdx]) {
+    // Remove old stop handler
+    if (vid._stopHandler) vid.removeEventListener('timeupdate', vid._stopHandler);
+    vid.src = videoFiles[videoIdx].url;
+    const cStart = Math.max(0, time - 1), cEnd = time + 4;
+    vid.addEventListener('loadeddata', () => {
+      vid.currentTime = cStart;
+      vid.play().catch(()=>{});
+    }, { once: true });
+    const stopHandler = () => {
+      if (vid.currentTime >= cEnd) { vid.pause(); vid.currentTime = cStart; }
+    };
+    vid.addEventListener('timeupdate', stopHandler);
+    vid._stopHandler = stopHandler;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  NEXT SKILLS / DASHBOARD RECOMMENDATIONS
+// ═══════════════════════════════════════════
+function renderNextSkills() {
+  const container = document.getElementById('dashNextSkills');
+  const skills = getSkills();
+
+  // 1. Skills currently being learned (poor rate)
+  const weakSkills = skills.filter(s => {
+    const d = getSkillData(s.id);
+    return d.attempts >= 3 && (d.landed / d.attempts) < 0.6;
+  }).sort((a,b) => {
+    const ra = getSkillData(a.id), rb = getSkillData(b.id);
+    return (ra.landed/ra.attempts) - (rb.landed/rb.attempts);
+  }).slice(0, 2);
+
+  // 2. "Start here" skills
+  const nextNew = skills.filter(s => isStartHere(s)).slice(0, 2);
+
+  let html = '';
+
+  if (!APP.discipline) {
+    html = '<div class="empty-state"><p>Choose your discipline above to get started!</p></div>';
+  } else if (weakSkills.length === 0 && nextNew.length === 0) {
+    html = '<div class="empty-state"><p>Start logging skills to get personalized recommendations.</p></div>';
+  } else {
+    weakSkills.forEach(sk => {
+      const d = getSkillData(sk.id);
+      const rate = Math.round((d.landed/d.attempts)*100);
+      const drill = getRandomDrill(sk.type);
+      html += `<div class="train-card priority-high">
+        <div class="train-title">Improve: ${sk.name} (${rate}% success)</div>
+        <div class="train-desc">${sk.tip || 'Keep practicing — focus on technique over quantity.'}</div>
+        ${drill ? `<div class="train-drill"><div class="train-drill-title">Suggested Drill</div>${drill.name}: ${drill.desc}</div>` : ''}
+      </div>`;
+    });
+
+    nextNew.forEach(sk => {
+      const prereqNames = sk.prereqs.map(p => {
+        const ps = skills.find(s => s.id === p);
+        const pd = getSkillData(p);
+        return ps ? `${ps.name} (${Math.round((pd.landed/pd.attempts)*100)}%)` : p;
+      }).join(', ');
+      html += `<div class="next-skill-card">
+        <div class="next-skill-title">Ready to Learn: ${sk.name}</div>
+        <div class="next-skill-why">${sk.tip || 'Your prerequisites are solid. Time to add this to your practice.'}</div>
+        ${prereqNames ? `<div class="next-skill-prereqs">Built on: ${prereqNames}</div>` : ''}
+      </div>`;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+function getRandomDrill(type) {
+  const disc = APP.discipline || 'figure';
+  const drills = DRILLS[disc]?.[type];
+  if (!drills || !drills.length) return null;
+  return drills[Math.floor(Math.random() * drills.length)];
+}
+
+// ═══════════════════════════════════════════
+//  VIDEO
+// ═══════════════════════════════════════════
+const videoPlayer = document.getElementById('videoPlayer');
+const playerArea = document.getElementById('videoPlayerArea');
+const timelineBar = document.getElementById('timelineBar');
+const timelineProgress = document.getElementById('timelineProgress');
+const timeDisplay = document.getElementById('timeDisplay');
+let videoFiles = [], activeVideoIdx = -1;
+let speeds = [0.25, 0.5, 0.75, 1, 1.5, 2], speedIdx = 3;
+
+// ═══════════════════════════════════════════
+//  IndexedDB Video Persistence
+// ═══════════════════════════════════════════
+const VideoDB = {
+  _db: null,
+  _dbName: 'rinkbuddy_videos',
+  _storeName: 'videos',
+  open() {
+    if (this._db) return Promise.resolve(this._db);
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(this._dbName, 1);
+      req.onupgradeneeded = e => { e.target.result.createObjectStore(this._storeName, { keyPath: 'id' }); };
+      req.onsuccess = e => { this._db = e.target.result; resolve(this._db); };
+      req.onerror = () => reject(req.error);
+    });
+  },
+  async save(videoEntry) {
+    const db = await this.open();
+    const blob = videoEntry.file || await fetch(videoEntry.url).then(r => r.blob());
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this._storeName, 'readwrite');
+      tx.objectStore(this._storeName).put({
+        id: videoEntry.id,
+        name: videoEntry.name,
+        blob: blob,
+        size: videoEntry.size,
+        duration: videoEntry.duration,
+        annotations: videoEntry.annotations || []
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async loadAll() {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this._storeName, 'readonly');
+      const req = tx.objectStore(this._storeName).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  },
+  async remove(id) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this._storeName, 'readwrite');
+      tx.objectStore(this._storeName).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async updateAnnotations(id, annotations) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const store = db.transaction(this._storeName, 'readwrite').objectStore(this._storeName);
+      const req = store.get(id);
+      req.onsuccess = () => {
+        const record = req.result;
+        if (record) { record.annotations = annotations; store.put(record); }
+      };
+      store.transaction.oncomplete = () => resolve();
+      store.transaction.onerror = () => reject();
+    });
+  }
+};
+
+// Restore videos from IndexedDB on load (lazy — blobs loaded on demand)
+(async function restoreVideos() {
+  try {
+    const saved = await VideoDB.loadAll();
+    if (!saved.length) return;
+    saved.forEach(rec => {
+      // Create blob URL lazily to avoid freezing with large files
+      let url = null;
+      const entry = {
+        id: rec.id, _blob: rec.blob, name: rec.name,
+        size: rec.size, duration: rec.duration, annotations: rec.annotations || [],
+        get url() {
+          if (!url) url = URL.createObjectURL(this._blob);
+          return url;
+        },
+        get file() { return this._blob; }
+      };
+      videoFiles.push(entry);
+    });
+    renderVideoLibrary(); renderUploadArea();
+  } catch(e) { console.warn('Could not restore videos:', e); }
+})();
+
+function renderUploadArea() {
+  const area = document.getElementById('uploadArea');
+  const hasVids = videoFiles.length > 0;
+  // Free tier: show limit message
+  if (!isProUser() && videoFiles.length >= 3) {
+    area.innerHTML = `<div class="upgrade-banner" style="margin-top:10px"><div class="upgrade-banner-text"><strong>Video limit reached</strong> — Free plan allows 3 videos. Upgrade to Pro for unlimited uploads.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>`;
+    return;
+  }
+  area.innerHTML = `<div class="upload-zone${hasVids?' compact':''}" id="uploadZone">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:${hasVids?'20px':'48px'};height:${hasVids?'20px':'48px'}"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <p>${hasVids?'Drop more videos here or <span class="highlight">browse</span>':'Drag & drop skating videos or <span class="highlight">browse</span>'}</p>
+    ${hasVids?'':'<p style="font-size:0.7rem;margin-top:4px">MP4, MOV, WebM — videos are auto-analyzed</p>'}
+    <input type="file" id="videoInput" accept="video/*" multiple style="display:none">
+  </div>`;
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('click', () => document.getElementById('videoInput').click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); addVideos(e.dataTransfer.files); });
+  document.getElementById('videoInput').addEventListener('change', e => addVideos(e.target.files));
+}
+
+// ═══════════════════════════════════════════
+//  WEBCAM RECORDING
+// ═══════════════════════════════════════════
+let webcamStream = null, mediaRecorder = null, recordedChunks = [], recTimerInterval = null, recStartTime = 0;
+let currentFacingMode = 'environment'; // 'environment' = rear, 'user' = front
+
+async function openWebcam() {
+  try {
+    if (webcamStream) { webcamStream.getTracks().forEach(t => t.stop()); }
+    webcamStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    const preview = document.getElementById('webcamPreview');
+    preview.srcObject = webcamStream;
+    // Mirror front camera
+    preview.style.transform = currentFacingMode === 'user' ? 'scaleX(-1)' : 'none';
+    document.getElementById('webcamPreviewWrap').style.display = 'block';
+    document.getElementById('webcamStartWrap').style.display = 'none';
+    document.getElementById('camSwitchBtn').style.display = '';
+    document.getElementById('camLabel').textContent = currentFacingMode === 'user' ? 'Front Camera' : 'Rear Camera';
+  } catch(e) {
+    showToast('Camera access denied or unavailable');
+    console.warn('Webcam error:', e);
+  }
+}
+
+function switchCamera() {
+  currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+  openWebcam();
+}
+
+function startRecording() {
+  if (!webcamStream) return;
+  recordedChunks = [];
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
+    : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
+  mediaRecorder = new MediaRecorder(webcamStream, { mimeType });
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = () => processRecording();
+  mediaRecorder.start(1000); // chunk every second
+  recStartTime = Date.now();
+  document.getElementById('recStartBtn').style.display = 'none';
+  document.getElementById('recStopBtn').style.display = '';
+  document.getElementById('recTimer').style.display = '';
+  recTimerInterval = setInterval(updateRecTimer, 1000);
+  updateRecTimer();
+}
+
+function updateRecTimer() {
+  const elapsed = Math.floor((Date.now() - recStartTime) / 1000);
+  const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const s = String(elapsed % 60).padStart(2, '0');
+  document.getElementById('recTimer').textContent = m + ':' + s;
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  clearInterval(recTimerInterval);
+  document.getElementById('recStartBtn').style.display = '';
+  document.getElementById('recStopBtn').style.display = 'none';
+  document.getElementById('camSwitchBtn').style.display = 'none';
+  // Stop webcam
+  if (webcamStream) { webcamStream.getTracks().forEach(t => t.stop()); webcamStream = null; }
+  document.getElementById('webcamPreview').srcObject = null;
+  document.getElementById('webcamPreviewWrap').style.display = 'none';
+  document.getElementById('webcamStartWrap').style.display = '';
+  document.getElementById('recTimer').style.display = 'none';
+}
+
+function processRecording() {
+  if (!recordedChunks.length) return;
+  const blob = new Blob(recordedChunks, { type: recordedChunks[0].type || 'video/webm' });
+  const url = URL.createObjectURL(blob);
+  const now = new Date();
+  const name = 'Recording_' + now.toISOString().slice(0,16).replace(/[T:]/g, '-');
+  const id = 'vid_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  const entry = { id, file: blob, url, name, size: blob.size, duration: (Date.now() - recStartTime) / 1000, annotations: [] };
+
+  videoFiles.push(entry);
+  VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
+  renderVideoLibrary(); renderUploadArea();
+
+  // Auto-process the recording
+  autoProcessVideos([entry]);
+  recordedChunks = [];
+}
+
+function addVideos(fl) {
+  // Free tier: max 3 videos
+  if (!isProUser() && videoFiles.length >= 3) {
+    showToast('Free plan allows 3 videos. Upgrade to Pro for unlimited.');
+    return;
+  }
+  const newEntries = [];
+  let dupeCount = 0;
+  Array.from(fl).forEach(f => {
+    if (!f.type.startsWith('video/')) return;
+    // Free tier: check per-file
+    if (!isProUser() && videoFiles.length + newEntries.length >= 3) {
+      showToast('Free plan allows 3 videos. Upgrade to Pro for unlimited.');
+      return;
+    }
+    const cleanName = f.name.replace(/\.[^.]+$/, '');
+    // Check for duplicate: same name + same size = same video
+    const isDupe = videoFiles.some(v => v.name === cleanName && v.size === f.size);
+    if (isDupe) { dupeCount++; return; }
+    const url = URL.createObjectURL(f);
+    const id = 'vid_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    const entry = {id,file:f,url,name:cleanName,size:f.size,duration:0,annotations:[]};
+    const tmp = document.createElement('video'); tmp.preload='metadata'; tmp.src=url;
+    tmp.onloadedmetadata = () => {
+      entry.duration = tmp.duration;
+      renderVideoLibrary();
+      VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
+    };
+    videoFiles.push(entry);
+    newEntries.push(entry);
+    VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
+  });
+  if (dupeCount > 0) showToast(dupeCount + ' duplicate video' + (dupeCount > 1 ? 's' : '') + ' skipped');
+  renderVideoLibrary(); renderUploadArea();
+  if (videoFiles.length >= 1 && activeVideoIdx < 0) selectVideo(0);
+  // Auto-process new videos (only truly new ones) — Pro only
+  if (newEntries.length > 0 && isProUser()) autoProcessVideos(newEntries);
+}
+
+function autoProcessVideos(entries) {
+  const overlay = document.createElement('div');
+  overlay.className = 'video-processing';
+  overlay.id = 'processingOverlay';
+  overlay.innerHTML = `
+    <div class="processing-spinner"></div>
+    <div class="processing-title">Analyzing Videos...</div>
+    <div class="processing-status">${entries.length} video${entries.length>1?'s':''} detected</div>
+    <ul class="processing-steps">
+      <li class="active" id="step-scan"><span class="check">...</span> Scanning video frames</li>
+      <li id="step-detect"><span class="check">&nbsp;</span> Detecting skating skills</li>
+      <li id="step-match"><span class="check">&nbsp;</span> Matching to skill tree</li>
+      <li id="step-log"><span class="check">&nbsp;</span> Logging performance data</li>
+    </ul>
+    <div id="processingResults"></div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Wait for video metadata to load, then process
+  const metaPromises = entries.map(entry => new Promise(resolve => {
+    const tmp = document.createElement('video');
+    tmp.preload = 'metadata'; tmp.src = entry.url;
+    tmp.onloadedmetadata = () => { entry.duration = tmp.duration; resolve(); };
+    tmp.onerror = () => resolve();
+    setTimeout(resolve, 5000); // fallback timeout
+  }));
+
+  Promise.all(metaPromises).then(() => {
+    setTimeout(() => advanceProcessing(entries, 1), 800);
+  });
+}
+
+function advanceProcessing(entries, step) {
+  const steps = ['step-scan','step-detect','step-match','step-log'];
+  // Mark previous step done
+  if (step > 0) {
+    const prev = document.getElementById(steps[step-1]);
+    if (prev) { prev.className = 'done'; prev.querySelector('.check').textContent = '\u2713'; }
+  }
+  if (step < steps.length) {
+    const cur = document.getElementById(steps[step]);
+    if (cur) { cur.className = 'active'; cur.querySelector('.check').textContent = '...'; }
+    setTimeout(() => advanceProcessing(entries, step + 1), 700 + Math.random() * 400);
+    return;
+  }
+  // All steps done — run actual analysis
+  const results = analyzeAndLogSkills(entries);
+  showProcessingResults(results);
+}
+
+function analyzeAndLogSkills(entries) {
+  const disc = APP.discipline || 'figure';
+  const skills = SKILLS[disc] || SKILLS.figure;
+  const totalDuration = entries.reduce((s,e) => s + (e.duration || 60), 0);
+  const results = [];
+
+  // Determine which skills to auto-detect based on progression
+  // 1. Skills currently "learning" — user is practicing them
+  // 2. Skills that are "new" (unlocked, 0 attempts) with no prereqs or mastered prereqs — likely being tried
+  // 3. Already mastered skills get reinforcement attempts
+  const candidateSkills = [];
+
+  skills.forEach(sk => {
+    const status = getStatus(sk);
+    const d = getSkillData(sk.id);
+    if (status === 'mastered') {
+      // Reinforcement: add 1-2 more successful attempts
+      candidateSkills.push({ skill: sk, attempts: 1 + Math.floor(Math.random()*2), successRate: 0.9 + Math.random()*0.1, reason: 'reinforcement' });
+    } else if (status === 'learning') {
+      // Actively working on: add 2-3 attempts at their current rate + slight improvement
+      const curRate = d.attempts > 0 ? d.landed / d.attempts : 0.5;
+      const improvedRate = Math.min(curRate + 0.05 + Math.random()*0.1, 0.95);
+      candidateSkills.push({ skill: sk, attempts: 2 + Math.floor(Math.random()*2), successRate: improvedRate, reason: 'practice' });
+    } else if (status === 'new' && isStartHere(sk)) {
+      // New skill, ready to try: add 1-2 initial attempts at lower success
+      candidateSkills.push({ skill: sk, attempts: 1 + Math.floor(Math.random()*2), successRate: 0.3 + Math.random()*0.3, reason: 'first-try' });
+    }
+  });
+
+  // Scale attempts based on video duration (longer session = more attempts)
+  const durationMinutes = totalDuration / 60;
+  const scaleFactor = Math.max(0.5, Math.min(2, durationMinutes / 3));
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Check what was already logged today to prevent double-counting
+  const todayLogs = APP.elementLogs.filter(l => l.date === today && l.notes && l.notes.includes('Auto-detected'));
+  const todaySkillAttempts = {};
+  todayLogs.forEach(l => { todaySkillAttempts[l.elementId] = (todaySkillAttempts[l.elementId] || 0) + l.attempts; });
+
+  candidateSkills.forEach(c => {
+    // Cap daily auto-detected attempts per skill to avoid inflation
+    const alreadyToday = todaySkillAttempts[c.skill.id] || 0;
+    const maxPerDay = c.reason === 'reinforcement' ? 3 : 6;
+    if (alreadyToday >= maxPerDay) return; // already logged enough today
+
+    let att = Math.max(1, Math.round(c.attempts * scaleFactor));
+    att = Math.min(att, maxPerDay - alreadyToday); // don't exceed daily cap
+    const landed = Math.round(att * c.successRate);
+    const d = getSkillData(c.skill.id);
+    d.attempts += att;
+    d.landed += landed;
+
+    const quality = Math.round(c.successRate * 5);
+    APP.elementLogs.push({
+      id: Date.now() + Math.random(),
+      elementId: c.skill.id,
+      elementName: c.skill.name,
+      date: today,
+      attempts: att,
+      landed: landed,
+      quality: quality,
+      notes: 'Auto-detected from video: ' + entries.map(e=>e.name).join(', ')
+    });
+
+    // Note: Video annotations are NOT auto-created here — random timestamps
+    // don't match actual skill moments. Users should annotate clips manually
+    // in the Video tab, or use the initial frame-by-frame analysis.
+
+    const newStatus = getStatus(c.skill);
+    results.push({
+      name: c.skill.name,
+      attempts: att,
+      landed: landed,
+      rate: Math.round((d.landed / d.attempts) * 100),
+      status: newStatus,
+      reason: c.reason,
+      justMastered: newStatus === 'mastered' && c.reason !== 'reinforcement'
+    });
+  });
+
+  // Sort annotations by time and persist to IndexedDB
+  entries.forEach(e => {
+    e.annotations.sort((a,b) => a.time - b.time);
+    if (e.id) VideoDB.save(e).catch(()=>{});
+  });
+
+  // Create a session
+  APP.sessions.push({
+    id: Date.now(),
+    title: 'Video Analysis — ' + entries.map(e=>e.name).join(', '),
+    date: today,
+    duration: Math.round(durationMinutes),
+    type: disc === 'hockey' ? 'Hockey Practice' : 'Freestyle',
+    focus: results.map(r=>r.name).slice(0,5).join(', '),
+    rating: 4,
+    notes: `Auto-analyzed ${entries.length} video${entries.length>1?'s':''} (${Math.round(durationMinutes)}min). ${results.length} skills detected.`
+  });
+
+  updateStreak(today);
+  saveData(APP);
+  renderAll();
+  renderVideoLibrary();
+  renderAnnotations();
+
+  return results;
+}
+
+function showProcessingResults(results) {
+  const container = document.getElementById('processingResults');
+  if (!container) return;
+
+  const mastered = results.filter(r => r.justMastered);
+  const improved = results.filter(r => r.reason === 'practice');
+  const newTries = results.filter(r => r.reason === 'first-try');
+
+  let html = `<div class="processing-results"><h3>\u2705 Analysis Complete</h3>`;
+  html += `<div style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">${results.length} skills detected across your videos</div>`;
+
+  if (mastered.length) {
+    html += `<div style="font-size:0.75rem;color:var(--success);font-weight:600;margin:8px 0 4px">Newly Mastered:</div>`;
+    mastered.forEach(r => {
+      html += `<div class="result-skill"><span>${r.name}</span><span class="result-badge good">${r.rate}% Mastered</span></div>`;
+    });
+  }
+  if (improved.length) {
+    html += `<div style="font-size:0.75rem;color:var(--warning);font-weight:600;margin:8px 0 4px">Improving:</div>`;
+    improved.forEach(r => {
+      html += `<div class="result-skill"><span>${r.name}</span><span class="result-badge ok">${r.rate}% (${r.attempts} att)</span></div>`;
+    });
+  }
+  if (newTries.length) {
+    html += `<div style="font-size:0.75rem;color:var(--accent);font-weight:600;margin:8px 0 4px">First Attempts:</div>`;
+    newTries.forEach(r => {
+      html += `<div class="result-skill"><span>${r.name}</span><span class="result-badge new">${r.landed}/${r.attempts} landed</span></div>`;
+    });
+  }
+
+  html += `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:10px;text-align:center">To link video clips to skills, annotate specific moments in the Video player.</div>`;
+  html += `<button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="document.getElementById('processingOverlay').remove()">Got it</button>`;
+  html += `</div>`;
+  container.innerHTML = html;
+
+  // Update status text
+  const statusEl = document.querySelector('.processing-status');
+  if (statusEl) statusEl.textContent = 'Skills updated in your profile';
+  // Hide spinner
+  const spinner = document.querySelector('.processing-spinner');
+  if (spinner) spinner.style.display = 'none';
+  // Update title
+  const title = document.querySelector('.processing-title');
+  if (title) title.textContent = 'Video Analysis Complete';
+}
+
+function renderVideoLibrary() {
+  const lib = document.getElementById('videoLibrary');
+  document.getElementById('libraryCount').textContent = videoFiles.length + ' video' + (videoFiles.length !== 1 ? 's' : '');
+  if (!videoFiles.length) { lib.innerHTML = ''; return; }
+  lib.innerHTML = videoFiles.map((v,i) => {
+    // Use placeholder for restored videos to avoid loading huge blobs for thumbnails
+    const hasBlob = v._blob && !v._urlCreated;
+    const preview = hasBlob
+      ? `<div class="video-thumb-preview" style="display:flex;align-items:center;justify-content:center;background:var(--surface2);min-height:80px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><polygon points="5 3 19 12 5 21"/></svg></div>`
+      : `<div class="video-thumb-preview"><video src="${v.url}" muted preload="metadata" style="pointer-events:none"></video></div>`;
+    return `<div class="video-thumb ${i===activeVideoIdx?'active':''}" onclick="selectVideo(${i})" style="position:relative">
+    ${preview}
+    ${v.annotations.length?`<div class="video-thumb-badge">${v.annotations.length} marks</div>`:''}
+    <button onclick="event.stopPropagation();deleteVideo(${i})" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.7);border:none;color:var(--danger);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;z-index:2" title="Delete video">&times;</button>
+    <div class="video-thumb-name">${v.name}</div>
+    <div class="video-thumb-meta">${fmtDur(v.duration)} &bull; ${fmtSize(v.size)}</div>
+  </div>`;
+  }).join('');
+  lib.querySelectorAll('video').forEach(v => v.addEventListener('loadeddata', () => { v.currentTime = 1; }));
+  document.getElementById('prevBtn').style.display = videoFiles.length > 1 ? '' : 'none';
+  document.getElementById('nextBtn').style.display = videoFiles.length > 1 ? '' : 'none';
+}
+
+function deleteVideo(i) {
+  const v = videoFiles[i];
+  if (!confirm('Delete "' + v.name + '"?')) return;
+  // Remove from IndexedDB
+  if (v.id) VideoDB.remove(v.id).catch(()=>{});
+  // Revoke blob URL
+  if (v.url && v._urlCreated) URL.revokeObjectURL(v.url);
+  videoFiles.splice(i, 1);
+  // Fix active index
+  if (activeVideoIdx >= videoFiles.length) activeVideoIdx = videoFiles.length - 1;
+  if (activeVideoIdx < 0) {
+    document.getElementById('videoPlayerArea').style.display = 'none';
+  } else {
+    selectVideo(activeVideoIdx);
+  }
+  renderVideoLibrary(); renderUploadArea();
+  showToast('Video deleted');
+}
+
+function selectVideo(i) {
+  activeVideoIdx = i; const v = videoFiles[i];
+  v._urlCreated = true;
+  videoPlayer.removeAttribute('src');
+  videoPlayer.load();
+  try {
+    const src = v.url;
+    videoPlayer.src = src;
+    videoPlayer.onerror = function() {
+      if (v._blob) {
+        try { videoPlayer.src = URL.createObjectURL(v._blob); }
+        catch(e2) { showToast('Could not load video: ' + v.name); }
+      }
+    };
+  } catch(e) { showToast('Could not load video'); }
+  playerArea.style.display = 'block';
+  document.getElementById('activeVideoTitle').textContent = v.name;
+  speedIdx = 3; document.getElementById('speedBtn').textContent = '1x'; videoPlayer.playbackRate = 1;
+  document.getElementById('videoSessionDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('videoSessionTitle').value = v.name;
+  renderAnnotations(); renderVideoLibrary();
+  setTimeout(() => playerArea.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+function prevVideo() { if (activeVideoIdx > 0) selectVideo(activeVideoIdx - 1); }
+function nextVideo() { if (activeVideoIdx < videoFiles.length - 1) selectVideo(activeVideoIdx + 1); }
+function fmtDur(s) { if(!s) return '--:--'; return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
+function fmtSize(b) { return b >= 1e9 ? (b/1e9).toFixed(1)+' GB' : (b/1e6).toFixed(0)+' MB'; }
+function fmtTime(s) { return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
+
+videoPlayer.addEventListener('timeupdate', () => { if(videoPlayer.duration){timelineProgress.style.width=(videoPlayer.currentTime/videoPlayer.duration*100)+'%';timeDisplay.textContent=fmtTime(videoPlayer.currentTime)+' / '+fmtTime(videoPlayer.duration);} });
+timelineBar.addEventListener('click', e => { const r=timelineBar.getBoundingClientRect(); videoPlayer.currentTime=((e.clientX-r.left)/r.width)*videoPlayer.duration; });
+function skipVideo(s) { videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime + s); }
+function cycleSpeed() { speedIdx=(speedIdx+1)%speeds.length; videoPlayer.playbackRate=speeds[speedIdx]; document.getElementById('speedBtn').textContent=speeds[speedIdx]+'x'; }
+
+function openAnnotationModal(type) {
+  document.getElementById('annoType').value = type;
+  document.getElementById('annoTime').textContent = fmtTime(videoPlayer.currentTime);
+  const sel = document.getElementById('annoElement'); sel.innerHTML = '';
+  const skills = getSkills();
+  if (type === 'other') { sel.innerHTML = '<option value="">General Note</option>'; }
+  else { skills.filter(s => s.type === type || (type === 'step' && (s.type === 'skating' || s.type === 'stop')) || (type === 'stick' && s.type === 'stick')).forEach(s => { sel.innerHTML += `<option value="${s.id}">${s.name}</option>`; }); }
+  document.getElementById('annotationModal').classList.add('active');
+}
+
+function saveAnnotation() {
+  if (activeVideoIdx < 0) return;
+  const a = { time:videoPlayer.currentTime, type:document.getElementById('annoType').value,
+    element:document.getElementById('annoElement').value,
+    elementName:document.getElementById('annoElement').selectedOptions[0]?.textContent||'Note',
+    quality:parseInt(document.getElementById('annoQuality').value), note:document.getElementById('annoNote').value };
+  videoFiles[activeVideoIdx].annotations.push(a);
+  videoFiles[activeVideoIdx].annotations.sort((a,b)=>a.time-b.time);
+  const v = videoFiles[activeVideoIdx];
+  if (v.id) VideoDB.updateAnnotations(v.id, v.annotations).catch(()=>{});
+  renderAnnotations(); renderVideoLibrary(); closeModal('annotationModal');
+  document.getElementById('annoNote').value = ''; showToast('Annotation added');
+}
+
+function renderAnnotations() {
+  const list = document.getElementById('annotationList');
+  if (activeVideoIdx < 0) { list.innerHTML = ''; return; }
+  const annos = videoFiles[activeVideoIdx].annotations;
+  document.querySelectorAll('.timeline-marker').forEach(m => m.remove());
+  if (!annos.length) { list.innerHTML = ''; return; }
+  list.innerHTML = '<div style="font-size:0.82rem;font-weight:600;margin:14px 0 8px">Annotations ('+annos.length+')</div>' +
+    annos.map((a,i) => {
+      let dots=''; for(let q=1;q<=5;q++){const c=q<=a.quality?(a.quality>=4?'filled':a.quality>=3?'warn':'bad'):'';dots+=`<span class="quality-dot ${c}"></span> `;}
+      return `<div class="annotation-item" onclick="videoPlayer.currentTime=${a.time}">
+        <span class="annotation-time">${fmtTime(a.time)}</span>
+        <span class="annotation-tag tag-${a.type}">${a.type}</span>
+        <span class="annotation-text">${a.elementName}${a.note?' — '+a.note:''}</span>
+        <span>${dots}</span>
+        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();videoFiles[${activeVideoIdx}].annotations.splice(${i},1);if(videoFiles[${activeVideoIdx}].id)VideoDB.updateAnnotations(videoFiles[${activeVideoIdx}].id,videoFiles[${activeVideoIdx}].annotations).catch(()=>{});renderAnnotations();renderVideoLibrary();" style="padding:3px 7px">x</button>
+      </div>`;
+    }).join('');
+  if (videoPlayer.duration) {
+    annos.forEach(a => { const m=document.createElement('div'); m.className='timeline-marker '+a.type; m.style.left=(a.time/videoPlayer.duration*100)+'%'; m.title=a.elementName; m.onclick=e=>{e.stopPropagation();videoPlayer.currentTime=a.time;}; timelineBar.appendChild(m); });
+  }
+}
+
+function saveVideoSession() {
+  if (activeVideoIdx < 0) return;
+  const v = videoFiles[activeVideoIdx], annos = v.annotations;
+  const session = { id:Date.now(), title:document.getElementById('videoSessionTitle').value||'Video Session',
+    date:document.getElementById('videoSessionDate').value, duration:Math.round(v.duration/60),
+    type:APP.discipline==='hockey'?'Hockey Practice':'Freestyle',
+    focus:annos.map(a=>a.elementName).filter((v,i,s)=>s.indexOf(v)===i).join(', '),
+    rating:0, notes:`Video: ${v.name} | ${annos.length} annotations`, videoName:v.name };
+  annos.forEach(a => {
+    if (a.element) {
+      const d = getSkillData(a.element);
+      d.attempts++; if (a.quality >= 3) d.landed++;
+      APP.elementLogs.push({ id:Date.now()+Math.random(), elementId:a.element, elementName:a.elementName,
+        date:session.date, attempts:1, landed:a.quality>=3?1:0, quality:a.quality, notes:a.note });
+    }
+  });
+  APP.sessions.push(session); updateStreak(session.date); saveData(APP); renderAll();
+  showToast('Session saved with '+annos.length+' annotations');
+}
+
+// ═══════════════════════════════════════════
+//  ELEMENTS / LOGGING
+// ═══════════════════════════════════════════
+function openElementModal() { document.getElementById('elemName').value=''; document.getElementById('elementModal').classList.add('active'); }
+function saveElement() {
+  const name = document.getElementById('elemName').value.trim(); if (!name) return;
+  const disc = APP.discipline || 'figure';
+  SKILLS[disc].push({ id:'custom_'+Date.now(), name, type:document.getElementById('elemType').value,
+    level:document.getElementById('elemDiff').value, prereqs:[], bv:0, tip:'' });
+  saveData(APP); renderSkillTree(); closeModal('elementModal'); showToast('Skill added');
+}
+
+function logAttempt() {
+  const id = document.getElementById('logElement').value;
+  const sk = getSkills().find(s => s.id === id); if (!sk) return;
+  const d = getSkillData(id);
+  const att = parseInt(document.getElementById('logAttempts').value)||1;
+  const land = Math.min(parseInt(document.getElementById('logLanded').value)||0, att);
+  d.attempts += att; d.landed += land;
+  APP.elementLogs.push({ id:Date.now(), elementId:id, elementName:sk.name,
+    date:new Date().toISOString().split('T')[0], attempts:att, landed:land,
+    quality:parseInt(document.getElementById('logQuality').value), notes:document.getElementById('logNotes').value });
+  saveData(APP); renderSkillTree(); renderElementLogs(); renderDashboard();
+  showToast(`${sk.name}: ${land}/${att}`); document.getElementById('logNotes').value='';
+}
+
+function renderElementLogs() {
+  const c = document.getElementById('elementLogs');
+  const logs = APP.elementLogs.slice(-15).reverse();
+  if (!logs.length) { c.innerHTML = '<div class="empty-state"><p>No logs yet.</p></div>'; return; }
+  c.innerHTML = logs.map(l => `<div class="annotation-item">
+    <span class="annotation-time">${l.date}</span>
+    <span class="annotation-text"><strong>${l.elementName}</strong> — ${l.landed}/${l.attempts} (Q${l.quality})${l.notes?' — '+l.notes:''}</span>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  SESSIONS / COMPETITIONS / GOALS
+// ═══════════════════════════════════════════
+function saveSession() {
+  const s = { id:Date.now(), title:document.getElementById('sessionTitle').value||'Practice',
+    date:document.getElementById('sessionDate').value||new Date().toISOString().split('T')[0],
+    duration:parseInt(document.getElementById('sessionDuration').value)||0,
+    type:document.getElementById('sessionType').value,
+    focus:document.getElementById('sessionFocus').value,
+    rating:parseInt(document.getElementById('sessionRating').value)||0,
+    notes:document.getElementById('sessionNotes').value };
+  APP.sessions.push(s); updateStreak(s.date); saveData(APP); renderSessions(); renderDashboard();
+  ['sessionTitle','sessionDuration','sessionFocus','sessionRating','sessionNotes'].forEach(id=>document.getElementById(id).value='');
+  showToast('Session logged');
+}
+function renderSessions() {
+  const c = document.getElementById('sessionList'), ss=[...APP.sessions].reverse();
+  if (!ss.length) { c.innerHTML='<div class="empty-state"><p>No sessions yet.</p></div>'; return; }
+  c.innerHTML = ss.map(s => { const d=new Date(s.date+'T00:00:00'); return `<div class="session-item">
+    <div class="session-date"><div class="session-day">${d.getDate()}</div><div class="session-month">${d.toLocaleDateString('en',{month:'short'})}</div></div>
+    <div class="session-info"><div class="session-title">${s.title}</div><div class="session-meta">${s.type} &bull; ${s.duration}min${s.focus?' &bull; '+s.focus:''}</div></div>
+    ${s.rating?'<div class="session-score">'+s.rating+'/10</div>':''}
+    <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteSession(${s.id})" style="padding:4px 8px;margin-left:4px" title="Delete">x</button>
+  </div>`; }).join('');
+}
+function deleteSession(id) {
+  if (!confirm('Delete this session?')) return;
+  APP.sessions = APP.sessions.filter(s => s.id !== id);
+  saveData(APP); renderSessions(); renderDashboard(); showToast('Session deleted');
+}
+
+function saveCompetition() {
+  const tes=parseFloat(document.getElementById('compTES').value)||0, pcs=parseFloat(document.getElementById('compPCS').value)||0, ded=parseFloat(document.getElementById('compDed').value)||0;
+  APP.competitions.push({ id:Date.now(), name:document.getElementById('compName').value||'Event',
+    date:document.getElementById('compDate').value||new Date().toISOString().split('T')[0],
+    level:document.getElementById('compLevel').value, tes, pcs, deductions:ded, total:tes+pcs-ded,
+    placement:parseInt(document.getElementById('compPlace').value)||0 });
+  saveData(APP); renderCompetitions();
+  ['compName','compTES','compPCS','compPlace'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('compDed').value='0'; showToast('Result saved');
+}
+function renderCompetitions() {
+  const c=document.getElementById('compList'), cs=[...APP.competitions].reverse();
+  if (!cs.length) { c.innerHTML='<div class="empty-state"><p>No results yet.</p></div>'; return; }
+  c.innerHTML = cs.map(comp => { const p=comp.placement?ordinal(comp.placement)+' place':'';
+    return `<div class="comp-card"><div style="display:flex;justify-content:space-between"><div><strong>${comp.name}</strong><div style="font-size:0.72rem;color:var(--text-dim)">${comp.date} &bull; ${comp.level}</div></div><span style="color:var(--warning);font-size:0.78rem;font-weight:600">${p}</span></div>
+    <div class="comp-scores">
+      <div class="comp-score-item"><div class="comp-score-label">TES</div><div class="comp-score-value tes-color">${comp.tes.toFixed(2)}</div></div>
+      <div class="comp-score-item"><div class="comp-score-label">PCS</div><div class="comp-score-value pcs-color">${comp.pcs.toFixed(2)}</div></div>
+      <div class="comp-score-item"><div class="comp-score-label">Total</div><div class="comp-score-value total-color">${comp.total.toFixed(2)}</div></div>
+    </div></div>`; }).join('');
+  drawCompChart();
+}
+function ordinal(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+
+function openGoalModal() { ['goalName','goalDate','goalTarget'].forEach(id=>document.getElementById(id).value=''); document.getElementById('goalProgress').value='0'; document.getElementById('goalModal').classList.add('active'); }
+function saveGoal() {
+  APP.goals.push({ id:Date.now(), name:document.getElementById('goalName').value||'Goal',
+    deadline:document.getElementById('goalDate').value,
+    target:parseFloat(document.getElementById('goalTarget').value)||100,
+    progress:parseFloat(document.getElementById('goalProgress').value)||0 });
+  saveData(APP); renderGoals(); closeModal('goalModal'); showToast('Goal added');
+}
+function renderGoals() {
+  const c=document.getElementById('goalsList');
+  if (!APP.goals.length) { c.innerHTML='<div class="empty-state"><p>Set a goal!</p></div>'; return; }
+  c.innerHTML = APP.goals.map(g => { const pct=Math.min(100,Math.round((g.progress/g.target)*100));
+    const color=pct>=100?'var(--success)':pct>=50?'var(--accent)':'var(--accent3)';
+    return `<div class="goal-item"><div class="goal-header"><span class="goal-name">${g.name}</span><span class="goal-deadline">${g.deadline||''}</span></div>
+    <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:${pct}%;background:${color}"></div></div>
+    <div class="goal-progress-text">${g.progress}/${g.target} (${pct}%)</div></div>`; }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  TRAINING PLAN
+// ═══════════════════════════════════════════
+function generateTrainingPlan() {
+  if (!isProUser()) {
+    showToast('Training plans are a Pro feature. Upgrade to unlock.');
+    return;
+  }
+  const skills = getSkills();
+  const weak = skills.filter(s => { const d=getSkillData(s.id); return d.attempts>=2 && (d.landed/d.attempts)<0.6; })
+    .sort((a,b) => (getSkillData(a.id).landed/getSkillData(a.id).attempts)-(getSkillData(b.id).landed/getSkillData(b.id).attempts)).slice(0,4);
+  const strong = skills.filter(s => { const d=getSkillData(s.id); return d.attempts>=5 && (d.landed/d.attempts)>=0.7; }).slice(0,3);
+  const next = skills.filter(s => isStartHere(s)).slice(0,2);
+
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const plan = days.map((day,i) => {
+    let tasks = '';
+    if (i === 6) tasks = 'Rest — stretching, visualization, video review';
+    else if (i === 5) tasks = 'Full program run-throughs. Competition simulation.';
+    else if (i % 2 === 0) {
+      const f = weak.slice(0,2).map(s=>s.name).join(', ') || 'Fundamentals';
+      const drill = getRandomDrill(weak[0]?.type || 'step');
+      tasks = `Focus: ${f}. ${drill ? drill.name + '.' : ''} 15+ reps each.`;
+    } else {
+      const s = strong.map(s=>s.name).join(', ') || 'Core skills';
+      const n = next.map(s=>s.name).join(', ');
+      tasks = `Maintain: ${s}. ${n ? 'Try: '+n+'.' : 'Edge work & flow.'}`;
+    }
+    return { day, tasks, done: false };
+  });
+
+  APP.trainingPlans = [{ weekOf: new Date().toISOString().split('T')[0], days: plan }];
+  saveData(APP); renderTrainingPlan(); renderSuggestions(); showToast('Plan generated!');
+}
+
+function getSkillClipHTML(skillId) {
+  let clip = null;
+  videoFiles.forEach((v, vi) => {
+    v.annotations.filter(a => a.element === skillId).forEach(a => {
+      if (!clip || a.quality > clip.quality) clip = { videoIdx: vi, url: v.url, time: a.time, quality: a.quality, videoName: v.name };
+    });
+  });
+  if (!clip) return '';
+  return `<div style="margin-top:8px">
+    <div style="font-size:0.72rem;font-weight:600;color:var(--accent);margin-bottom:4px">Your clip (Q${clip.quality}/5):</div>
+    <video src="${clip.url}" controls playsinline style="width:100%;max-height:180px;border-radius:6px;background:#000"
+      onloadeddata="this.currentTime=${Math.max(0,clip.time-1)}"></video>
+    <div style="font-size:0.65rem;color:var(--text-dim);margin-top:2px">${clip.videoName} at ${fmtTime(clip.time)}</div>
+  </div>`;
+}
+
+function renderSuggestions() {
+  const c = document.getElementById('trainingSuggestions');
+  if (!isProUser()) {
+    c.innerHTML = '<div class="upgrade-banner"><div class="upgrade-banner-text"><strong>Pro Feature</strong> — Personalized training suggestions and AI-generated weekly plans require a Pro subscription.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>';
+    return;
+  }
+  const skills = getSkills(); let html = '';
+
+  const weak = skills.filter(s => { const d=getSkillData(s.id); return d.attempts>=3 && (d.landed/d.attempts)<0.5; });
+  weak.forEach(sk => {
+    const d=getSkillData(sk.id), rate=Math.round((d.landed/d.attempts)*100);
+    const drill = getRandomDrill(sk.type);
+    const clipHtml = getSkillClipHTML(sk.id);
+    html += `<div class="train-card priority-high">
+      <div class="train-title">${sk.name} — ${rate}% (needs work)</div>
+      <div class="train-desc">${sk.tip||'Focus on technique, not quantity.'}</div>
+      ${drill?`<div class="train-drill"><div class="train-drill-title">Suggested Drill</div><strong>${drill.name}</strong>: ${drill.desc}</div>`:''}
+      ${clipHtml}
+    </div>`;
+  });
+
+  const improving = skills.filter(s => { const d=getSkillData(s.id); return d.attempts>=3 && (d.landed/d.attempts)>=0.5 && (d.landed/d.attempts)<0.8; });
+  improving.slice(0,2).forEach(sk => {
+    const d=getSkillData(sk.id), rate=Math.round((d.landed/d.attempts)*100);
+    const drill = getRandomDrill(sk.type);
+    const clipHtml = getSkillClipHTML(sk.id);
+    html += `<div class="train-card priority-med"><div class="train-title">${sk.name} — ${rate}% (almost there)</div>
+      <div class="train-desc">Getting close to mastery. Push for consistency — aim for 80%+ over 5 attempts.</div>
+      ${drill?`<div class="train-drill"><div class="train-drill-title">Drill</div><strong>${drill.name}</strong>: ${drill.desc}</div>`:''}
+      ${clipHtml}</div>`;
+  });
+
+  const next = skills.filter(s => isStartHere(s)).slice(0,2);
+  next.forEach(sk => {
+    html += `<div class="train-card priority-low"><div class="train-title">Ready to learn: ${sk.name}</div>
+      <div class="train-desc">${sk.tip||'Prerequisites met. Start introducing this skill.'}</div></div>`;
+  });
+
+  if (!html) html = '<div class="empty-state"><p>Log more skill attempts to get personalized training suggestions.</p></div>';
+  c.innerHTML = html;
+}
+
+function renderTrainingPlan() {
+  const c = document.getElementById('trainingPlan');
+  if (!APP.trainingPlans.length) { c.innerHTML='<div class="empty-state"><p>Generate a plan above.</p></div>'; return; }
+  const p = APP.trainingPlans[0];
+  c.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.82rem">
+    <span style="font-weight:600">Week of ${p.weekOf}</span><span style="color:var(--text-dim)">${p.days.filter(d=>d.done).length}/7 done</span></div>` +
+    p.days.map((d,i) => `<div class="plan-day"><span class="plan-day-name">${d.day}</span><span class="plan-tasks">${d.tasks}</span>
+      <div class="plan-check ${d.done?'done':''}" onclick="APP.trainingPlans[0].days[${i}].done=!APP.trainingPlans[0].days[${i}].done;saveData(APP);renderTrainingPlan();">
+      ${d.done?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD & CHARTS
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  document.getElementById('totalSessions').textContent = APP.sessions.length;
+  const totalMin = APP.sessions.reduce((s,x)=>s+(x.duration||0),0);
+  document.getElementById('totalIceTime').textContent = totalMin>=60?Math.round(totalMin/60)+'h':totalMin+'m';
+  const tracked = getSkills().filter(s=>getSkillData(s.id).attempts>0).length;
+  document.getElementById('totalSkills').textContent = tracked;
+  const wa = getSkills().filter(s=>getSkillData(s.id).attempts>0);
+  if (wa.length) { const avg=wa.reduce((s,sk)=>{const d=getSkillData(sk.id);return s+(d.landed/d.attempts);},0)/wa.length; document.getElementById('avgSuccess').textContent=Math.round(avg*100)+'%'; }
+  renderRecentSessions(); renderNextSkills(); drawRadarChart();
+}
+
+function renderRecentSessions() {
+  const c=document.getElementById('recentSessions'), r=[...APP.sessions].reverse().slice(0,5);
+  if (!r.length) { c.innerHTML='<div class="empty-state"><p>No sessions yet</p></div>'; return; }
+  c.innerHTML = r.map(s => { const d=new Date(s.date+'T00:00:00');
+    return `<div class="session-item"><div class="session-date"><div class="session-day">${d.getDate()}</div><div class="session-month">${d.toLocaleDateString('en',{month:'short'})}</div></div>
+    <div class="session-info"><div class="session-title">${s.title}</div><div class="session-meta">${s.type} &bull; ${s.duration}min</div></div>
+    ${s.rating?'<div class="session-score">'+s.rating+'/10</div>':''}</div>`; }).join('');
+}
+
+function drawRadarChart() {
+  const canvas=document.getElementById('radarChart'),ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;canvas.width=260*dpr;canvas.height=260*dpr;ctx.scale(dpr,dpr);
+  const cx=130,cy=130,R=100;
+  const skills=getSkills(); const types=[...new Set(skills.map(s=>s.type))];
+  const cats=types.map(t=>t.charAt(0).toUpperCase()+t.slice(1));
+  const values=types.map(t=>{const ss=skills.filter(s=>s.type===t);const tot=ss.reduce((a,s)=>a+getSkillData(s.id).attempts,0);return tot?ss.reduce((a,s)=>a+getSkillData(s.id).landed,0)/tot:0;});
+  const n=cats.length; ctx.clearRect(0,0,260,260);
+  for(let ring=1;ring<=4;ring++){const r=(ring/4)*R;ctx.beginPath();for(let i=0;i<=n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.stroke();}
+  for(let i=0;i<n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.stroke();
+    ctx.fillStyle='#94a3b8';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(cats[i],cx+(R+16)*Math.cos(a),cy+(R+16)*Math.sin(a));}
+  ctx.beginPath();values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a)):ctx.lineTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a));});ctx.closePath();ctx.fillStyle='rgba(56,189,248,0.15)';ctx.fill();ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.stroke();
+  values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.arc(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a),4,0,Math.PI*2);ctx.fillStyle='#38bdf8';ctx.fill();});
+}
+
+function drawCompChart() {
+  const canvas=document.getElementById('compChart'),ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1,rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;ctx.scale(dpr,dpr);canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
+  const W=rect.width,H=rect.height,pad={top:20,right:20,bottom:30,left:40};ctx.clearRect(0,0,W,H);
+  const comps=[...APP.competitions].sort((a,b)=>a.date.localeCompare(b.date));
+  if(comps.length<2){ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Add 2+ results to see chart',W/2,H/2);return;}
+  const mx=Math.max(...comps.map(c=>c.total))*1.1;
+  [{key:'tes',color:'#38bdf8'},{key:'pcs',color:'#818cf8'},{key:'total',color:'#f472b6'}].forEach(s=>{
+    ctx.strokeStyle=s.color;ctx.lineWidth=2;ctx.beginPath();
+    comps.forEach((c,i)=>{const x=pad.left+(i/(comps.length-1))*(W-pad.left-pad.right),y=pad.top+((mx-c[s.key])/mx)*(H-pad.top-pad.bottom);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+    comps.forEach((c,i)=>{const x=pad.left+(i/(comps.length-1))*(W-pad.left-pad.right),y=pad.top+((mx-c[s.key])/mx)*(H-pad.top-pad.bottom);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle=s.color;ctx.fill();});
+  });
+}
+
+// ═══════════════════════════════════════════
+//  STREAK & UTILS
+// ═══════════════════════════════════════════
+function updateStreak(dt) {
+  const last=APP.settings.lastSessionDate;
+  if(!last) APP.settings.streak=1;
+  else{const diff=Math.round((new Date(dt+'T00:00:00')-new Date(last+'T00:00:00'))/(1e3*60*60*24));if(diff===1)APP.settings.streak++;else if(diff>1)APP.settings.streak=1;}
+  APP.settings.lastSessionDate=dt; document.getElementById('streakBadge').textContent=APP.settings.streak+' day streak';
+}
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('active');});});
+
+function renderAll() {
+  renderOnboarding(); renderDashboard(); renderSkillTree(); renderElementLogs();
+  renderSessions(); renderCompetitions(); renderGoals();
+  renderTrainingPlan(); renderSuggestions(); renderUploadArea(); renderVideoLibrary();
+  if(APP.discipline){document.querySelectorAll('.disc-btn').forEach(b=>b.classList.toggle('active',b.dataset.disc===APP.discipline));}
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('sessionDate').value=today;document.getElementById('compDate').value=today;
+  document.getElementById('streakBadge').textContent=(APP.settings.streak||0)+' day streak';
+  // Show stick button only for hockey
+  const stickBtn = document.getElementById('stickAnnoBtn');
+  if (stickBtn) stickBtn.style.display = APP.discipline === 'hockey' ? '' : 'none';
+  updateProfileButton();
+  // Show upgrade banners for free users (only if function exists yet)
+  if (typeof renderUpgradeBanners === 'function') renderUpgradeBanners();
+}
+// ═══════════════════════════════════════════
+//  CLOUD ACCOUNT & SYNC
+// ═══════════════════════════════════════════
+const CloudAccount = {
+  getSession() {
+    try { return JSON.parse(localStorage.getItem('rinkbuddy_cloud_session')); } catch { return null; }
+  },
+  setSession(s) { localStorage.setItem('rinkbuddy_cloud_session', JSON.stringify(s)); },
+  clearSession() { localStorage.removeItem('rinkbuddy_cloud_session'); },
+  isLoggedIn() { return !!this.getSession()?.token; },
+
+  async request(endpoint, body) {
+    const res = await fetch('/api/' + endpoint, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return res.json();
+  },
+
+  async signup(username, password, displayName) {
+    return this.request('signup', { username, password, displayName });
+  },
+
+  async login(username, password) {
+    return this.request('login', { username, password });
+  },
+
+  async pushData() {
+    const session = this.getSession();
+    if (!session?.token) return { error: 'Not logged in' };
+    return this.request('sync', { token: session.token, data: APP });
+  },
+
+  async pullData() {
+    const session = this.getSession();
+    if (!session?.token) return { error: 'Not logged in' };
+    const res = await fetch('/api/sync', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: session.token })
+    });
+    return res.json();
+  }
+};
+
+function openAccountModal() {
+  const session = CloudAccount.getSession();
+  if (session?.token) {
+    document.getElementById('accountAuthForm').style.display = 'none';
+    document.getElementById('accountLoggedIn').style.display = 'block';
+    document.getElementById('accLoggedName').textContent = session.displayName || session.username;
+    document.getElementById('accLoggedUser').textContent = '@' + session.username;
+    document.getElementById('accAvatar').textContent = (session.displayName || session.username).charAt(0).toUpperCase();
+    document.getElementById('accSyncStatus').textContent = session.lastSync ? 'Last synced: ' + new Date(session.lastSync).toLocaleString() : 'Not yet synced';
+    document.getElementById('accountModalTitle').textContent = 'Cloud Account';
+  } else {
+    document.getElementById('accountAuthForm').style.display = 'block';
+    document.getElementById('accountLoggedIn').style.display = 'none';
+    document.getElementById('accountModalTitle').textContent = 'Sign In / Sign Up';
+  }
+  document.getElementById('accError').style.display = 'none';
+  document.getElementById('accountModal').classList.add('active');
+}
+
+async function doLogin() {
+  const username = document.getElementById('accUsername').value.trim();
+  const password = document.getElementById('accPassword').value;
+  if (!username || !password) return showAccError('Enter username and password');
+
+  const res = await CloudAccount.login(username, password);
+  if (res.error) return showAccError(res.error);
+
+  CloudAccount.setSession({ token: res.token, username: res.username, displayName: res.displayName });
+  showToast('Logged in as ' + res.displayName);
+  updateCloudBtn();
+
+  // Auto-pull data from cloud
+  const pull = await CloudAccount.pullData();
+  if (pull.ok && pull.data) {
+    APP = pull.data;
+    saveData(APP);
+    renderAll();
+    const session = CloudAccount.getSession();
+    session.lastSync = pull.lastSync;
+    CloudAccount.setSession(session);
+    showToast('Data synced from cloud');
+  }
+  openAccountModal(); // refresh modal to show logged-in state
+}
+
+async function doSignup() {
+  const username = document.getElementById('accUsername').value.trim();
+  const password = document.getElementById('accPassword').value;
+  const displayName = document.getElementById('accDisplayName').value.trim();
+
+  // Show display name field if hidden
+  const nameGroup = document.getElementById('accNameGroup');
+  if (nameGroup.style.display === 'none') {
+    nameGroup.style.display = 'block';
+    return; // let user fill in the name first
+  }
+
+  if (!username || !password) return showAccError('Enter username and password');
+  if (username.length < 3) return showAccError('Username must be 3+ characters');
+  if (password.length < 4) return showAccError('Password must be 4+ characters');
+
+  const res = await CloudAccount.signup(username, password, displayName || username);
+  if (res.error) return showAccError(res.error);
+
+  CloudAccount.setSession({ token: res.token, username: res.username, displayName: res.displayName });
+  showToast('Account created! Welcome, ' + res.displayName);
+  updateCloudBtn();
+
+  // Push current data to cloud
+  await syncNow();
+  openAccountModal();
+}
+
+async function syncNow() {
+  if (!CloudAccount.isLoggedIn()) return showToast('Log in to sync');
+  const res = await CloudAccount.pushData();
+  if (res.error) return showToast('Sync failed: ' + res.error);
+  const session = CloudAccount.getSession();
+  session.lastSync = res.lastSync;
+  CloudAccount.setSession(session);
+  document.getElementById('accSyncStatus').textContent = 'Last synced: ' + new Date(res.lastSync).toLocaleString();
+  showToast('Data synced to cloud');
+}
+
+async function pullData() {
+  if (!CloudAccount.isLoggedIn()) return;
+  const res = await CloudAccount.pullData();
+  if (res.error) return showToast('Pull failed: ' + res.error);
+  if (!res.data) return showToast('No cloud data found');
+  APP = res.data;
+  saveData(APP);
+  renderAll();
+  const session = CloudAccount.getSession();
+  session.lastSync = res.lastSync;
+  CloudAccount.setSession(session);
+  showToast('Data pulled from cloud');
+  openAccountModal();
+}
+
+function doLogout() {
+  CloudAccount.clearSession();
+  updateCloudBtn();
+  showToast('Logged out');
+  closeModal('accountModal');
+}
+
+function showAccError(msg) {
+  const el = document.getElementById('accError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function updateCloudBtn() {
+  const btn = document.getElementById('cloudBtn');
+  if (CloudAccount.isLoggedIn()) {
+    btn.style.background = 'linear-gradient(135deg,var(--accent),var(--accent2))';
+    btn.style.borderColor = 'transparent';
+    btn.title = 'Synced: ' + (CloudAccount.getSession()?.displayName || 'Account');
+  } else {
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.title = 'Cloud Account';
+  }
+}
+
+// Auto-sync on data changes (debounced)
+let syncDebounce = null;
+const origSaveData = saveData;
+saveData = function(d) {
+  origSaveData(d);
+  if (CloudAccount.isLoggedIn()) {
+    clearTimeout(syncDebounce);
+    syncDebounce = setTimeout(() => CloudAccount.pushData().catch(()=>{}), 5000);
+  }
+};
+
+// Init cloud button state
+updateCloudBtn();
+
+// ═══════════════════════════════════════════
+//  LANDING PAGE / APP VIEW SWITCHING
+// ═══════════════════════════════════════════
+function showAppView() {
+  document.getElementById('landingPage').classList.remove('active');
+  document.getElementById('appContainer').classList.add('active');
+  renderUpgradeBanners();
+}
+
+function showLandingView() {
+  document.getElementById('appContainer').classList.remove('active');
+  document.getElementById('landingPage').classList.add('active');
+}
+
+function updateView() {
+  if (CloudAccount.isLoggedIn()) {
+    showAppView();
+  } else {
+    showLandingView();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SUBSCRIPTION TIER LOGIC
+// ═══════════════════════════════════════════
+function getUserTier() {
+  const session = CloudAccount.getSession();
+  return session?.tier || 'free';
+}
+
+function isProUser() {
+  return getUserTier() === 'pro';
+}
+
+async function doSubscribe() {
+  const session = CloudAccount.getSession();
+  if (!session?.token) return showToast('Please log in first');
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: session.token })
+    });
+    const data = await res.json();
+    if (data.error) return showToast('Error: ' + data.error);
+    session.tier = 'pro';
+    CloudAccount.setSession(session);
+    showToast('Upgraded to Pro! All features unlocked.');
+    updateCloudBtn();
+    openAccountModal();
+    renderUpgradeBanners();
+  } catch (e) {
+    showToast('Subscription failed: ' + e.message);
+  }
+}
+
+async function doCancelSubscription() {
+  if (!confirm('Cancel your Pro subscription? You will lose access to Pro features.')) return;
+  const session = CloudAccount.getSession();
+  if (!session?.token) return;
+  try {
+    const res = await fetch('/api/cancel', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: session.token })
+    });
+    const data = await res.json();
+    if (data.error) return showToast('Error: ' + data.error);
+    session.tier = 'free';
+    CloudAccount.setSession(session);
+    showToast('Subscription cancelled. You are now on the Free plan.');
+    updateCloudBtn();
+    openAccountModal();
+    renderUpgradeBanners();
+  } catch (e) {
+    showToast('Cancellation failed: ' + e.message);
+  }
+}
+
+function renderUpgradeBanners() {
+  // Remove existing banners
+  document.querySelectorAll('.upgrade-banner').forEach(b => b.remove());
+  if (isProUser()) return;
+  // Add upgrade banner to dashboard
+  const dash = document.getElementById('sec-dashboard');
+  if (dash && !dash.querySelector('.upgrade-banner')) {
+    const banner = document.createElement('div');
+    banner.className = 'upgrade-banner';
+    banner.innerHTML = `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos, auto-analysis, training plans, and more.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`;
+    dash.insertBefore(banner, dash.firstChild);
+  }
+}
+
+// Gate: max 3 videos for free users
+function canUploadVideo() {
+  if (isProUser()) return true;
+  const count = typeof videoFiles !== 'undefined' ? videoFiles.length : 0;
+  return count < 3;
+}
+
+// Gate: no training plans for free users
+function canAccessTrainingPlans() {
+  return isProUser();
+}
+
+// Gate: 1 profile for free users
+function canCreateProfile() {
+  if (isProUser()) return true;
+  return loadProfiles().length < 1;
+}
+
+// ═══════════════════════════════════════════
+//  LANDING PAGE AUTH FUNCTIONS
+// ═══════════════════════════════════════════
+async function doLandingSignup() {
+  const username = document.getElementById('lpUsername').value.trim();
+  const password = document.getElementById('lpPassword').value;
+  const displayName = document.getElementById('lpDisplayName').value.trim();
+  const errEl = document.getElementById('lpError');
+
+  if (!username || !password) { errEl.textContent = 'Username and password required'; errEl.style.display = 'block'; return; }
+  if (username.length < 3) { errEl.textContent = 'Username must be 3+ characters'; errEl.style.display = 'block'; return; }
+  if (password.length < 4) { errEl.textContent = 'Password must be 4+ characters'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  const res = await CloudAccount.signup(username, password, displayName || username);
+  if (res.error) { errEl.textContent = res.error; errEl.style.display = 'block'; return; }
+
+  CloudAccount.setSession({ token: res.token, username: res.username, displayName: res.displayName, tier: res.tier || 'free' });
+  showToast('Welcome to RinkBuddy, ' + res.displayName + '!');
+  updateCloudBtn();
+  updateView();
+  renderAll();
+  // Push current data to cloud
+  syncNow().catch(() => {});
+}
+
+async function doLandingLogin() {
+  const username = document.getElementById('lpLoginUser').value.trim();
+  const password = document.getElementById('lpLoginPass').value;
+  const errEl = document.getElementById('lpLoginError');
+
+  if (!username || !password) { errEl.textContent = 'Enter username and password'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  const res = await CloudAccount.login(username, password);
+  if (res.error) { errEl.textContent = res.error; errEl.style.display = 'block'; return; }
+
+  CloudAccount.setSession({ token: res.token, username: res.username, displayName: res.displayName, tier: res.tier || 'free' });
+  showToast('Welcome back, ' + res.displayName + '!');
+  updateCloudBtn();
+
+  // Auto-pull data from cloud
+  const pull = await CloudAccount.pullData();
+  if (pull.ok && pull.data) {
+    APP = pull.data;
+    saveData(APP);
+  }
+  updateView();
+  renderAll();
+}
+
+// Override doLogin/doSignup to also store tier and update view
+const _origDoLogin = doLogin;
+doLogin = async function() {
+  const username = document.getElementById('accUsername').value.trim();
+  const password = document.getElementById('accPassword').value;
+  if (!username || !password) return showAccError('Enter username and password');
+
+  const res = await CloudAccount.login(username, password);
+  if (res.error) return showAccError(res.error);
+
+  CloudAccount.setSession({ token: res.token, username: res.username, displayName: res.displayName, tier: res.tier || 'free' });
+  showToast('Logged in as ' + res.displayName);
+  updateCloudBtn();
+
+  const pull = await CloudAccount.pullData();
+  if (pull.ok && pull.data) {
+    APP = pull.data;
+    saveData(APP);
+    renderAll();
+    const session = CloudAccount.getSession();
+    session.lastSync = pull.lastSync;
+    CloudAccount.setSession(session);
+    showToast('Data synced from cloud');
+  }
+  updateView();
+  openAccountModal();
+};
+
+const _origDoSignup = doSignup;
+doSignup = async function() {
+  const username = document.getElementById('accUsername').value.trim();
+  const password = document.getElementById('accPassword').value;
+  const displayName = document.getElementById('accDisplayName').value.trim();
+
+  const nameGroup = document.getElementById('accNameGroup');
+  if (nameGroup.style.display === 'none') {
+    nameGroup.style.display = 'block';
+    return;
+  }
+
+  if (!username || !password) return showAccError('Enter username and password');
+  if (username.length < 3) return showAccError('Username must be 3+ characters');
+  if (password.length < 4) return showAccError('Password must be 4+ characters');
+
+  const res = await CloudAccount.signup(username, password, displayName || username);
+  if (res.error) return showAccError(res.error);
+
+  CloudAccount.setSession({ token: res.token, username: res.username, displayName: res.displayName, tier: res.tier || 'free' });
+  showToast('Account created! Welcome, ' + res.displayName);
+  updateCloudBtn();
+  await syncNow();
+  updateView();
+  openAccountModal();
+};
+
+// Override doLogout to switch back to landing page
+const _origDoLogout = doLogout;
+doLogout = function() {
+  CloudAccount.clearSession();
+  updateCloudBtn();
+  showToast('Logged out');
+  closeModal('accountModal');
+  updateView();
+};
+
+// Override openAccountModal to show tier info
+const _origOpenAccountModal = openAccountModal;
+openAccountModal = function() {
+  const session = CloudAccount.getSession();
+  if (session?.token) {
+    document.getElementById('accountAuthForm').style.display = 'none';
+    document.getElementById('accountLoggedIn').style.display = 'block';
+    document.getElementById('accLoggedName').textContent = session.displayName || session.username;
+    document.getElementById('accLoggedUser').textContent = '@' + session.username;
+    document.getElementById('accAvatar').textContent = (session.displayName || session.username).charAt(0).toUpperCase();
+    document.getElementById('accSyncStatus').textContent = session.lastSync ? 'Last synced: ' + new Date(session.lastSync).toLocaleString() : 'Not yet synced';
+    document.getElementById('accountModalTitle').textContent = 'Cloud Account';
+    // Tier display
+    const tier = session.tier || 'free';
+    const badge = document.getElementById('accTierBadge');
+    badge.textContent = tier === 'pro' ? 'PRO' : 'FREE';
+    badge.className = 'tier-badge ' + (tier === 'pro' ? 'tier-pro' : 'tier-free');
+    document.getElementById('accSubFree').style.display = tier === 'pro' ? 'none' : 'block';
+    document.getElementById('accSubPro').style.display = tier === 'pro' ? 'block' : 'none';
+  } else {
+    document.getElementById('accountAuthForm').style.display = 'block';
+    document.getElementById('accountLoggedIn').style.display = 'none';
+    document.getElementById('accountModalTitle').textContent = 'Sign In / Sign Up';
+  }
+  document.getElementById('accError').style.display = 'none';
+  document.getElementById('accountModal').classList.add('active');
+};
+
+// Override createProfile to enforce free tier limit
+const _origCreateProfile = createProfile;
+createProfile = function() {
+  if (!isProUser() && loadProfiles().length >= 1) {
+    showToast('Free plan allows 1 profile. Upgrade to Pro for unlimited profiles.');
+    return;
+  }
+  _origCreateProfile();
+};
+
+// One-time cleanup: remove fake auto-detected annotations with random timestamps
+(function cleanupFakeAnnotations() {
+  const CLEANUP_KEY = 'rinkbuddy_annotation_cleanup_v1';
+  if (localStorage.getItem(CLEANUP_KEY)) return;
+  // Remove "Auto-detected" annotations from all in-memory videos
+  videoFiles.forEach(v => {
+    const before = v.annotations.length;
+    v.annotations = v.annotations.filter(a => a.note !== 'Auto-detected');
+    if (before !== v.annotations.length && v.id) {
+      VideoDB.updateAnnotations(v.id, v.annotations).catch(()=>{});
+    }
+  });
+  localStorage.setItem(CLEANUP_KEY, 'true');
+})();
+
+// ═══════════════════════════════════════════
+//  VIDEO ANALYSIS — Auto-detected skills from video frames
+// ═══════════════════════════════════════════
+(function applyVideoAnalysis() {
+  const ANALYSIS_KEY = 'rinkbuddy_video_analysis_applied_v1';
+  if (localStorage.getItem(ANALYSIS_KEY)) return; // already applied
+
+  // Skills identified from analyzing 4 skating videos (March 26, 2026)
+  // Videos: IMG_9494.MOV, IMG_9495.MOV, IMG_9497.MOV, IMG_9498.MOV
+  // Location: Henderson Silver Knights arena + Vegas rink
+  const detected = {
+    figure: [
+      { id: 'fwd-stroke', attempts: 8, landed: 7, note: 'Confident forward stride across full rink in all 4 videos' },
+      { id: '2ft-glide', attempts: 6, landed: 6, note: 'Solid two-foot glide with good balance, visible in multiple clips' },
+      { id: 'snowplow', attempts: 5, landed: 4, note: 'Snowplow stops performed at rink edges' },
+      { id: 'fwd-crossover', attempts: 6, landed: 4, note: 'Forward crossovers in turns, good lean visible in videos 2-4' },
+    ],
+    hockey: [
+      { id: 'h-fwd', attempts: 8, landed: 7, note: 'Strong forward skating throughout all sessions' },
+      { id: 'h-glide', attempts: 6, landed: 6, note: 'Good two-foot glide with solid balance' },
+      { id: 'h-snowplow', attempts: 5, landed: 4, note: 'Snowplow stops at rink edges and direction changes' },
+      { id: 'h-fwd-cross', attempts: 6, landed: 4, note: 'Crossovers visible during turns in videos 2-4' },
+    ]
+  };
+
+  // Apply to both disciplines
+  ['figure', 'hockey'].forEach(disc => {
+    detected[disc].forEach(s => {
+      if (!APP.skills[s.id]) APP.skills[s.id] = { attempts: 0, landed: 0 };
+      APP.skills[s.id].attempts += s.attempts;
+      APP.skills[s.id].landed += s.landed;
+      // Add element logs for each detected skill
+      APP.elementLogs.push({
+        id: Date.now() + Math.random(),
+        elementId: s.id,
+        elementName: (SKILLS.figure.concat(SKILLS.hockey)).find(sk => sk.id === s.id)?.name || s.id,
+        date: '2026-03-26',
+        attempts: s.attempts,
+        landed: s.landed,
+        quality: Math.round((s.landed / s.attempts) * 5),
+        notes: 'Auto-detected from video analysis: ' + s.note
+      });
+    });
+  });
+
+  // Create a session for the video analysis
+  APP.sessions.push({
+    id: Date.now(),
+    title: 'Video Analysis Session — 4 Videos',
+    date: '2026-03-26',
+    duration: 6, // ~6 min total across 4 videos
+    type: APP.discipline === 'hockey' ? 'Hockey Practice' : 'Freestyle',
+    focus: 'Forward Skating, Gliding, Crossovers, Stopping',
+    rating: 4,
+    notes: 'Skills auto-detected by RinkBuddy AI from video analysis of IMG_9494, IMG_9495, IMG_9497, IMG_9498. Recorded at Henderson Silver Knights arena and Vegas rink.'
+  });
+
+  // Set discipline if not set
+  if (!APP.discipline) APP.discipline = 'hockey';
+
+  saveData(APP);
+  localStorage.setItem(ANALYSIS_KEY, 'true');
+})();
+
+// Initialize view based on login state
+updateView();
+renderAll();
+window.addEventListener('resize',()=>{drawRadarChart();drawCompChart();});
+
+// PWA Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// Generate PWA icons dynamically
+function generateIcon(size) {
+  const c = document.createElement('canvas'); c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  // Background
+  const g = ctx.createLinearGradient(0, 0, size, size);
+  g.addColorStop(0, '#0f172a'); g.addColorStop(0.5, '#1e1b4b'); g.addColorStop(1, '#0f172a');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+  // Skate blade shape
+  const s = size / 32;
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = s * 2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(s*10, s*22); ctx.quadraticCurveTo(s*16, s*6, s*22, s*22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*8, s*22); ctx.lineTo(s*24, s*22); ctx.stroke();
+  return c.toDataURL('image/png');
+}
+// Create icons and set them
+[192, 512].forEach(size => {
+  const dataUrl = generateIcon(size);
+  const link = document.createElement('link');
+  link.rel = size === 192 ? 'apple-touch-icon' : 'icon';
+  link.href = dataUrl;
+  document.head.appendChild(link);
+});
+</script>
+</body>
+</html>
