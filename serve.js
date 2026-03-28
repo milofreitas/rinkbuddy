@@ -5,9 +5,14 @@ const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
 
-// npm install stripe
+// Stripe setup
 let stripe;
-try { stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); } catch(e) { console.log('Stripe not configured — subscription payments disabled'); }
+if (process.env.STRIPE_SECRET_KEY) {
+  try { stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); console.log('[startup] Stripe initialized successfully'); }
+  catch(e) { console.error('[startup] Stripe require failed:', e.message); }
+} else {
+  console.log('[startup] STRIPE_SECRET_KEY not set — Stripe disabled');
+}
 
 const STRIPE_PRICE_ID = process.env.STRIPE_PRICE_ID || 'price_PLACEHOLDER';
 // STRIPE_WEBHOOK_SECRET env var is needed for webhook signature verification

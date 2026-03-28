@@ -90,7 +90,7 @@
     .skill-grid::-webkit-scrollbar{height:4px}
     .skill-grid::-webkit-scrollbar-track{background:transparent}
     .skill-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-    .skill-grid .skill-card{min-width:130px;flex:1 0 130px;scroll-snap-align:start}
+    .skill-grid .skill-card{width:155px;flex:0 0 155px;scroll-snap-align:start}
     .skill-card{background:var(--surface2);border-radius:10px;padding:12px;text-align:center;border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative}
     .skill-card:hover{border-color:var(--accent)}
     .skill-card.mastered{border-color:var(--success);background:rgba(52,211,153,0.05)}
@@ -274,7 +274,7 @@
     /* Coach session items need relative positioning for delete btn */
     #lessonLogList .session-item{position:relative;padding-right:40px}
 
-    @media(max-width:600px){.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid .skill-card{min-width:110px;flex:1 0 110px}}
+    @media(max-width:600px){.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid .skill-card{width:130px;flex:0 0 130px}}
     ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
@@ -314,7 +314,7 @@
     .lp-section-sub{text-align:center;color:var(--text-dim);font-size:1rem;margin-bottom:48px;max-width:600px;margin-left:auto;margin-right:auto}
 
     .lp-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
-    .lp-skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+    .lp-skills-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
     .lp-feature{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all 0.3s}
     .lp-feature:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
     .lp-feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:1.5rem}
@@ -883,7 +883,7 @@
   <button class="nav-btn active" data-section="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
   <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
   <button class="nav-btn nav-btn-primary" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
-  <button class="nav-btn" data-section="training" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
+  <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
   <button class="nav-btn" data-section="coach" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
 </nav>
 
