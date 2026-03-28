@@ -1262,6 +1262,11 @@
             <div class="card-title" style="font-size:0.85rem">Top Skills Practiced</div>
             <div id="reportTopSkills"></div>
           </div>
+          <!-- AI Insights -->
+          <div class="card" style="margin-bottom:0;margin-top:10px;display:none">
+            <div class="card-title" style="font-size:0.85rem">🤖 AI Video Insights</div>
+            <div id="reportAIInsights"></div>
+          </div>
           <!-- Focus Areas -->
           <div class="card" style="margin-bottom:0;margin-top:10px">
             <div class="card-title" style="font-size:0.85rem">Areas To Work On</div>
@@ -4430,18 +4435,32 @@ function updateLessonSkills() {
   ).join('');
 }
 
+let lessonSaving = false;
+let lastCoachAIDetections = null; // Store AI detections for saving with lesson
+
 async function saveLesson() {
+  if (lessonSaving) return;
   initCoachData();
   const studentId = document.getElementById('lessonStudent').value;
   if (!studentId) return showToast('Please select a student');
   const date = document.getElementById('lessonDate').value;
   if (!date) return showToast('Please select a date');
+
   const duration = parseInt(document.getElementById('lessonDuration').value);
   const notes = document.getElementById('lessonNotes').value.trim();
   const nextFocus = document.getElementById('lessonNextFocus').value.trim();
   const rating = parseInt(document.getElementById('lessonRating').value);
   const skillsFocused = [];
   document.querySelectorAll('#lessonSkillChecks input:checked').forEach(cb => skillsFocused.push(cb.value));
+
+  if (skillsFocused.length === 0 && !notes) {
+    if (!confirm('No skills selected and no notes. Save anyway?')) return;
+  }
+
+  // Prevent double-save
+  lessonSaving = true;
+  const saveBtn = document.querySelector('#coach-lessons .btn-primary');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
 
   const lessonId = Date.now().toString(36);
   let videoKey = null;
@@ -4456,22 +4475,42 @@ async function saveLesson() {
     }
   }
 
+  // Build AI analysis data if available
+  const aiData = lastCoachAIDetections ? lastCoachAIDetections.map(d => ({
+    timestamp: d.timestamp,
+    skillId: d.skillId,
+    skillName: d.skillName,
+    confidence: d.confidence,
+    note: d.note
+  })) : null;
+
   APP.coach.lessonLog.push({
     id: lessonId,
     studentId, date, duration, skillsFocused, notes, nextFocus, rating,
-    videoKey: videoKey
+    videoKey, aiAnalysis: aiData
   });
   saveData(APP);
 
-  // Reset form
+  // Full form reset
   document.getElementById('lessonNotes').value = '';
   document.getElementById('lessonNextFocus').value = '';
   document.getElementById('lessonRating').value = '3';
+  document.getElementById('lessonDuration').value = '30';
+  document.getElementById('lessonDurLabel').textContent = '30';
   document.querySelectorAll('#lessonSkillChecks input:checked').forEach(cb => cb.checked = false);
   removeCoachVideo();
+  lastCoachAIDetections = null;
+  document.getElementById('coachAIResults').style.display = 'none';
+  document.getElementById('coachAIProgress').style.display = 'none';
 
   renderLessonLog();
   showToast('Lesson saved' + (videoKey ? ' with video' : ''));
+
+  // Re-enable save after short delay
+  setTimeout(() => {
+    lessonSaving = false;
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Lesson'; }
+  }, 1500);
 }
 
 function renderLessonLog() {
@@ -4496,16 +4535,30 @@ function renderLessonLog() {
       const sk = allSkills.find(s => s.id === sid);
       return sk ? sk.name : sid;
     });
+    // Separate AI notes from user notes
+    const userNotes = (l.notes || '').replace(/\n*🤖 AI Analysis:[\s\S]*/g, '').trim();
+    const hasAI = l.aiAnalysis && l.aiAnalysis.length > 0;
+
     return `<div class="session-item" style="flex-wrap:wrap;cursor:default">
       <div class="session-date"><div class="session-day">${d.getDate()}</div><div class="session-month">${d.toLocaleDateString('en-US',{month:'short'})}</div></div>
       <div class="session-info" style="min-width:120px">
-        <div class="session-title">${studentName}</div>
+        <div class="session-title">${studentName}${hasAI ? ' <span style="font-size:0.6rem;background:rgba(139,92,246,0.15);color:#a78bfa;padding:1px 5px;border-radius:3px;vertical-align:middle">🤖 AI</span>' : ''}</div>
         <div class="session-meta">${l.duration}min &middot; <span style="color:var(--warning)">${ratingStars}</span></div>
       </div>
       <div style="width:100%;padding-left:56px;margin-top:4px">
         ${skillNames.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${skillNames.map(n => `<span style="font-size:0.65rem;padding:2px 6px;background:rgba(56,189,248,0.1);border-radius:4px;color:var(--accent)">${n}</span>`).join('')}</div>` : ''}
-        ${l.notes ? `<div style="font-size:0.78rem;color:var(--text-dim)">${l.notes}</div>` : ''}
-        ${l.nextFocus ? `<div style="font-size:0.72rem;color:var(--accent2);margin-top:2px">Next: ${l.nextFocus}</div>` : ''}
+        ${userNotes ? `<div style="font-size:0.78rem;color:var(--text-dim)">${userNotes}</div>` : ''}
+        ${hasAI ? `<details style="margin-top:6px">
+          <summary style="font-size:0.72rem;color:#a78bfa;cursor:pointer;font-weight:500">🤖 AI detected ${l.aiAnalysis.length} skill${l.aiAnalysis.length!==1?'s':''} — tap to expand</summary>
+          <div style="margin-top:6px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:6px;padding:8px">
+            ${l.aiAnalysis.map(a => `<div style="display:flex;gap:6px;padding:3px 0;font-size:0.72rem">
+              <span style="color:var(--text-dim);font-family:monospace;min-width:32px">${fmtTime(a.timestamp)}</span>
+              <span style="font-weight:500">${a.skillName}</span>
+              ${a.note ? `<span style="color:var(--text-dim);font-style:italic">— ${a.note}</span>` : ''}
+            </div>`).join('')}
+          </div>
+        </details>` : ''}
+        ${l.nextFocus ? `<div style="font-size:0.72rem;color:var(--accent2);margin-top:4px">→ Next: ${l.nextFocus}</div>` : ''}
         ${l.videoKey ? `<button class="btn btn-secondary btn-sm" onclick="playLessonVideo('${l.videoKey}','${l.id}')" style="margin-top:6px;font-size:0.7rem;gap:4px">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           Watch Video</button>
@@ -4680,11 +4733,8 @@ async function analyzeCoachVideo() {
         if (checkedIds.has(cb.value)) cb.checked = true;
       });
 
-      // Build notes from AI
-      const aiNotes = deduped.map(r => `[${fmtTime(r.timestamp)}] ${r.skillName}${r.note ? ' — ' + r.note : ''}`).join('\n');
-      const notesEl = document.getElementById('lessonNotes');
-      const existing = notesEl.value.trim();
-      notesEl.value = (existing ? existing + '\n\n' : '') + '🤖 AI Analysis:\n' + aiNotes;
+      // Store detections for saving with lesson
+      lastCoachAIDetections = deduped;
 
       // Show detected skills summary
       results.style.display = 'block';
@@ -4862,10 +4912,14 @@ function generateProgressReport() {
     </div>`;
   }).join('');
 
-  // Top skills
+  // Top skills — combine coach-checked + AI-detected
   const skillCount = {};
-  lessons.forEach(l => (l.skillsFocused||[]).forEach(sid => { skillCount[sid] = (skillCount[sid]||0)+1; }));
-  const topSkills = Object.entries(skillCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  lessons.forEach(l => {
+    (l.skillsFocused||[]).forEach(sid => { skillCount[sid] = (skillCount[sid]||0)+1; });
+    // Also count AI-detected skills
+    if (l.aiAnalysis) l.aiAnalysis.forEach(a => { if (a.skillId) skillCount[a.skillId] = (skillCount[a.skillId]||0)+1; });
+  });
+  const topSkills = Object.entries(skillCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const maxCount = topSkills.length > 0 ? topSkills[0][1] : 1;
   const topSkillsEl = document.getElementById('reportTopSkills');
   if (topSkills.length === 0) {
@@ -4885,6 +4939,45 @@ function generateProgressReport() {
     }).join('');
   }
 
+  // AI Insights — aggregate AI analysis across lessons
+  const aiLessons = lessons.filter(l => l.aiAnalysis && l.aiAnalysis.length > 0);
+  const aiInsightsEl = document.getElementById('reportAIInsights');
+  if (aiInsightsEl) {
+    if (aiLessons.length === 0) {
+      aiInsightsEl.closest('.card').style.display = 'none';
+    } else {
+      aiInsightsEl.closest('.card').style.display = '';
+      // Aggregate AI skill detections with confidence
+      const aiSkillData = {};
+      aiLessons.forEach(l => {
+        l.aiAnalysis.forEach(a => {
+          if (!a.skillName) return;
+          if (!aiSkillData[a.skillName]) aiSkillData[a.skillName] = { count: 0, totalConf: 0, notes: [] };
+          aiSkillData[a.skillName].count++;
+          aiSkillData[a.skillName].totalConf += (a.confidence || 0.5);
+          if (a.note && aiSkillData[a.skillName].notes.length < 3) aiSkillData[a.skillName].notes.push(a.note);
+        });
+      });
+      const aiSkillsSorted = Object.entries(aiSkillData).sort((a,b) => b[1].count - a[1].count).slice(0, 6);
+      aiInsightsEl.innerHTML = `
+        <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px">${aiLessons.length} lesson${aiLessons.length!==1?'s':''} analyzed by AI</div>
+        ${aiSkillsSorted.map(([name, data]) => {
+          const avgConf = Math.round((data.totalConf / data.count) * 100);
+          const confColor = avgConf >= 75 ? '#22c55e' : avgConf >= 50 ? '#f59e0b' : '#ef4444';
+          return `<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:0.78rem;font-weight:500">${name}</span>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:0.68rem;color:var(--text-dim)">${data.count}x detected</span>
+                <span style="font-size:0.65rem;padding:1px 5px;border-radius:3px;background:${confColor}20;color:${confColor}">${avgConf}%</span>
+              </div>
+            </div>
+            ${data.notes.length > 0 ? `<div style="font-size:0.68rem;color:var(--text-dim);margin-top:2px;font-style:italic">${data.notes[0]}</div>` : ''}
+          </div>`;
+        }).join('')}`;
+    }
+  }
+
   // Focus areas
   const nextItems = [];
   lessons.slice(0,5).forEach(l => { if (l.nextFocus && !nextItems.includes(l.nextFocus)) nextItems.push(l.nextFocus); });
@@ -4899,7 +4992,8 @@ function generateProgressReport() {
   }
 
   // Store plain text for copy
-  area.dataset.plainReport = `═══ PROGRESS REPORT ═══\nStudent: ${student.name}\nLevel: ${student.level}\nDiscipline: ${student.discipline}\nReport Date: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}\n\nTotal Lessons: ${lessons.length}\nTotal Time: ${totalTime} min\nAvg Rating: ${avgRating}/5\n\nTop Skills:\n${topSkills.map(([sid,c])=>`• ${skillNameMap[sid]||sid} (${c}x)`).join('\n')}\n\nFocus Areas:\n${nextItems.length>0?nextItems.map(n=>`• ${n}`).join('\n'):'• None noted'}\n\nGenerated by RinkBuddy Coach`;
+  const aiText = aiLessons.length > 0 ? `\n\nAI Video Analysis (${aiLessons.length} lessons):\n${Object.entries(aiSkillData||{}).sort((a,b)=>b[1].count-a[1].count).slice(0,6).map(([n,d])=>`• ${n} (${d.count}x, avg ${Math.round((d.totalConf/d.count)*100)}% confidence)`).join('\n')}` : '';
+  area.dataset.plainReport = `═══ PROGRESS REPORT ═══\nStudent: ${student.name}\nLevel: ${student.level}\nDiscipline: ${student.discipline}\nReport Date: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}\n\nTotal Lessons: ${lessons.length}\nTotal Time: ${totalTime} min\nAvg Rating: ${avgRating}/5\n\nTop Skills:\n${topSkills.map(([sid,c])=>`• ${skillNameMap[sid]||sid} (${c}x)`).join('\n')}${aiText}\n\nFocus Areas:\n${nextItems.length>0?nextItems.map(n=>`• ${n}`).join('\n'):'• None noted'}\n\nGenerated by RinkBuddy Coach`;
 }
 
 function copyProgressReport() {
