@@ -2280,8 +2280,46 @@ function showSkillDetail(id) {
     }
   } else {
     html += `<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.82rem;background:var(--surface2);border-radius:8px">
-      No video clips yet. Record this skill in the <strong>Video</strong> tab to see your clips here.
+      No video clips yet. Upload a video in the <strong>Video</strong> tab and run <strong>AI Scan</strong> to detect this skill.
     </div>`;
+  }
+
+  // Show thumbnail frames from AI-detected annotations
+  const frameClips = [];
+  videoFiles.forEach((v, vi) => {
+    v.annotations.filter(a => a.element === id).forEach(a => {
+      frameClips.push({ videoIdx: vi, videoName: v.name, time: a.time, quality: a.quality, note: a.note || '', blob: v._blob, url: v.url });
+    });
+  });
+  if (frameClips.length > 0) {
+    html += `<div style="margin-top:12px">
+      <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px">Detected frames (${frameClips.length}):</div>
+      <div id="skillFrameGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px"></div>
+    </div>`;
+    // Extract thumbnails after render
+    setTimeout(() => {
+      const grid = document.getElementById('skillFrameGrid');
+      if (!grid) return;
+      frameClips.forEach((cl, i) => {
+        const card = document.createElement('div');
+        card.style.cssText = 'position:relative;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;aspect-ratio:16/9';
+        card.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:0.72rem">Loading...</div>`;
+        card.onclick = () => { switchTab('video'); selectVideo(cl.videoIdx); setTimeout(()=>{ const vp=document.getElementById('videoPlayer'); if(vp){vp.currentTime=cl.time;vp.play().catch(()=>{});} },300); closeModal('skillDetailModal'); };
+        grid.appendChild(card);
+        extractFrameThumbnail(cl.blob || cl.url, cl.time, (dataUrl) => {
+          if (dataUrl) {
+            card.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">
+              <div style="position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(transparent,rgba(0,0,0,0.8));font-size:0.68rem;color:#fff">
+                <div style="font-weight:600">${fmtTime(cl.time)}</div>
+                <div style="opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cl.note.replace(' [AI detected]','')}</div>
+              </div>`;
+          } else {
+            card.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:0.72rem;flex-direction:column;gap:2px">
+              <span>${fmtTime(cl.time)}</span><span style="opacity:0.6">${cl.videoName}</span></div>`;
+          }
+        });
+      });
+    }, 100);
   }
 
   document.getElementById('skillDetailTitle').textContent = sk.name;
@@ -3069,6 +3107,35 @@ async function extractVideoFrames(videoEntry, onProgress) {
       vid.src = videoEntry.url;
     }
   });
+}
+
+function extractFrameThumbnail(blobOrUrl, time, callback) {
+  const vid = document.createElement('video');
+  vid.crossOrigin = 'anonymous';
+  vid.muted = true;
+  vid.preload = 'auto';
+  let timeout = setTimeout(() => { callback(null); }, 8000);
+  vid.onerror = () => { clearTimeout(timeout); callback(null); };
+  vid.onloadedmetadata = () => {
+    vid.currentTime = Math.min(time, vid.duration - 0.1);
+  };
+  vid.onseeked = () => {
+    clearTimeout(timeout);
+    try {
+      const c = document.createElement('canvas');
+      const scale = Math.min(1, 320 / vid.videoWidth);
+      c.width = Math.round(vid.videoWidth * scale);
+      c.height = Math.round(vid.videoHeight * scale);
+      c.getContext('2d').drawImage(vid, 0, 0, c.width, c.height);
+      callback(c.toDataURL('image/jpeg', 0.7));
+    } catch(e) { callback(null); }
+    URL.revokeObjectURL(vid.src);
+  };
+  if (blobOrUrl instanceof Blob) {
+    vid.src = URL.createObjectURL(blobOrUrl);
+  } else {
+    vid.src = blobOrUrl;
+  }
 }
 
 async function analyzeFramesWithAI(frames, skillNames, onProgress) {
