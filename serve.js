@@ -5,11 +5,22 @@ const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
 
+// npm install stripe
+let stripe;
+try { stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); } catch(e) { console.log('Stripe not configured — subscription payments disabled'); }
+
+const STRIPE_PRICE_ID = process.env.STRIPE_PRICE_ID || 'price_PLACEHOLDER';
+// STRIPE_WEBHOOK_SECRET env var is needed for webhook signature verification
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const APP_URL = process.env.APP_URL || 'http://localhost:8080';
+
 const PORT = process.env.PORT || 8080;
 const HTTPS_PORT = 8443;
 const DIR = path.dirname(__filename || __dirname);
 const ACCOUNTS_DIR = path.join(DIR, 'accounts');
 fs.mkdirSync(ACCOUNTS_DIR, { recursive: true });
+const FEEDBACK_DIR = path.join(DIR, 'feedback');
+fs.mkdirSync(FEEDBACK_DIR, { recursive: true });
 
 const MIME = {
   '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript',
@@ -30,6 +41,15 @@ function readBody(req) {
     let body = '';
     req.on('data', c => { body += c; if (body.length > 50e6) reject('Too large'); });
     req.on('end', () => { try { resolve(JSON.parse(body)); } catch { reject('Invalid JSON'); } });
+  });
+}
+
+function readRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', c => { chunks.push(c); });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
   });
 }
 
@@ -59,7 +79,91 @@ async function handleAPI(req, res) {
     return res.end();
   }
 
+  // ── Stripe Webhook (needs raw body, no token auth) ──
+  if (route === '/api/stripe-webhook' && req.method === 'POST') {
+    if (!stripe) return jsonRes(res, 400, { error: 'Stripe not configured' });
+    try {
+      const rawBody = await readRawBody(req);
+      let event;
+      if (STRIPE_WEBHOOK_SECRET) {
+        const sig = req.headers['stripe-signature'];
+        event = stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET);
+      } else {
+        event = JSON.parse(rawBody.toString());
+      }
+
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        const username = session.client_reference_id;
+        const account = findByUsername(username);
+        if (account) {
+          account.tier = 'pro';
+          account.stripeCustomerId = session.customer;
+          account.stripeSubscriptionId = session.subscription;
+          account.subscribedAt = new Date().toISOString();
+          fs.writeFileSync(getAccountFile(account.username), JSON.stringify(account, null, 2));
+        }
+      } else if (event.type === 'customer.subscription.deleted') {
+        const subscription = event.data.object;
+        const account = findByStripeCustomerId(subscription.customer);
+        if (account) {
+          account.tier = 'free';
+          account.cancelledAt = new Date().toISOString();
+          fs.writeFileSync(getAccountFile(account.username), JSON.stringify(account, null, 2));
+        }
+      }
+
+      return jsonRes(res, 200, { received: true });
+    } catch (err) {
+      return jsonRes(res, 400, { error: 'Webhook error: ' + err.message });
+    }
+  }
+
   try {
+    // ── Google Auth ──
+    if (route === '/api/google-auth' && req.method === 'POST') {
+      const { credential } = await readBody(req);
+      if (!credential) return jsonRes(res, 400, { error: 'Missing credential' });
+
+      // Decode Google JWT (header.payload.signature)
+      try {
+        const payload = JSON.parse(Buffer.from(credential.split('.')[1], 'base64').toString());
+        const { email, name, sub: googleId } = payload;
+        if (!email) return jsonRes(res, 400, { error: 'Invalid Google token' });
+
+        // Use email as username (sanitized)
+        const username = email.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        const file = getAccountFile(username);
+        const token = crypto.randomBytes(32).toString('hex');
+
+        if (fs.existsSync(file)) {
+          // Existing account — log in
+          const account = JSON.parse(fs.readFileSync(file, 'utf8'));
+          account.token = token;
+          if (!account.tier) account.tier = 'free';
+          fs.writeFileSync(file, JSON.stringify(account, null, 2));
+          return jsonRes(res, 200, { ok: true, token, username: account.username, displayName: account.displayName, tier: account.tier });
+        } else {
+          // New account — sign up
+          const account = {
+            username,
+            displayName: name || email.split('@')[0],
+            googleId,
+            email,
+            passwordHash: null, salt: null,
+            token,
+            tier: 'free',
+            created: new Date().toISOString(),
+            data: null
+          };
+          fs.writeFileSync(file, JSON.stringify(account, null, 2));
+          return jsonRes(res, 201, { ok: true, token, username: account.username, displayName: account.displayName, tier: account.tier });
+        }
+      } catch(e) {
+        return jsonRes(res, 400, { error: 'Invalid Google token' });
+      }
+    }
+
     // ── Sign Up ──
     if (route === '/api/signup' && req.method === 'POST') {
       const { username, password, displayName } = await readBody(req);
@@ -149,6 +253,84 @@ async function handleAPI(req, res) {
       return jsonRes(res, 200, { ok: true, tier: 'free' });
     }
 
+    // ── Create Stripe Checkout Session ──
+    if (route === '/api/create-checkout-session' && req.method === 'POST') {
+      if (!stripe) return jsonRes(res, 400, { error: 'Stripe not configured' });
+      const { token } = await readBody(req);
+      const account = findByToken(token);
+      if (!account) return jsonRes(res, 401, { error: 'Invalid session' });
+
+      const sessionParams = {
+        mode: 'subscription',
+        line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
+        success_url: APP_URL + '/?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: APP_URL + '/',
+        client_reference_id: account.username,
+      };
+      if (account.stripeCustomerId) {
+        sessionParams.customer = account.stripeCustomerId;
+      }
+
+      const checkoutSession = await stripe.checkout.sessions.create(sessionParams);
+      return jsonRes(res, 200, { ok: true, url: checkoutSession.url });
+    }
+
+    // ── Stripe Webhook ──
+    // (handled above in handleAPI before JSON body parsing)
+
+    // ── Create Stripe Billing Portal Session ──
+    if (route === '/api/create-portal-session' && req.method === 'POST') {
+      if (!stripe) return jsonRes(res, 400, { error: 'Stripe not configured' });
+      const { token } = await readBody(req);
+      const account = findByToken(token);
+      if (!account) return jsonRes(res, 401, { error: 'Invalid session' });
+      if (!account.stripeCustomerId) return jsonRes(res, 400, { error: 'No billing account found' });
+
+      const portalSession = await stripe.billingPortal.sessions.create({
+        customer: account.stripeCustomerId,
+        return_url: APP_URL + '/',
+      });
+      return jsonRes(res, 200, { ok: true, url: portalSession.url });
+    }
+
+    // ── Submit Feedback ──
+    if (route === '/api/feedback' && req.method === 'POST') {
+      const { token, message, rating, email } = await readBody(req);
+      if (!message) return jsonRes(res, 400, { error: 'Message required' });
+
+      let username = 'anonymous';
+      if (token) {
+        const account = findByToken(token);
+        if (account) username = account.username;
+      }
+
+      const feedback = {
+        username,
+        message,
+        rating: Math.min(5, Math.max(1, parseInt(rating))) || null,
+        email: email || null,
+        created: new Date().toISOString()
+      };
+
+      const filename = `feedback_${Date.now()}.json`;
+      fs.writeFileSync(path.join(FEEDBACK_DIR, filename), JSON.stringify(feedback, null, 2));
+      return jsonRes(res, 200, { ok: true });
+    }
+
+    // ── Feedback Stats ──
+    if (route === '/api/feedback-stats' && req.method === 'GET') {
+      const files = fs.readdirSync(FEEDBACK_DIR).filter(f => f.endsWith('.json'));
+      let total = 0, ratingSum = 0, ratingCount = 0;
+      for (const f of files) {
+        try {
+          const fb = JSON.parse(fs.readFileSync(path.join(FEEDBACK_DIR, f), 'utf8'));
+          total++;
+          if (fb.rating) { ratingSum += fb.rating; ratingCount++; }
+        } catch {}
+      }
+      return jsonRes(res, 200, { total, averageRating: ratingCount ? +(ratingSum / ratingCount).toFixed(1) : null });
+    }
+
     return jsonRes(res, 404, { error: 'Not found' });
   } catch (e) {
     return jsonRes(res, 500, { error: String(e) });
@@ -162,6 +344,25 @@ function findByToken(token) {
     try {
       const acc = JSON.parse(fs.readFileSync(path.join(ACCOUNTS_DIR, f), 'utf8'));
       if (acc.token === token) return acc;
+    } catch {}
+  }
+  return null;
+}
+
+function findByUsername(username) {
+  if (!username) return null;
+  const file = getAccountFile(username);
+  if (!fs.existsSync(file)) return null;
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
+}
+
+function findByStripeCustomerId(customerId) {
+  if (!customerId) return null;
+  const files = fs.readdirSync(ACCOUNTS_DIR).filter(f => f.endsWith('.json'));
+  for (const f of files) {
+    try {
+      const acc = JSON.parse(fs.readFileSync(path.join(ACCOUNTS_DIR, f), 'utf8'));
+      if (acc.stripeCustomerId === customerId) return acc;
     } catch {}
   }
   return null;

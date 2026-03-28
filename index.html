@@ -10,6 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>RinkBuddy — Skating Performance Analyzer</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg: #0b1120; --surface: #131b2e; --surface2: #1a2540;
@@ -47,6 +48,11 @@
     .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
     .btn-secondary:hover{background:var(--border)}
     .btn-danger{background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.3)}
+    .btn-google{background:#fff;color:#333;border:1px solid #ddd;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 16px;border-radius:8px;font-size:0.85rem;cursor:pointer;transition:all 0.2s}
+    .btn-google:hover{background:#f5f5f5;border-color:#bbb}
+    .btn-google svg{width:18px;height:18px;flex-shrink:0}
+    .divider-or{display:flex;align-items:center;gap:12px;margin:14px 0;font-size:0.78rem;color:var(--text-dim)}
+    .divider-or::before,.divider-or::after{content:'';flex:1;border-top:1px solid var(--border)}
     .btn-sm{padding:6px 12px;font-size:0.72rem}
     .form-group{margin-bottom:14px}
     .form-label{display:block;font-size:0.78rem;color:var(--text-dim);margin-bottom:5px;font-weight:500}
@@ -355,7 +361,7 @@
 <div id="landingPage">
   <nav class="lp-nav" id="lpNav">
     <a href="#" class="lp-nav-logo">
-      <svg viewBox="0 0 32 32" fill="none" width="28" height="28"><defs><linearGradient id="lg1" x1="2" y1="6" x2="30" y2="26"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><path d="M10 5h5c1.5 0 3 1 3 3v9c0 1.5 1 3 3 3.5l4 1.5" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M10 5c-2 0-3.5 1.5-3.5 4v8.5c0 1.5-1 2.5-2.5 3l-1 0.5" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M3 23h24" stroke="url(#lg1)" stroke-width="2.2" stroke-linecap="round"/><path d="M2 27h28" stroke="url(#lg1)" stroke-width="2.8" stroke-linecap="round"/><line x1="3" y1="23" x2="2" y2="27" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/><line x1="27" y1="23" x2="30" y2="27" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 32 32" fill="none" width="28" height="28"><defs><linearGradient id="lg1" x1="2" y1="2" x2="30" y2="30"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><path d="M12 3C10 3 8.5 4.5 8.5 6.5V16c0 1.2-.8 2-2 2.5L5 19.5c-1.2.6-1.5 1.5-1.5 2.5h0" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 3c2 0 3 1.5 3 3.5V15c0 1.5.8 2.5 2 3l2 1c.8.4 1.2 1.2.5 2h0" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M12 3h6" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/><path d="M12 7h6" stroke="url(#lg1)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M3.5 22h22" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/><path d="M2 26h28" stroke="url(#lg1)" stroke-width="3" stroke-linecap="round"/><path d="M3.5 22L2 26" stroke="url(#lg1)" stroke-width="1.8" stroke-linecap="round"/><path d="M25.5 22l4.5 4" stroke="url(#lg1)" stroke-width="1.8" stroke-linecap="round"/></svg>
       RinkBuddy
     </a>
     <div class="lp-nav-links">
@@ -517,11 +523,36 @@
     </div>
   </section>
 
+<section class="lp-section" id="feedback" style="text-align:center">
+  <h2 class="lp-section-title">Share Your Feedback</h2>
+  <p class="lp-section-subtitle">Help us improve RinkBuddy. We read every message.</p>
+  <div style="max-width:500px;margin:24px auto 0;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px">
+    <div style="display:flex;gap:8px;margin-bottom:14px;justify-content:center" id="lpFeedbackStars">
+      <button onclick="setFeedbackRating(1)" class="btn btn-sm btn-secondary" data-star="1" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+      <button onclick="setFeedbackRating(2)" class="btn btn-sm btn-secondary" data-star="2" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+      <button onclick="setFeedbackRating(3)" class="btn btn-sm btn-secondary" data-star="3" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+      <button onclick="setFeedbackRating(4)" class="btn btn-sm btn-secondary" data-star="4" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+      <button onclick="setFeedbackRating(5)" class="btn btn-sm btn-secondary" data-star="5" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+    </div>
+    <textarea class="form-textarea" id="lpFeedbackMsg" placeholder="What do you think? Suggestions, bugs, feature requests..." rows="3"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="form-input" id="lpFeedbackEmail" placeholder="Email (optional, for follow-up)" style="flex:1">
+      <button class="btn btn-primary" onclick="submitLandingFeedback()">Send</button>
+    </div>
+    <div id="lpFeedbackSuccess" style="display:none;color:var(--success);font-size:0.82rem;margin-top:10px">Thanks for your feedback!</div>
+  </div>
+</section>
+
   <!-- Signup Form -->
   <section class="lp-signup-section" id="lp-signup">
     <div class="lp-signup-form">
       <h3>Create Your Account</h3>
       <p>Start tracking your skating journey in under 30 seconds.</p>
+      <button class="btn-google" onclick="googleSignIn()">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider-or">or create with email</div>
       <input type="hidden" id="lpSignupPlan" value="free">
       <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="lpUsername" placeholder="Choose a username" autocapitalize="none" autocorrect="off"></div>
       <div class="form-group"><label class="form-label">Display Name</label><input class="form-input" id="lpDisplayName" placeholder="Your name (optional)"></div>
@@ -557,7 +588,7 @@
 
 <header class="header">
   <div class="logo">
-    <svg viewBox="0 0 32 32" fill="none"><defs><linearGradient id="g1" x1="2" y1="6" x2="30" y2="26"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><path d="M10 5h5c1.5 0 3 1 3 3v9c0 1.5 1 3 3 3.5l4 1.5" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M10 5c-2 0-3.5 1.5-3.5 4v8.5c0 1.5-1 2.5-2.5 3l-1 0.5" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M3 23h24" stroke="url(#g1)" stroke-width="2.2" stroke-linecap="round"/><path d="M2 27h28" stroke="url(#g1)" stroke-width="2.8" stroke-linecap="round"/><line x1="3" y1="23" x2="2" y2="27" stroke="url(#g1)" stroke-width="2" stroke-linecap="round"/><line x1="27" y1="23" x2="30" y2="27" stroke="url(#g1)" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg viewBox="0 0 32 32" fill="none"><defs><linearGradient id="g1" x1="2" y1="2" x2="30" y2="30"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><path d="M12 3C10 3 8.5 4.5 8.5 6.5V16c0 1.2-.8 2-2 2.5L5 19.5c-1.2.6-1.5 1.5-1.5 2.5h0" stroke="url(#g1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M18 3c2 0 3 1.5 3 3.5V15c0 1.5.8 2.5 2 3l2 1c.8.4 1.2 1.2.5 2h0" stroke="url(#g1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M12 3h6" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/><path d="M12 7h6" stroke="url(#g1)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M3.5 22h22" stroke="url(#g1)" stroke-width="2" stroke-linecap="round"/><path d="M2 26h28" stroke="url(#g1)" stroke-width="3" stroke-linecap="round"/><path d="M3.5 22L2 26" stroke="url(#g1)" stroke-width="1.8" stroke-linecap="round"/><path d="M25.5 22l4.5 4" stroke="url(#g1)" stroke-width="1.8" stroke-linecap="round"/></svg>
     RinkBuddy
   </div>
   <div class="header-right">
@@ -833,6 +864,11 @@
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M18 10h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v4H6c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2z"/><circle cx="12" cy="16" r="1.5"/></svg>
         <p style="font-size:0.82rem;color:var(--text-dim);margin-top:8px">Sign in to sync your data across devices</p>
       </div>
+      <button class="btn-google" onclick="googleSignIn()">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider-or">or sign in with email</div>
       <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="accUsername" placeholder="Choose a username" autocapitalize="none" autocorrect="off"></div>
       <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="accPassword" type="password" placeholder="Your password"></div>
       <div id="accNameGroup" class="form-group" style="display:none"><label class="form-label">Display Name</label><input class="form-input" id="accDisplayName" placeholder="Your name (optional)"></div>
@@ -868,10 +904,27 @@
         <button class="btn btn-primary" style="flex:1" onclick="syncNow()">Sync Now</button>
         <button class="btn btn-secondary" style="flex:1" onclick="pullData()">Pull from Cloud</button>
       </div>
-      <button class="btn btn-danger btn-sm" style="width:100%;margin-top:10px" onclick="doLogout()">Log Out</button>
+      <button class="btn btn-secondary btn-sm" style="width:100%;margin-bottom:8px;margin-top:10px" onclick="openFeedbackModal()">Send Feedback</button>
+      <button class="btn btn-danger btn-sm" style="width:100%;margin-top:0" onclick="doLogout()">Log Out</button>
     </div>
   </div>
   <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('accountModal')">Close</button></div>
+</div></div>
+
+<div class="modal-overlay" id="feedbackModal"><div class="modal">
+  <div class="modal-title">Send Feedback</div>
+  <div style="display:flex;gap:8px;margin-bottom:14px;justify-content:center" id="appFeedbackStars">
+    <button onclick="setAppFeedbackRating(1)" class="btn btn-sm btn-secondary" data-star="1" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+    <button onclick="setAppFeedbackRating(2)" class="btn btn-sm btn-secondary" data-star="2" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+    <button onclick="setAppFeedbackRating(3)" class="btn btn-sm btn-secondary" data-star="3" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+    <button onclick="setAppFeedbackRating(4)" class="btn btn-sm btn-secondary" data-star="4" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+    <button onclick="setAppFeedbackRating(5)" class="btn btn-sm btn-secondary" data-star="5" style="font-size:1.2rem;padding:8px 12px">&#9734;</button>
+  </div>
+  <textarea class="form-textarea" id="appFeedbackMsg" placeholder="What do you think? Suggestions, bugs, feature requests..." rows="3"></textarea>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('feedbackModal').classList.remove('active')">Cancel</button>
+    <button class="btn btn-primary" style="flex:1" onclick="submitAppFeedback()">Send Feedback</button>
+  </div>
 </div></div>
 
 </div><!-- end #appContainer -->
@@ -1149,6 +1202,27 @@ function saveData(d) {
   localStorage.setItem(key, JSON.stringify(d));
 }
 let APP = loadData();
+
+// Handle Stripe checkout return
+(function checkStripeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('session_id')) {
+    window.history.replaceState({}, '', '/');
+    // Refresh session to get updated tier
+    setTimeout(async () => {
+      if (CloudAccount.isLoggedIn()) {
+        const pull = await CloudAccount.pullData();
+        if (pull.ok) {
+          const session = CloudAccount.getSession();
+          session.tier = 'pro';
+          CloudAccount.setSession(session);
+          showToast('Welcome to RinkBuddy Pro!');
+          renderAll();
+        }
+      }
+    }, 1000);
+  }
+})();
 
 // Migrate legacy data to a default profile if no profiles exist
 (function migrateLegacy() {
@@ -2556,6 +2630,55 @@ async function doSignup() {
   openAccountModal();
 }
 
+// Google Sign-In config — replace with your Google Client ID from console.cloud.google.com
+const GOOGLE_CLIENT_ID = '1057539314090-ajkmj1mrhgnf90qchqb5cshddq3689q0.apps.googleusercontent.com';
+
+function googleSignIn() {
+  if (typeof google === 'undefined' || !google.accounts) {
+    showToast('Google Sign-In loading, try again in a moment');
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleResponse
+  });
+  google.accounts.id.prompt();
+}
+
+async function handleGoogleResponse(response) {
+  if (!response.credential) return showToast('Google sign-in failed');
+  try {
+    const res = await fetch('/api/google-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    }).then(r => r.json());
+
+    if (res.error) return showToast('Google auth error: ' + res.error);
+
+    CloudAccount.setSession({ token: res.token, username: res.username, displayName: res.displayName, tier: res.tier || 'free' });
+    showToast('Signed in as ' + res.displayName);
+    updateCloudBtn();
+
+    // Pull data
+    const pull = await CloudAccount.pullData();
+    if (pull.ok && pull.data) {
+      APP = pull.data;
+      saveData(APP);
+      renderAll();
+      const session = CloudAccount.getSession();
+      session.lastSync = pull.lastSync;
+      CloudAccount.setSession(session);
+    }
+
+    // Update view (landing → app)
+    if (typeof updateView === 'function') updateView();
+    if (document.getElementById('accountModal').classList.contains('active')) openAccountModal();
+  } catch(e) {
+    showToast('Google sign-in failed');
+  }
+}
+
 async function syncNow() {
   if (!CloudAccount.isLoggedIn()) return showToast('Log in to sync');
   const res = await CloudAccount.pushData();
@@ -2660,18 +2783,34 @@ async function doSubscribe() {
   const session = CloudAccount.getSession();
   if (!session?.token) return showToast('Please log in first');
   try {
-    const res = await fetch('/api/subscribe', {
+    // Try Stripe Checkout first
+    const res = await fetch('/api/create-checkout-session', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: session.token })
     });
     const data = await res.json();
+    if (data.url) {
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+      return;
+    }
+    // If Stripe not configured, fall back to direct subscribe for local dev
+    if (data.error && data.error.includes('not configured')) {
+      const fallback = await fetch('/api/subscribe', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: session.token })
+      });
+      const fbData = await fallback.json();
+      if (fbData.error) return showToast('Error: ' + fbData.error);
+      session.tier = 'pro';
+      CloudAccount.setSession(session);
+      showToast('Upgraded to Pro! All features unlocked.');
+      updateCloudBtn();
+      openAccountModal();
+      renderUpgradeBanners();
+      return;
+    }
     if (data.error) return showToast('Error: ' + data.error);
-    session.tier = 'pro';
-    CloudAccount.setSession(session);
-    showToast('Upgraded to Pro! All features unlocked.');
-    updateCloudBtn();
-    openAccountModal();
-    renderUpgradeBanners();
   } catch (e) {
     showToast('Subscription failed: ' + e.message);
   }
@@ -2682,18 +2821,34 @@ async function doCancelSubscription() {
   const session = CloudAccount.getSession();
   if (!session?.token) return;
   try {
-    const res = await fetch('/api/cancel', {
+    // Try Stripe billing portal first
+    const res = await fetch('/api/create-portal-session', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: session.token })
     });
     const data = await res.json();
+    if (data.url) {
+      // Redirect to Stripe billing portal
+      window.location.href = data.url;
+      return;
+    }
+    // If Stripe not configured, fall back to direct cancel for local dev
+    if (data.error && (data.error.includes('not configured') || data.error.includes('No billing account'))) {
+      const fallback = await fetch('/api/cancel', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: session.token })
+      });
+      const fbData = await fallback.json();
+      if (fbData.error) return showToast('Error: ' + fbData.error);
+      session.tier = 'free';
+      CloudAccount.setSession(session);
+      showToast('Subscription cancelled. You are now on the Free plan.');
+      updateCloudBtn();
+      openAccountModal();
+      renderUpgradeBanners();
+      return;
+    }
     if (data.error) return showToast('Error: ' + data.error);
-    session.tier = 'free';
-    CloudAccount.setSession(session);
-    showToast('Subscription cancelled. You are now on the Free plan.');
-    updateCloudBtn();
-    openAccountModal();
-    renderUpgradeBanners();
   } catch (e) {
     showToast('Cancellation failed: ' + e.message);
   }
@@ -2997,6 +3152,70 @@ function generateIcon(size) {
   link.href = dataUrl;
   document.head.appendChild(link);
 });
+
+// ── Feedback system ──
+let feedbackRating = 0;
+let appFeedbackRating = 0;
+
+function setFeedbackRating(n) {
+  feedbackRating = n;
+  document.querySelectorAll('#lpFeedbackStars button').forEach((b, i) => {
+    b.textContent = i < n ? '\u2605' : '\u2606';
+    b.style.color = i < n ? 'var(--warning)' : 'var(--text-dim)';
+  });
+}
+
+function setAppFeedbackRating(n) {
+  appFeedbackRating = n;
+  document.querySelectorAll('#appFeedbackStars button').forEach((b, i) => {
+    b.textContent = i < n ? '\u2605' : '\u2606';
+    b.style.color = i < n ? 'var(--warning)' : 'var(--text-dim)';
+  });
+}
+
+async function submitLandingFeedback() {
+  const message = document.getElementById('lpFeedbackMsg').value.trim();
+  const email = document.getElementById('lpFeedbackEmail').value.trim();
+  if (!message) return showToast('Please write a message');
+
+  try {
+    await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, rating: feedbackRating || null, email: email || null })
+    });
+    document.getElementById('lpFeedbackMsg').value = '';
+    document.getElementById('lpFeedbackEmail').value = '';
+    document.getElementById('lpFeedbackSuccess').style.display = 'block';
+    feedbackRating = 0;
+    setFeedbackRating(0);
+    setTimeout(() => document.getElementById('lpFeedbackSuccess').style.display = 'none', 3000);
+  } catch(e) { showToast('Failed to send feedback'); }
+}
+
+function openFeedbackModal() {
+  document.getElementById('accountModal').classList.remove('active');
+  appFeedbackRating = 0;
+  setAppFeedbackRating(0);
+  document.getElementById('appFeedbackMsg').value = '';
+  document.getElementById('feedbackModal').classList.add('active');
+}
+
+async function submitAppFeedback() {
+  const message = document.getElementById('appFeedbackMsg').value.trim();
+  if (!message) return showToast('Please write a message');
+
+  const session = CloudAccount.getSession();
+  try {
+    await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: session?.token, message, rating: appFeedbackRating || null })
+    });
+    document.getElementById('feedbackModal').classList.remove('active');
+    showToast('Thanks for your feedback!');
+  } catch(e) { showToast('Failed to send feedback'); }
+}
 </script>
 </body>
 </html>
