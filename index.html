@@ -1155,10 +1155,28 @@
           </div>
           <div id="coachVideoPreview" style="margin-top:8px;display:none">
             <video id="coachVideoPlayer" controls playsinline style="width:100%;max-height:200px;border-radius:8px;background:#000"></video>
-            <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
+            <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap">
               <span style="font-size:0.72rem;color:var(--text-dim)" id="coachVideoName"></span>
-              <button class="btn btn-danger btn-sm" onclick="removeCoachVideo()" style="margin-left:auto;font-size:0.65rem;padding:2px 8px">Remove</button>
+              <div style="margin-left:auto;display:flex;gap:6px">
+                <button class="btn btn-primary btn-sm" onclick="analyzeCoachVideo()" id="coachAIBtn" style="font-size:0.7rem;padding:4px 10px;gap:4px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  🤖 AI Analyze
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="removeCoachVideo()" style="font-size:0.65rem;padding:2px 8px">Remove</button>
+              </div>
             </div>
+            <div id="coachAIProgress" style="display:none;margin-top:8px;background:var(--surface2);border-radius:8px;padding:12px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <div class="spin-icon" style="animation:spin 1s linear infinite;width:16px;height:16px">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                </div>
+                <span style="font-size:0.82rem;font-weight:600" id="coachAIStatus">Analyzing video...</span>
+              </div>
+              <div style="height:4px;background:var(--bg);border-radius:2px;overflow:hidden">
+                <div id="coachAIFill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#6366f1);border-radius:2px;transition:width 0.3s"></div>
+              </div>
+            </div>
+            <div id="coachAIResults" style="display:none;margin-top:8px"></div>
           </div>
           <div id="coachRecordArea" style="display:none;margin-top:8px">
             <video id="coachCamPreview" autoplay muted playsinline style="width:100%;max-height:200px;border-radius:8px;background:#000;transform:scaleX(-1)"></video>
@@ -4563,6 +4581,188 @@ function cancelCoachRecording() {
   document.getElementById('coachRecordArea').style.display = 'none';
   document.getElementById('coachCamPreview').srcObject = null;
   coachRecChunks = [];
+}
+
+// ═══ COACH AI VIDEO ANALYSIS ═══
+async function analyzeCoachVideo() {
+  if (!coachVideoBlob) return showToast('No video to analyze');
+
+  const btn = document.getElementById('coachAIBtn');
+  const prog = document.getElementById('coachAIProgress');
+  const results = document.getElementById('coachAIResults');
+  const fill = document.getElementById('coachAIFill');
+  const status = document.getElementById('coachAIStatus');
+
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  prog.style.display = 'block';
+  results.style.display = 'none';
+  fill.style.width = '0%';
+  status.textContent = 'Extracting frames from video...';
+
+  try {
+    // Extract frames from coach video blob
+    const frames = await extractCoachFrames(coachVideoBlob, (pct, msg) => {
+      fill.style.width = (pct * 40) + '%';
+      status.textContent = msg;
+    });
+
+    if (!frames.length) throw new Error('Could not extract frames');
+
+    status.textContent = `Extracted ${frames.length} frames. Sending to AI...`;
+    fill.style.width = '40%';
+
+    // Get the student's discipline for context
+    const studentId = document.getElementById('lessonStudent').value;
+    const student = (APP.coach?.students || []).find(s => s.id === studentId);
+    const disc = student ? student.discipline : (APP.discipline || 'foundations');
+    const allSkills = [...(SKILLS.foundations||[]), ...(SKILLS[disc]||[])];
+    const skillNames = allSkills.map(s => ({ id: s.id, name: s.name, type: s.type }));
+
+    // Send to AI in batches
+    const batchSize = 5;
+    const allDetected = [];
+    for (let i = 0; i < frames.length; i += batchSize) {
+      const batch = frames.slice(i, i + batchSize);
+      const batchNum = Math.floor(i / batchSize) + 1;
+      const totalBatches = Math.ceil(frames.length / batchSize);
+      const batchPct = 40 + (i / frames.length) * 55;
+      fill.style.width = batchPct + '%';
+      status.textContent = `AI analyzing batch ${batchNum}/${totalBatches}...`;
+
+      const response = await fetch('/api/analyze-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          frames: batch.map(f => ({ timestamp: f.timestamp, timeLabel: f.timeLabel, data: f.data })),
+          skills: skillNames,
+          discipline: disc
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: 'Server error' }));
+        throw new Error(err.error || 'Analysis failed');
+      }
+
+      const data = await response.json();
+      if (data.skills && data.skills.length) allDetected.push(...data.skills);
+    }
+
+    // Deduplicate
+    allDetected.sort((a, b) => a.timestamp - b.timestamp);
+    const deduped = [];
+    for (const r of allDetected) {
+      if (!deduped.find(d => d.skillId === r.skillId && Math.abs(d.timestamp - r.timestamp) < 3)) deduped.push(r);
+    }
+
+    fill.style.width = '100%';
+    status.textContent = `Done! ${deduped.length} skill${deduped.length !== 1 ? 's' : ''} detected.`;
+
+    // Show results
+    if (deduped.length === 0) {
+      results.style.display = 'block';
+      results.innerHTML = `<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:0.85rem;font-weight:600;margin-bottom:4px">No skills detected</div>
+        <div style="font-size:0.72rem;color:var(--text-dim)">Try a clearer video or manually check skills below.</div>
+      </div>`;
+    } else {
+      // Auto-check the skill checkboxes
+      const checkedIds = new Set();
+      deduped.forEach(r => {
+        if (r.skillId) checkedIds.add(r.skillId);
+      });
+      document.querySelectorAll('#lessonSkillChecks input[type="checkbox"]').forEach(cb => {
+        if (checkedIds.has(cb.value)) cb.checked = true;
+      });
+
+      // Build notes from AI
+      const aiNotes = deduped.map(r => `[${fmtTime(r.timestamp)}] ${r.skillName}${r.note ? ' — ' + r.note : ''}`).join('\n');
+      const notesEl = document.getElementById('lessonNotes');
+      const existing = notesEl.value.trim();
+      notesEl.value = (existing ? existing + '\n\n' : '') + '🤖 AI Analysis:\n' + aiNotes;
+
+      // Show detected skills summary
+      results.style.display = 'block';
+      results.innerHTML = `<div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-radius:8px;padding:12px;margin-top:4px">
+        <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px;color:var(--accent)">🤖 AI Detected ${deduped.length} Skill${deduped.length !== 1 ? 's' : ''}</div>
+        ${deduped.map(r => {
+          const confColor = r.confidence >= 0.8 ? '#22c55e' : r.confidence >= 0.5 ? '#f59e0b' : '#ef4444';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.78rem">
+            <span style="color:var(--text-dim);min-width:36px;font-family:monospace;font-size:0.7rem">${fmtTime(r.timestamp)}</span>
+            <span style="flex:1;font-weight:500">${r.skillName}</span>
+            <span style="width:8px;height:8px;border-radius:50%;background:${confColor};flex-shrink:0" title="${Math.round((r.confidence||0)*100)}% confidence"></span>
+          </div>`;
+        }).join('')}
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('coachAIResults').style.display='none'" style="font-size:0.7rem;flex:1">Dismiss</button>
+        </div>
+      </div>`;
+
+      showToast(`AI detected ${deduped.length} skills — checkboxes updated`);
+    }
+
+    setTimeout(() => { prog.style.display = 'none'; }, 2000);
+
+  } catch (err) {
+    console.error('Coach AI analysis error:', err);
+    prog.style.display = 'block';
+    status.textContent = '';
+    prog.querySelector('div').innerHTML = `<span style="font-size:0.82rem;font-weight:600;color:var(--danger)">Analysis failed</span>
+      <div style="font-size:0.72rem;color:var(--text-dim);margin-top:4px">${err.message || 'Unknown error'}. Make sure ANTHROPIC_API_KEY is set on the server.</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 🤖 AI Analyze`;
+  }
+}
+
+async function extractCoachFrames(blob, onProgress) {
+  return new Promise((resolve, reject) => {
+    const vid = document.createElement('video');
+    vid.muted = true;
+    vid.preload = 'auto';
+    vid.onerror = () => reject(new Error('Could not load video'));
+
+    vid.onloadedmetadata = () => {
+      const duration = vid.duration;
+      if (!duration || duration < 1) return reject(new Error('Video too short'));
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const maxFrames = 20;
+      const interval = Math.max(2, duration / maxFrames);
+      const timestamps = [];
+      for (let t = 0.5; t < duration - 0.5; t += interval) timestamps.push(t);
+      if (timestamps.length === 0) timestamps.push(duration / 2);
+
+      const frames = [];
+      let idx = 0;
+
+      function captureNext() {
+        if (idx >= timestamps.length) return resolve(frames);
+        onProgress(idx / timestamps.length, `Extracting frame ${idx + 1}/${timestamps.length}...`);
+        vid.currentTime = timestamps[idx];
+      }
+
+      vid.onseeked = () => {
+        const scale = Math.min(1, 720 / vid.videoWidth);
+        canvas.width = Math.round(vid.videoWidth * scale);
+        canvas.height = Math.round(vid.videoHeight * scale);
+        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+        frames.push({
+          timestamp: timestamps[idx],
+          timeLabel: fmtTime(timestamps[idx]),
+          data: canvas.toDataURL('image/jpeg', 0.7)
+        });
+        idx++;
+        captureNext();
+      };
+
+      captureNext();
+    };
+
+    vid.src = URL.createObjectURL(blob);
+  });
 }
 
 async function playLessonVideo(videoKey, lessonId) {
