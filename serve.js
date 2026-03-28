@@ -18,9 +18,18 @@ const PORT = process.env.PORT || 8080;
 const HTTPS_PORT = 8443;
 const DIR = path.dirname(__filename || __dirname);
 const ACCOUNTS_DIR = path.join(DIR, 'accounts');
+const accountsDirExisted = fs.existsSync(ACCOUNTS_DIR);
 fs.mkdirSync(ACCOUNTS_DIR, { recursive: true });
 const FEEDBACK_DIR = path.join(DIR, 'feedback');
 fs.mkdirSync(FEEDBACK_DIR, { recursive: true });
+
+// Startup diagnostics for Railway volume persistence
+function countAccounts() {
+  try { return fs.readdirSync(ACCOUNTS_DIR).filter(f => f.endsWith('.json')).length; } catch { return 0; }
+}
+const startupAccountCount = countAccounts();
+console.log(`[startup] Accounts directory ${accountsDirExisted ? 'EXISTS' : 'CREATED'}: ${ACCOUNTS_DIR}`);
+console.log(`[startup] Accounts found: ${startupAccountCount}`);
 
 const MIME = {
   '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript',
@@ -439,6 +448,57 @@ Rules:
         } catch {}
       }
       return jsonRes(res, 200, { total, averageRating: ratingCount ? +(ratingSum / ratingCount).toFixed(1) : null });
+    }
+
+    // ── Health Check ──
+    if (route === '/api/health' && req.method === 'GET') {
+      const accountCount = countAccounts();
+      return jsonRes(res, 200, {
+        status: 'ok',
+        uptime: process.uptime(),
+        accountCount,
+        accountsDir: ACCOUNTS_DIR,
+        accountsDirExists: fs.existsSync(ACCOUNTS_DIR),
+        stripeConfigured: !!stripe,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // ── Create Checkout (alias for /api/create-checkout-session) ──
+    if (route === '/api/create-checkout' && req.method === 'POST') {
+      if (!stripe) return jsonRes(res, 400, { error: 'Stripe not configured' });
+      const { token } = await readBody(req);
+      const account = findByToken(token);
+      if (!account) return jsonRes(res, 401, { error: 'Invalid session' });
+
+      const sessionParams = {
+        mode: 'subscription',
+        line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
+        success_url: APP_URL + '/?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: APP_URL + '/',
+        client_reference_id: account.username,
+      };
+      if (account.stripeCustomerId) {
+        sessionParams.customer = account.stripeCustomerId;
+      }
+
+      const checkoutSession = await stripe.checkout.sessions.create(sessionParams);
+      return jsonRes(res, 200, { ok: true, url: checkoutSession.url });
+    }
+
+    // ── Check Subscription ──
+    if (route === '/api/check-subscription' && req.method === 'POST') {
+      const { token } = await readBody(req);
+      const account = findByToken(token);
+      if (!account) return jsonRes(res, 401, { error: 'Invalid session' });
+
+      return jsonRes(res, 200, {
+        ok: true,
+        tier: account.tier || 'free',
+        isPro: account.tier === 'pro',
+        subscribedAt: account.subscribedAt || null,
+        stripeCustomerId: account.stripeCustomerId || null
+      });
     }
 
     return jsonRes(res, 404, { error: 'Not found' });

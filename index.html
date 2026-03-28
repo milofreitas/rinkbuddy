@@ -709,7 +709,7 @@
           <li>Competition score tracking</li>
           <li>Priority support</li>
         </ul>
-        <a href="#lp-signup" class="lp-btn lp-btn-pro" style="width:100%;justify-content:center" onclick="document.getElementById('lpSignupPlan').value='pro'">Go Pro</a>
+        <a href="#lp-signup" class="lp-btn lp-btn-pro" id="lpGoProBtn" style="width:100%;justify-content:center" onclick="handleGoProClick(event)">Go Pro</a>
       </div>
     </div>
   </section>
@@ -3549,6 +3549,7 @@ async function handleGoogleResponse(response) {
     // Update view (landing → app)
     if (typeof updateView === 'function') updateView();
     if (document.getElementById('accountModal').classList.contains('active')) openAccountModal();
+    if (typeof checkSubscriptionStatus === 'function') checkSubscriptionStatus();
   } catch(e) {
     showToast('Google sign-in failed');
   }
@@ -3687,20 +3688,9 @@ async function doSubscribe() {
       window.location.href = data.url;
       return;
     }
-    // If Stripe not configured, fall back to direct subscribe for local dev
+    // If Stripe not configured, show "Coming Soon" message
     if (data.error && data.error.includes('not configured')) {
-      const fallback = await fetch('/api/subscribe', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: session.token })
-      });
-      const fbData = await fallback.json();
-      if (fbData.error) return showToast('Error: ' + fbData.error);
-      session.tier = 'pro';
-      CloudAccount.setSession(session);
-      showToast('Upgraded to Pro! All features unlocked.');
-      updateCloudBtn();
-      openAccountModal();
-      renderUpgradeBanners();
+      showToast('Pro subscriptions coming soon! Stay tuned.');
       return;
     }
     if (data.error) return showToast('Error: ' + data.error);
@@ -3828,6 +3818,39 @@ async function doLandingLogin() {
   }
   updateView();
   renderAll();
+  // Check subscription status after login
+  checkSubscriptionStatus();
+}
+
+// Handle "Go Pro" button on landing page pricing section
+function handleGoProClick(e) {
+  if (CloudAccount.isLoggedIn()) {
+    e.preventDefault();
+    doSubscribe();
+  } else {
+    // Not logged in — scroll to signup form and mark as pro intent
+    document.getElementById('lpSignupPlan').value = 'pro';
+  }
+}
+
+// Check subscription status from server and update local session
+async function checkSubscriptionStatus() {
+  const session = CloudAccount.getSession();
+  if (!session?.token) return;
+  try {
+    const res = await fetch('/api/check-subscription', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: session.token })
+    });
+    const data = await res.json();
+    if (data.ok && data.tier) {
+      session.tier = data.tier;
+      CloudAccount.setSession(session);
+      if (typeof renderUpgradeBanners === 'function') renderUpgradeBanners();
+    }
+  } catch (e) {
+    // Silently fail — subscription check is best-effort
+  }
 }
 
 // Override doLogin/doSignup to also store tier and update view
@@ -3856,6 +3879,7 @@ doLogin = async function() {
   }
   updateView();
   openAccountModal();
+  checkSubscriptionStatus();
 };
 
 const _origDoSignup = doSignup;
@@ -4009,6 +4033,8 @@ createProfile = function() {
 // Initialize view based on login state
 updateView();
 renderAll();
+// Check subscription status on page load (in case tier changed server-side)
+if (CloudAccount.isLoggedIn()) checkSubscriptionStatus();
 window.addEventListener('resize',()=>{drawRadarChart();drawCompChart();});
 
 // PWA Service Worker
