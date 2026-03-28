@@ -875,9 +875,8 @@
   <button class="nav-btn active" data-section="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
   <button class="nav-btn" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
   <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
-  <button class="nav-btn" data-section="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Sessions</button>
-  <button class="nav-btn" data-section="coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
   <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
+  <button class="nav-btn" data-section="coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
 </nav>
 
 <main class="content">
@@ -1021,8 +1020,8 @@
     <div class="card"><div class="card-title">Recent Logs</div><div id="elementLogs"></div></div>
   </div>
 
-  <!-- ═══ SESSIONS ═══ -->
-  <div class="section" id="sec-sessions">
+  <!-- ═══ SESSIONS (hidden for now) ═══ -->
+  <div class="section" id="sec-sessions" style="display:none !important">
     <div class="card">
       <div class="card-title">Log Session</div>
       <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="sessionTitle" placeholder="e.g., Morning practice"></div>
@@ -1136,6 +1135,35 @@
         <div class="form-group">
           <label class="form-label">Next Focus Areas</label>
           <textarea class="form-textarea" id="lessonNextFocus" placeholder="What to work on next time..." style="min-height:50px"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">📹 Lesson Video</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="recordCoachVideo()" id="coachRecordBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="red" stroke="none"/></svg>
+              Record
+            </button>
+            <label class="btn btn-secondary btn-sm" style="cursor:pointer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input type="file" accept="video/*" id="coachVideoUpload" onchange="handleCoachVideoUpload(this)" style="display:none">
+            </label>
+          </div>
+          <div id="coachVideoPreview" style="margin-top:8px;display:none">
+            <video id="coachVideoPlayer" controls playsinline style="width:100%;max-height:200px;border-radius:8px;background:#000"></video>
+            <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
+              <span style="font-size:0.72rem;color:var(--text-dim)" id="coachVideoName"></span>
+              <button class="btn btn-danger btn-sm" onclick="removeCoachVideo()" style="margin-left:auto;font-size:0.65rem;padding:2px 8px">Remove</button>
+            </div>
+          </div>
+          <div id="coachRecordArea" style="display:none;margin-top:8px">
+            <video id="coachCamPreview" autoplay muted playsinline style="width:100%;max-height:200px;border-radius:8px;background:#000;transform:scaleX(-1)"></video>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button class="btn btn-danger btn-sm" onclick="startCoachRecording()" id="coachStartRec">⏺ Start Recording</button>
+              <button class="btn btn-secondary btn-sm" onclick="stopCoachRecording()" id="coachStopRec" style="display:none">⏹ Stop</button>
+              <button class="btn btn-secondary btn-sm" onclick="cancelCoachRecording()" style="margin-left:auto">Cancel</button>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Overall Rating</label>
@@ -4325,7 +4353,7 @@ function updateLessonSkills() {
   ).join('');
 }
 
-function saveLesson() {
+async function saveLesson() {
   initCoachData();
   const studentId = document.getElementById('lessonStudent').value;
   if (!studentId) return showToast('Please select a student');
@@ -4338,9 +4366,23 @@ function saveLesson() {
   const skillsFocused = [];
   document.querySelectorAll('#lessonSkillChecks input:checked').forEach(cb => skillsFocused.push(cb.value));
 
+  const lessonId = Date.now().toString(36);
+  let videoKey = null;
+
+  // Save video to IndexedDB if attached
+  if (coachVideoBlob) {
+    videoKey = 'coach-video-' + lessonId;
+    try {
+      await VideoDB.save(videoKey, coachVideoBlob);
+    } catch(e) {
+      console.error('Failed to save coach video:', e);
+    }
+  }
+
   APP.coach.lessonLog.push({
-    id: Date.now().toString(36),
-    studentId, date, duration, skillsFocused, notes, nextFocus, rating
+    id: lessonId,
+    studentId, date, duration, skillsFocused, notes, nextFocus, rating,
+    videoKey: videoKey
   });
   saveData(APP);
 
@@ -4349,9 +4391,10 @@ function saveLesson() {
   document.getElementById('lessonNextFocus').value = '';
   document.getElementById('lessonRating').value = '3';
   document.querySelectorAll('#lessonSkillChecks input:checked').forEach(cb => cb.checked = false);
+  removeCoachVideo();
 
   renderLessonLog();
-  showToast('Lesson saved');
+  showToast('Lesson saved' + (videoKey ? ' with video' : ''));
 }
 
 function renderLessonLog() {
@@ -4386,10 +4429,101 @@ function renderLessonLog() {
         ${skillNames.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${skillNames.map(n => `<span style="font-size:0.65rem;padding:2px 6px;background:rgba(56,189,248,0.1);border-radius:4px;color:var(--accent)">${n}</span>`).join('')}</div>` : ''}
         ${l.notes ? `<div style="font-size:0.78rem;color:var(--text-dim)">${l.notes}</div>` : ''}
         ${l.nextFocus ? `<div style="font-size:0.72rem;color:var(--accent2);margin-top:2px">Next: ${l.nextFocus}</div>` : ''}
+        ${l.videoKey ? `<button class="btn btn-secondary btn-sm" onclick="playLessonVideo('${l.videoKey}','${l.id}')" style="margin-top:6px;font-size:0.7rem;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Watch Video</button>
+        <div id="lessonVideo-${l.id}" style="display:none;margin-top:6px"><video controls playsinline style="width:100%;max-height:250px;border-radius:8px;background:#000"></video></div>` : ''}
       </div>
       <button class="btn btn-danger btn-sm" onclick="deleteLesson('${l.id}')" style="position:absolute;right:10px;top:10px" title="Delete">✕</button>
     </div>`;
   }).join('');
+}
+
+// ═══ COACH VIDEO ═══
+let coachVideoBlob = null;
+let coachVideoUrl = null;
+let coachMediaStream = null;
+let coachMediaRecorder = null;
+let coachRecChunks = [];
+
+function handleCoachVideoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  coachVideoBlob = file;
+  coachVideoUrl = URL.createObjectURL(file);
+  document.getElementById('coachVideoPlayer').src = coachVideoUrl;
+  document.getElementById('coachVideoName').textContent = file.name + ' (' + (file.size / 1048576).toFixed(1) + 'MB)';
+  document.getElementById('coachVideoPreview').style.display = 'block';
+  document.getElementById('coachRecordArea').style.display = 'none';
+}
+
+function removeCoachVideo() {
+  coachVideoBlob = null;
+  if (coachVideoUrl) URL.revokeObjectURL(coachVideoUrl);
+  coachVideoUrl = null;
+  document.getElementById('coachVideoPreview').style.display = 'none';
+  document.getElementById('coachVideoPlayer').src = '';
+  document.getElementById('coachVideoUpload').value = '';
+}
+
+async function recordCoachVideo() {
+  try {
+    coachMediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
+    document.getElementById('coachCamPreview').srcObject = coachMediaStream;
+    document.getElementById('coachRecordArea').style.display = 'block';
+    document.getElementById('coachVideoPreview').style.display = 'none';
+  } catch (e) {
+    showToast('Camera access denied');
+  }
+}
+
+function startCoachRecording() {
+  coachRecChunks = [];
+  coachMediaRecorder = new MediaRecorder(coachMediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+  coachMediaRecorder.ondataavailable = e => { if (e.data.size > 0) coachRecChunks.push(e.data); };
+  coachMediaRecorder.onstop = () => {
+    coachVideoBlob = new Blob(coachRecChunks, { type: 'video/webm' });
+    coachVideoUrl = URL.createObjectURL(coachVideoBlob);
+    document.getElementById('coachVideoPlayer').src = coachVideoUrl;
+    document.getElementById('coachVideoName').textContent = 'Recording (' + (coachVideoBlob.size / 1048576).toFixed(1) + 'MB)';
+    document.getElementById('coachVideoPreview').style.display = 'block';
+    document.getElementById('coachRecordArea').style.display = 'none';
+    if (coachMediaStream) { coachMediaStream.getTracks().forEach(t => t.stop()); coachMediaStream = null; }
+  };
+  coachMediaRecorder.start();
+  document.getElementById('coachStartRec').style.display = 'none';
+  document.getElementById('coachStopRec').style.display = 'inline-flex';
+  showToast('Recording...');
+}
+
+function stopCoachRecording() {
+  if (coachMediaRecorder && coachMediaRecorder.state === 'recording') coachMediaRecorder.stop();
+  document.getElementById('coachStartRec').style.display = 'inline-flex';
+  document.getElementById('coachStopRec').style.display = 'none';
+}
+
+function cancelCoachRecording() {
+  if (coachMediaRecorder && coachMediaRecorder.state === 'recording') coachMediaRecorder.stop();
+  if (coachMediaStream) { coachMediaStream.getTracks().forEach(t => t.stop()); coachMediaStream = null; }
+  document.getElementById('coachRecordArea').style.display = 'none';
+  document.getElementById('coachCamPreview').srcObject = null;
+  coachRecChunks = [];
+}
+
+async function playLessonVideo(videoKey, lessonId) {
+  const container = document.getElementById('lessonVideo-' + lessonId);
+  if (!container) return;
+  if (container.style.display === 'block') { container.style.display = 'none'; return; }
+  try {
+    const blob = await VideoDB.load(videoKey);
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      container.querySelector('video').src = url;
+      container.style.display = 'block';
+    } else {
+      showToast('Video not found — it may have been cleared from browser storage');
+    }
+  } catch(e) { showToast('Error loading video'); }
 }
 
 function deleteLesson(lessonId) {
