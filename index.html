@@ -656,6 +656,7 @@
   </div>
   <div class="header-right">
     <div class="discipline-toggle" id="discToggle">
+      <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
       <button class="disc-btn active" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
       <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
     </div>
@@ -996,33 +997,41 @@
 
 <script>
 // ═══════════════════════════════════════════
-//  SKILL DEFINITIONS — Figure & Hockey
+//  SKILL DEFINITIONS — Foundations, Figure & Hockey
 // ═══════════════════════════════════════════
 const SKILLS = {
+  foundations: [
+    // Beginner
+    {id:'f-fwd-stroke',name:'Forward Stroking/Skating',type:'step',level:'beginner',prereqs:[],bv:0,
+     tip:'Focus on full extension of the pushing leg and smooth weight transfer. Knees bent, push to the side.'},
+    {id:'f-bwd-stroke',name:'Backward Stroking/Skating',type:'step',level:'beginner',prereqs:['f-fwd-stroke'],bv:0,
+     tip:'Keep weight on the ball of the foot. C-cut pushes with each foot. Look over shoulder periodically.'},
+    {id:'f-fwd-crossover',name:'Forward Crossover',type:'step',level:'beginner',prereqs:['f-fwd-stroke'],bv:0,
+     tip:'Lean into the circle. Cross over fully with the outside foot. Push hard with under-foot.'},
+    {id:'f-bwd-crossover',name:'Backward Crossover',type:'step',level:'beginner',prereqs:['f-bwd-stroke'],bv:0,
+     tip:'Push with the inside edge. Keep arms steady for balance. The cross-under push is where the power comes from.'},
+    {id:'f-snowplow',name:'Snowplow Stop',type:'step',level:'beginner',prereqs:[],bv:0,
+     tip:'Angle both feet inward. Bend knees and press gently. Equal pressure both feet.'},
+    {id:'f-2ft-glide',name:'Two-Foot Glide',type:'step',level:'beginner',prereqs:[],bv:0,
+     tip:'Keep knees soft, arms out for balance. Core engaged. Practice shifting weight side to side.'},
+    {id:'f-t-stop',name:'T-Stop',type:'step',level:'beginner',prereqs:['f-fwd-stroke'],bv:0,
+     tip:'Drag the back foot perpendicular. Keep most weight on the front foot.'},
+    // Intermediate
+    {id:'f-edge-control',name:'Edge Control',type:'step',level:'intermediate',prereqs:['f-fwd-stroke','f-bwd-stroke'],bv:0,
+     tip:'Practice inside and outside edges on both feet. Feel the blade grip and release on each edge.'},
+    {id:'f-transition',name:'Forward to Backward Transition',type:'step',level:'intermediate',prereqs:['f-fwd-stroke','f-bwd-stroke'],bv:0,
+     tip:'Open hips and pivot on both feet. Keep speed through the transition.'},
+  ],
   figure: [
     // Beginner
-    {id:'fwd-stroke',name:'Forward Stroking',type:'step',level:'beginner',prereqs:[],bv:0,
-     tip:'Focus on full extension of the pushing leg and smooth weight transfer.'},
-    {id:'bwd-stroke',name:'Backward Stroking',type:'step',level:'beginner',prereqs:['fwd-stroke'],bv:0,
-     tip:'Keep weight on the ball of the foot. Look over shoulder periodically.'},
-    {id:'fwd-crossover',name:'Forward Crossover',type:'step',level:'beginner',prereqs:['fwd-stroke'],bv:0,
-     tip:'Lean into the circle. Cross over fully with the outside foot.'},
-    {id:'bwd-crossover',name:'Backward Crossover',type:'step',level:'beginner',prereqs:['bwd-stroke'],bv:0,
-     tip:'Push with the inside edge. Keep arms steady for balance.'},
-    {id:'snowplow',name:'Snowplow Stop',type:'step',level:'beginner',prereqs:[],bv:0,
-     tip:'Angle both feet inward. Bend knees and press gently.'},
-    {id:'t-stop',name:'T-Stop',type:'step',level:'beginner',prereqs:['fwd-stroke'],bv:0,
-     tip:'Drag the back foot perpendicular. Keep most weight on the front foot.'},
-    {id:'2ft-spin',name:'Two-Foot Spin',type:'spin',level:'beginner',prereqs:['fwd-crossover'],bv:0.5,
+    {id:'2ft-spin',name:'Two-Foot Spin',type:'spin',level:'beginner',prereqs:['f-fwd-crossover'],bv:0.5,
      tip:'Start from a small circle. Pull arms in tight to increase speed.'},
-    {id:'2ft-glide',name:'Two-Foot Glide',type:'step',level:'beginner',prereqs:[],bv:0,
-     tip:'Keep knees soft, arms out for balance. Core engaged.'},
     // Intermediate
-    {id:'3turn',name:'Three Turn',type:'step',level:'intermediate',prereqs:['fwd-crossover'],bv:0,
+    {id:'3turn',name:'Three Turn',type:'step',level:'intermediate',prereqs:['f-fwd-crossover'],bv:0,
      tip:'Rotate shoulders first, hips follow. Check the turn with opposite arm.'},
-    {id:'mohawk',name:'Mohawk',type:'step',level:'intermediate',prereqs:['fwd-crossover','bwd-crossover'],bv:0,
+    {id:'mohawk',name:'Mohawk',type:'step',level:'intermediate',prereqs:['f-fwd-crossover','f-bwd-crossover'],bv:0,
      tip:'Open the hip of the free foot. Keep shoulders square to the circle.'},
-    {id:'toe',name:'Toe Loop',type:'jump',level:'intermediate',prereqs:['3turn','bwd-crossover'],bv:0.4,
+    {id:'toe',name:'Toe Loop',type:'jump',level:'intermediate',prereqs:['3turn','f-bwd-crossover'],bv:0.4,
      tip:'Pick with the toe. Rotate from the back outside edge. Arms tight on landing.'},
     {id:'sal',name:'Salchow',type:'jump',level:'intermediate',prereqs:['3turn'],bv:0.4,
      tip:'Enter from a back inside edge. Scoop the free leg through.'},
@@ -1066,42 +1075,29 @@ const SKILLS = {
     {id:'chsq',name:'Choreo Sequence',type:'step',level:'expert',prereqs:['stseq'],bv:3.0},
   ],
   hockey: [
-    // Beginner
-    {id:'h-fwd',name:'Forward Skating',type:'skating',level:'beginner',prereqs:[],bv:0,
-     tip:'Knees bent, lean forward slightly. Push to the side, not back.'},
-    {id:'h-bwd',name:'Backward Skating',type:'skating',level:'beginner',prereqs:[],bv:0,
-     tip:'C-cuts with each foot alternating. Keep head up.'},
-    {id:'h-snowplow',name:'Snowplow Stop',type:'stop',level:'beginner',prereqs:['h-fwd'],bv:0,
-     tip:'Both feet angled in. Bend knees to control pressure.'},
-    {id:'h-glide',name:'Two-Foot Glide',type:'skating',level:'beginner',prereqs:[],bv:0,
-     tip:'Stay low. Practice balancing on one foot at a time.'},
-    {id:'h-fwd-cross',name:'Forward Crossover',type:'skating',level:'beginner',prereqs:['h-fwd'],bv:0,
-     tip:'Lean into the turn. Push hard with the outside foot under-push.'},
     // Intermediate
-    {id:'h-hockey-stop',name:'Hockey Stop',type:'stop',level:'intermediate',prereqs:['h-snowplow','h-fwd'],bv:0,
+    {id:'h-hockey-stop',name:'Hockey Stop',type:'stop',level:'intermediate',prereqs:['f-snowplow','f-fwd-stroke'],bv:0,
      tip:'Turn both feet 90 degrees. Lean away from the direction of travel. Shave the ice.'},
-    {id:'h-bwd-cross',name:'Backward Crossover',type:'skating',level:'intermediate',prereqs:['h-bwd','h-fwd-cross'],bv:0,
+    {id:'h-bwd-cross',name:'Backward Crossover',type:'skating',level:'intermediate',prereqs:['f-bwd-stroke','f-fwd-crossover'],bv:0,
      tip:'Lean into the circle. The cross-under push is where the power comes from.'},
-    {id:'h-transition',name:'Forward to Backward',type:'skating',level:'intermediate',prereqs:['h-fwd','h-bwd'],bv:0,
-     tip:'Open hips and pivot on both feet. Keep speed through the transition.'},
-    {id:'h-tight-turn',name:'Tight Turns',type:'skating',level:'intermediate',prereqs:['h-fwd-cross'],bv:0,
+    {id:'h-tight-turn',name:'Tight Turns',type:'skating',level:'intermediate',prereqs:['f-fwd-crossover'],bv:0,
      tip:'Deep knee bend. Edge work controls the radius.'},
     {id:'h-1ft-stop',name:'One-Foot Stop',type:'stop',level:'intermediate',prereqs:['h-hockey-stop'],bv:0,
      tip:'All weight on the stopping foot. Angle the blade and press down.'},
-    {id:'h-power-start',name:'Power Start',type:'skating',level:'intermediate',prereqs:['h-fwd'],bv:0,
+    {id:'h-power-start',name:'Power Start',type:'skating',level:'intermediate',prereqs:['f-fwd-stroke'],bv:0,
      tip:'First 3 strides explosive. Dig in deep with full blade. Stay low.'},
     // Advanced
-    {id:'h-mohawk',name:'Mohawk Turn',type:'skating',level:'advanced',prereqs:['h-transition'],bv:0,
+    {id:'h-mohawk',name:'Mohawk Turn',type:'skating',level:'advanced',prereqs:['f-transition'],bv:0,
      tip:'Heel-to-heel pivot. Keep low through the transition for speed.'},
     {id:'h-power-stop',name:'Power Slide Stop',type:'stop',level:'advanced',prereqs:['h-hockey-stop'],bv:0,
      tip:'Turn the body and slide both feet. Create maximum ice spray.'},
     {id:'h-edge-work',name:'Inside/Outside Edges',type:'step',level:'advanced',prereqs:['h-tight-turn'],bv:0,
      tip:'Practice slalom patterns. Feel the edges grip and release.'},
-    {id:'h-lateral',name:'Lateral Movement',type:'skating',level:'advanced',prereqs:['h-fwd-cross','h-bwd-cross'],bv:0,
+    {id:'h-lateral',name:'Lateral Movement',type:'skating',level:'advanced',prereqs:['f-fwd-crossover','h-bwd-cross'],bv:0,
      tip:'Defensive shuffles. Stay low, push sideways with inside edges.'},
     {id:'h-quick-feet',name:'Quick Feet Agility',type:'skating',level:'advanced',prereqs:['h-power-start'],bv:0,
      tip:'Rapid short strides. Practice with cones. React and change direction.'},
-    {id:'h-spin-move',name:'Spin-o-rama',type:'skating',level:'advanced',prereqs:['h-mohawk','h-transition'],bv:0,
+    {id:'h-spin-move',name:'Spin-o-rama',type:'skating',level:'advanced',prereqs:['h-mohawk','f-transition'],bv:0,
      tip:'Full 360 pivot while maintaining puck control. Protect the puck.'},
     // Expert
     {id:'h-top-speed',name:'Top Speed Sprint',type:'skating',level:'expert',prereqs:['h-power-start','h-quick-feet'],bv:0,
@@ -1117,7 +1113,7 @@ const SKILLS = {
      tip:'Top hand at the butt end, bottom hand halfway down. Keep the blade flat on the ice.'},
     {id:'h-stationary-puck',name:'Stationary Puck Control',type:'stick',level:'beginner',prereqs:['h-stick-grip'],bv:0,
      tip:'Roll the puck side to side with wrists. Keep your head up.'},
-    {id:'h-fwd-dribble',name:'Forward Dribble',type:'stick',level:'beginner',prereqs:['h-fwd','h-stationary-puck'],bv:0,
+    {id:'h-fwd-dribble',name:'Forward Dribble',type:'stick',level:'beginner',prereqs:['f-fwd-stroke','h-stationary-puck'],bv:0,
      tip:'Push the puck ahead, skate to it. Keep it within stick reach.'},
     {id:'h-wrist-shot',name:'Wrist Shot',type:'stick',level:'beginner',prereqs:['h-stick-grip'],bv:0,
      tip:'Pull the puck back, roll wrists, snap through. Follow through at the target.'},
@@ -1128,7 +1124,7 @@ const SKILLS = {
      tip:'Cup the puck on the backhand. Sweep through with wrist roll.'},
     {id:'h-receiving',name:'Receiving Passes',type:'stick',level:'intermediate',prereqs:['h-forehand-pass'],bv:0,
      tip:'Soft hands — cushion the puck on the blade. Give with the pass, don\'t stab at it.'},
-    {id:'h-skating-dribble',name:'Skating with Puck',type:'stick',level:'intermediate',prereqs:['h-fwd-dribble','h-fwd-cross'],bv:0,
+    {id:'h-skating-dribble',name:'Skating with Puck',type:'stick',level:'intermediate',prereqs:['h-fwd-dribble','f-fwd-crossover'],bv:0,
      tip:'Head up, feel the puck. Practice at full speed, not just slow.'},
     {id:'h-snap-shot',name:'Snap Shot',type:'stick',level:'intermediate',prereqs:['h-wrist-shot'],bv:0,
      tip:'Quick release — load and snap the blade. Less windup than wrist shot.'},
@@ -1205,26 +1201,23 @@ const DRILLS = {
 //  SKILL VISUAL GUIDES — what each skill looks like
 // ═══════════════════════════════════════════
 const SKILL_GUIDES = {
+  // Foundations
+  'f-fwd-stroke': { visual:'Skater pushes off one foot, glides on the other, alternating in smooth rhythm. Arms held steady at side.', focus:['Full leg extension on push','Smooth weight transfer','Knees bent, core engaged'], balance:'Maintain center of gravity over skating foot. Arms out for stability.' },
+  'f-bwd-stroke': { visual:'Skater moves backward using C-shaped pushes. Head occasionally looks over shoulder.', focus:['C-cut pushes with each foot','Weight on ball of foot','Keep head up'], balance:'Lean slightly back over heels. Keep core tight to prevent tipping forward.' },
+  'f-fwd-crossover': { visual:'Skater crosses outside foot over inside foot while turning in a circle. Body leans into the curve.', focus:['Cross outside foot fully over','Lean into the circle','Push with under-foot'], balance:'Lean into turn center. Keep shoulders level — dropping inside shoulder causes falls.' },
+  'f-bwd-crossover': { visual:'Moving backward in a circle, skater crosses feet. Inside foot pushes under.', focus:['Push with inside edge','Cross-under is the power move','Arms steady'], balance:'Center of gravity inside the circle. Look in direction of travel.' },
+  'f-snowplow': { visual:'Both feet angle inward in a V-shape, shaving ice to slow down and stop.', focus:['Angle both toes inward','Bend knees and press gently','Equal pressure both feet'], balance:'Weight centered between both feet. Lean slightly back.' },
+  'f-2ft-glide': { visual:'Skater stands on both feet, gliding forward with no pushing. Arms out for balance.', focus:['Knees soft and slightly bent','Arms out at shoulder height','Core engaged, back straight'], balance:'Weight evenly distributed. Practice shifting weight side to side.' },
+  'f-t-stop': { visual:'One foot trails behind perpendicular to the skating direction, dragging to stop.', focus:['Back foot 90 degrees to front','Most weight on front foot','Drag gently'], balance:'Keep hips square. All balance on front foot.' },
+  'f-edge-control': { visual:'Skater traces curves on inside and outside edges, alternating feet in serpentine patterns.', focus:['Feel blade angle on each edge','Alternate inside/outside edges','Maintain steady speed through curves'], balance:'Shift weight precisely over the edge. Core engaged to maintain body position.' },
+  'f-transition': { visual:'Pivoting from forward to backward skating without losing speed.', focus:['Open hips','Pivot on both feet','Maintain speed through transition'], balance:'Hips and shoulders must rotate together. Stay low through the pivot.' },
   // Figure Skating
-  'fwd-stroke': { visual:'Skater pushes off one foot, glides on the other, alternating in smooth rhythm. Arms held steady at side.', focus:['Full leg extension on push','Smooth weight transfer','Knees bent, core engaged'], balance:'Maintain center of gravity over skating foot. Arms out for stability.' },
-  'bwd-stroke': { visual:'Skater moves backward using C-shaped pushes. Head occasionally looks over shoulder.', focus:['C-cut pushes with each foot','Weight on ball of foot','Keep head up'], balance:'Lean slightly back over heels. Keep core tight to prevent tipping forward.' },
-  'fwd-crossover': { visual:'Skater crosses outside foot over inside foot while turning in a circle. Body leans into the curve.', focus:['Cross outside foot fully over','Lean into the circle','Push with under-foot'], balance:'Lean into turn center. Keep shoulders level — dropping inside shoulder causes falls.' },
-  'bwd-crossover': { visual:'Moving backward in a circle, skater crosses feet. Inside foot pushes under.', focus:['Push with inside edge','Cross-under is the power move','Arms steady'], balance:'Center of gravity inside the circle. Look in direction of travel.' },
-  'snowplow': { visual:'Both feet angle inward in a V-shape, shaving ice to slow down and stop.', focus:['Angle both toes inward','Bend knees and press gently','Equal pressure both feet'], balance:'Weight centered between both feet. Lean slightly back.' },
-  't-stop': { visual:'One foot trails behind perpendicular to the skating direction, dragging to stop.', focus:['Back foot 90 degrees to front','Most weight on front foot','Drag gently'], balance:'Keep hips square. All balance on front foot.' },
-  '2ft-glide': { visual:'Skater stands on both feet, gliding forward with no pushing. Arms out for balance.', focus:['Knees soft and slightly bent','Arms out at shoulder height','Core engaged, back straight'], balance:'Weight evenly distributed. Practice shifting weight side to side.' },
   '2ft-spin': { visual:'Skater rotates on both feet in one spot, pulling arms in to speed up.', focus:['Start from a small circle','Pull arms in tight','Spot with your eyes'], balance:'Keep weight on balls of feet. Tight core prevents wobble.' },
   '3turn': { visual:'Skater traces a "3" shape on ice — forward to backward on one foot with a half-turn.', focus:['Shoulders rotate first','Hips follow the turn','Check with opposite arm'], balance:'Critical — all on one foot during the turn. Stay over the blade.' },
   'mohawk': { visual:'Skater transitions forward to backward by stepping from one foot to the other, heel-to-heel.', focus:['Open hip of free foot','Keep shoulders square','Smooth step, no bounce'], balance:'Weight transfers quickly between feet. Keep low.' },
   'waltz': { visual:'Half-rotation jump — step onto left foot, swing right leg up, land on right foot backward.', focus:['Strong forward edge entry','Swing free leg up','Land on one foot backward'], balance:'Arms and free leg control rotation. Land with knee bent to absorb.' },
   // Hockey Skating
-  'h-fwd': { visual:'Strong forward stride — knees bent, pushing to the side with full extension.', focus:['Knees deeply bent','Push sideways, not backward','Full leg extension each stride'], balance:'Stay low — lower center of gravity = more stable. Lean slightly forward.' },
-  'h-bwd': { visual:'Skating backward using alternating C-cut pushes with each foot.', focus:['C-cuts with each foot','Keep head up','Stay low'], balance:'Weight over balls of feet. Core engaged to prevent falling backward.' },
-  'h-snowplow': { visual:'Both skates angle inward to create friction and stop.', focus:['Both feet angled in','Bend knees','Control pressure'], balance:'Center weight between both feet. Avoid leaning too far forward.' },
-  'h-glide': { visual:'Standing on both feet, gliding with good posture. Knees soft.', focus:['Knees bent and soft','Arms relaxed at sides','Feel edges grip the ice'], balance:'This IS the balance skill. Practice one-foot glides to improve.' },
-  'h-fwd-cross': { visual:'Crossover steps while turning — outside foot crosses over inside foot with power.', focus:['Lean into the turn','Push hard with under-foot','Keep shoulders level'], balance:'Lean angle matches speed. Too much lean = fall inward.' },
   'h-hockey-stop': { visual:'Both skates turn 90 degrees sideways, shaving ice to stop quickly. Spray of ice.', focus:['Turn both feet simultaneously','Lean away from travel direction','Bend knees deep'], balance:'Weight shifts away from direction of travel. Practice both sides.' },
-  'h-transition': { visual:'Pivoting from forward to backward skating without losing speed.', focus:['Open hips','Pivot on both feet','Maintain speed through transition'], balance:'Hips and shoulders must rotate together. Stay low through the pivot.' },
   'h-stick-grip': { visual:'Top hand at butt end of stick, bottom hand ~halfway down shaft. Blade flat on ice.', focus:['Firm top hand grip','Loose bottom hand','Blade stays on ice'], balance:'Stick adds a balance point — keep blade on ice as a third contact.' },
   'h-stationary-puck': { visual:'Standing still, rolling puck side to side with wrist movements.', focus:['Soft wrists','Keep head up','Puck in front of body'], balance:'Stay low. Head up forces body awareness rather than visual reliance.' },
   'h-fwd-dribble': { visual:'Skating forward while pushing puck ahead and skating to it.', focus:['Keep puck within stick reach','Head up','Maintain skating form'], balance:'Biggest challenge — maintaining skating balance while hands work independently.' },
@@ -1362,9 +1355,23 @@ function renderProfileList() {
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isActive?'rgba(56,189,248,0.1)':'var(--surface2)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="switchProfile('${p.id}')">
       <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white">${p.name.charAt(0).toUpperCase()}</div>
       <div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${p.name}</div><div style="font-size:0.7rem;color:var(--text-dim)">${isActive ? 'Active' : 'Tap to switch'}</div></div>
+      <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();renameProfile('${p.id}')" style="padding:4px 8px" title="Rename">✏️</button>
       ${profiles.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProfile('${p.id}')" style="padding:4px 8px">x</button>` : ''}
     </div>`;
   }).join('');
+}
+
+function renameProfile(id) {
+  const profiles = loadProfiles();
+  const p = profiles.find(pr => pr.id === id);
+  if (!p) return;
+  const newName = prompt('Rename profile:', p.name);
+  if (!newName || !newName.trim() || newName.trim() === p.name) return;
+  p.name = newName.trim();
+  localStorage.setItem('rinkbuddy_profiles', JSON.stringify(profiles));
+  renderProfileList();
+  updateProfileButton();
+  showToast('Profile renamed to ' + p.name);
 }
 
 function updateProfileButton() {
@@ -1377,7 +1384,7 @@ function updateProfileButton() {
   }
 }
 
-function getSkills() { return SKILLS[APP.discipline] || SKILLS.figure; }
+function getSkills() { return SKILLS[APP.discipline] || SKILLS.foundations; }
 function getSkillData(id) {
   if (!APP.skills[id]) APP.skills[id] = { attempts: 0, landed: 0 };
   return APP.skills[id];
@@ -1400,6 +1407,11 @@ function renderOnboarding() {
     <h2>Welcome to RinkBuddy</h2>
     <p>What type of skating do you do?</p>
     <div class="onboard-cards">
+      <div class="onboard-card" onclick="switchDiscipline('foundations')">
+        <svg viewBox="0 0 48 48" fill="none" stroke="var(--success)" stroke-width="1.5"><circle cx="24" cy="24" r="20"/><path d="M15 30h18M17 25h14M19 20h10M21 15h6" stroke-linecap="round"/></svg>
+        <h3>Foundations</h3>
+        <p>Shared basics: stroking, crossovers, stops, glides</p>
+      </div>
       <div class="onboard-card" onclick="switchDiscipline('figure')">
         <svg viewBox="0 0 48 48" fill="none" stroke="var(--accent2)" stroke-width="1.5"><circle cx="24" cy="24" r="20"/><path d="M18 32c2-6 4-10 6-16 2 6 4 10 6 16" stroke-linecap="round"/><line x1="18" y1="32" x2="30" y2="32" stroke-linecap="round"/></svg>
         <h3>Figure Skating</h3>
@@ -1465,7 +1477,7 @@ function renderSkillTree() {
     expert:'Elite-level elements'
   };
 
-  document.getElementById('skillDiscLabel').textContent = APP.discipline === 'hockey' ? 'Hockey Skating' : 'Figure Skating';
+  document.getElementById('skillDiscLabel').textContent = APP.discipline === 'hockey' ? 'Hockey Skating' : APP.discipline === 'foundations' ? 'Foundations' : 'Figure Skating';
 
   let html = '';
   levels.forEach(lv => {
@@ -1987,8 +1999,10 @@ function advanceProcessing(entries, step) {
 }
 
 function analyzeAndLogSkills(entries) {
-  const disc = APP.discipline || 'figure';
-  const skills = SKILLS[disc] || SKILLS.figure;
+  const disc = APP.discipline || 'foundations';
+  const discSkills = SKILLS[disc] || SKILLS.foundations;
+  // Always include foundation skills alongside the current discipline's skills
+  const skills = disc === 'foundations' ? discSkills : SKILLS.foundations.concat(discSkills);
   const totalDuration = entries.reduce((s,e) => s + (e.duration || 60), 0);
   const results = [];
 
@@ -2079,7 +2093,7 @@ function analyzeAndLogSkills(entries) {
     title: 'Video Analysis — ' + entries.map(e=>e.name).join(', '),
     date: today,
     duration: Math.round(durationMinutes),
-    type: disc === 'hockey' ? 'Hockey Practice' : 'Freestyle',
+    type: disc === 'hockey' ? 'Hockey Practice' : disc === 'foundations' ? 'Foundations Practice' : 'Freestyle',
     focus: results.map(r=>r.name).slice(0,5).join(', '),
     rating: 4,
     notes: `Auto-analyzed ${entries.length} video${entries.length>1?'s':''} (${Math.round(durationMinutes)}min). ${results.length} skills detected.`
@@ -2267,7 +2281,7 @@ function saveVideoSession() {
   const v = videoFiles[activeVideoIdx], annos = v.annotations;
   const session = { id:Date.now(), title:document.getElementById('videoSessionTitle').value||'Video Session',
     date:document.getElementById('videoSessionDate').value, duration:Math.round(v.duration/60),
-    type:APP.discipline==='hockey'?'Hockey Practice':'Freestyle',
+    type:APP.discipline==='hockey'?'Hockey Practice':APP.discipline==='foundations'?'Foundations Practice':'Freestyle',
     focus:annos.map(a=>a.elementName).filter((v,i,s)=>s.indexOf(v)===i).join(', '),
     rating:0, notes:`Video: ${v.name} | ${annos.length} annotations`, videoName:v.name };
   annos.forEach(a => {
@@ -2288,7 +2302,7 @@ function saveVideoSession() {
 function openElementModal() { document.getElementById('elemName').value=''; document.getElementById('elementModal').classList.add('active'); }
 function saveElement() {
   const name = document.getElementById('elemName').value.trim(); if (!name) return;
-  const disc = APP.discipline || 'figure';
+  const disc = APP.discipline || 'foundations';
   SKILLS[disc].push({ id:'custom_'+Date.now(), name, type:document.getElementById('elemType').value,
     level:document.getElementById('elemDiff').value, prereqs:[], bv:0, tip:'' });
   saveData(APP); renderSkillTree(); closeModal('elementModal'); showToast('Skill added');
@@ -3129,22 +3143,16 @@ createProfile = function() {
   // Videos: IMG_9494.MOV, IMG_9495.MOV, IMG_9497.MOV, IMG_9498.MOV
   // Location: Henderson Silver Knights arena + Vegas rink
   const detected = {
-    figure: [
-      { id: 'fwd-stroke', attempts: 8, landed: 7, note: 'Confident forward stride across full rink in all 4 videos' },
-      { id: '2ft-glide', attempts: 6, landed: 6, note: 'Solid two-foot glide with good balance, visible in multiple clips' },
-      { id: 'snowplow', attempts: 5, landed: 4, note: 'Snowplow stops performed at rink edges' },
-      { id: 'fwd-crossover', attempts: 6, landed: 4, note: 'Forward crossovers in turns, good lean visible in videos 2-4' },
-    ],
-    hockey: [
-      { id: 'h-fwd', attempts: 8, landed: 7, note: 'Strong forward skating throughout all sessions' },
-      { id: 'h-glide', attempts: 6, landed: 6, note: 'Good two-foot glide with solid balance' },
-      { id: 'h-snowplow', attempts: 5, landed: 4, note: 'Snowplow stops at rink edges and direction changes' },
-      { id: 'h-fwd-cross', attempts: 6, landed: 4, note: 'Crossovers visible during turns in videos 2-4' },
+    foundations: [
+      { id: 'f-fwd-stroke', attempts: 8, landed: 7, note: 'Confident forward stride across full rink in all 4 videos' },
+      { id: 'f-2ft-glide', attempts: 6, landed: 6, note: 'Solid two-foot glide with good balance, visible in multiple clips' },
+      { id: 'f-snowplow', attempts: 5, landed: 4, note: 'Snowplow stops performed at rink edges' },
+      { id: 'f-fwd-crossover', attempts: 6, landed: 4, note: 'Forward crossovers in turns, good lean visible in videos 2-4' },
     ]
   };
 
-  // Apply to both disciplines
-  ['figure', 'hockey'].forEach(disc => {
+  // Apply to foundations
+  ['foundations'].forEach(disc => {
     detected[disc].forEach(s => {
       if (!APP.skills[s.id]) APP.skills[s.id] = { attempts: 0, landed: 0 };
       APP.skills[s.id].attempts += s.attempts;
@@ -3153,7 +3161,7 @@ createProfile = function() {
       APP.elementLogs.push({
         id: Date.now() + Math.random(),
         elementId: s.id,
-        elementName: (SKILLS.figure.concat(SKILLS.hockey)).find(sk => sk.id === s.id)?.name || s.id,
+        elementName: (SKILLS.foundations.concat(SKILLS.figure).concat(SKILLS.hockey)).find(sk => sk.id === s.id)?.name || s.id,
         date: '2026-03-26',
         attempts: s.attempts,
         landed: s.landed,
@@ -3169,14 +3177,14 @@ createProfile = function() {
     title: 'Video Analysis Session — 4 Videos',
     date: '2026-03-26',
     duration: 6, // ~6 min total across 4 videos
-    type: APP.discipline === 'hockey' ? 'Hockey Practice' : 'Freestyle',
+    type: APP.discipline === 'hockey' ? 'Hockey Practice' : APP.discipline === 'foundations' ? 'Foundations Practice' : 'Freestyle',
     focus: 'Forward Skating, Gliding, Crossovers, Stopping',
     rating: 4,
     notes: 'Skills auto-detected by RinkBuddy AI from video analysis of IMG_9494, IMG_9495, IMG_9497, IMG_9498. Recorded at Henderson Silver Knights arena and Vegas rink.'
   });
 
   // Set discipline if not set
-  if (!APP.discipline) APP.discipline = 'hockey';
+  if (!APP.discipline) APP.discipline = 'foundations';
 
   saveData(APP);
   localStorage.setItem(ANALYSIS_KEY, 'true');
