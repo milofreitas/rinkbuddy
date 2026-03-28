@@ -783,7 +783,7 @@
       <div class="divider-or">or create with email</div>
       <input type="hidden" id="lpSignupPlan" value="free">
       <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="lpUsername" placeholder="Choose a username" autocapitalize="none" autocorrect="off"></div>
-      <div class="form-group"><label class="form-label">Display Name</label><input class="form-input" id="lpDisplayName" placeholder="Your name (optional)"></div>
+      <div class="form-group" style="display:none"><label class="form-label">Display Name</label><input class="form-input" id="lpDisplayName" placeholder="Your name (optional)"></div>
       <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="lpPassword" type="password" placeholder="Create a password (4+ chars)"></div>
       <div id="lpError" style="color:var(--danger);font-size:0.78rem;margin-bottom:10px;display:none"></div>
       <button class="lp-btn lp-btn-primary" style="width:100%;justify-content:center;margin-bottom:10px" onclick="doLandingSignup()">Create Account & Start Free</button>
@@ -3855,6 +3855,7 @@ function showLandingView() {
 
 function updateView() {
   if (CloudAccount.isLoggedIn()) {
+    if (window.location.hash) window.history.replaceState(null, '', window.location.pathname);
     showAppView();
   } else {
     showLandingView();
