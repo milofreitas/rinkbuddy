@@ -87,7 +87,7 @@
     .skill-grid::-webkit-scrollbar{height:4px}
     .skill-grid::-webkit-scrollbar-track{background:transparent}
     .skill-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-    .skill-grid .skill-card{min-width:130px;max-width:150px;flex-shrink:0;scroll-snap-align:start}
+    .skill-grid .skill-card{min-width:130px;flex:1 0 130px;scroll-snap-align:start}
     .skill-card{background:var(--surface2);border-radius:10px;padding:12px;text-align:center;border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative}
     .skill-card:hover{border-color:var(--accent)}
     .skill-card.mastered{border-color:var(--success);background:rgba(52,211,153,0.05)}
@@ -271,7 +271,7 @@
     /* Coach session items need relative positioning for delete btn */
     #lessonLogList .session-item{position:relative;padding-right:40px}
 
-    @media(max-width:600px){.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid .skill-card{min-width:110px;max-width:130px}}
+    @media(max-width:600px){.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid .skill-card{min-width:110px;flex:1 0 110px}}
     ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
