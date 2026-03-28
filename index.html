@@ -3446,15 +3446,21 @@ function renderRecentSessions() {
 
 function drawRadarChart() {
   const canvas=document.getElementById('radarChart'),ctx=canvas.getContext('2d');
-  const dpr=window.devicePixelRatio||1;canvas.width=260*dpr;canvas.height=260*dpr;ctx.scale(dpr,dpr);
-  const cx=130,cy=130,R=100;
+  const container=canvas.parentElement;
+  const size=Math.min(container.clientWidth, 260);
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=size*dpr;canvas.height=size*dpr;
+  canvas.style.width=size+'px';canvas.style.height=size+'px';
+  ctx.scale(dpr,dpr);
+  const cx=size/2,cy=size/2,R=size*0.38;
   const skills=getSkills(); const types=[...new Set(skills.map(s=>s.type))];
   const cats=types.map(t=>t.charAt(0).toUpperCase()+t.slice(1));
   const values=types.map(t=>{const ss=skills.filter(s=>s.type===t);const tot=ss.reduce((a,s)=>a+getSkillData(s.id).attempts,0);return tot?ss.reduce((a,s)=>a+getSkillData(s.id).landed,0)/tot:0;});
-  const n=cats.length; ctx.clearRect(0,0,260,260);
+  const n=cats.length; ctx.clearRect(0,0,size,size);
+  const labelFont=Math.max(9,Math.round(size*0.042));
   for(let ring=1;ring<=4;ring++){const r=(ring/4)*R;ctx.beginPath();for(let i=0;i<=n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.stroke();}
   for(let i=0;i<n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.stroke();
-    ctx.fillStyle='#94a3b8';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(cats[i],cx+(R+16)*Math.cos(a),cy+(R+16)*Math.sin(a));}
+    ctx.fillStyle='#94a3b8';ctx.font=labelFont+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(cats[i],cx+(R+size*0.06)*Math.cos(a),cy+(R+size*0.06)*Math.sin(a));}
   ctx.beginPath();values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a)):ctx.lineTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a));});ctx.closePath();ctx.fillStyle='rgba(56,189,248,0.15)';ctx.fill();ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.stroke();
   values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.arc(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a),4,0,Math.PI*2);ctx.fillStyle='#38bdf8';ctx.fill();});
 }
