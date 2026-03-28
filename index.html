@@ -34,6 +34,9 @@
     .nav-btn:hover{color:var(--text);background:var(--surface2)}
     .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(56,189,248,0.05)}
     .nav-btn svg{width:18px;height:18px}
+    .nav-btn-primary:not(.active){color:var(--accent);position:relative}
+    .nav-btn-primary:not(.active) svg{stroke:var(--accent)}
+    .nav-btn-primary:not(.active)::after{content:'';position:absolute;top:4px;right:calc(50% - 18px);width:5px;height:5px;background:var(--accent);border-radius:50%;opacity:0.7}
     .content{max-width:1000px;margin:0 auto;padding:16px}
     .section{display:none}.section.active{display:block}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;animation:fadeIn 0.3s ease}
@@ -877,8 +880,8 @@
 
 <nav class="nav">
   <button class="nav-btn active" data-section="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
-  <button class="nav-btn" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
   <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
+  <button class="nav-btn nav-btn-primary" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
   <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
   <button class="nav-btn" data-section="coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
 </nav>
