@@ -308,58 +308,79 @@ async function handleAPI(req, res) {
     if (route === '/api/analyze-video' && req.method === 'POST') {
       if (!ANTHROPIC_API_KEY) return jsonRes(res, 400, { error: 'ANTHROPIC_API_KEY not configured on server' });
 
-      const { frames, skills, discipline } = await readBody(req);
+      const { frames, skills, discipline, batchContext } = await readBody(req);
       if (!frames || !frames.length) return jsonRes(res, 400, { error: 'No frames provided' });
 
       const skillList = (skills || []).map(s => `- ${s.name} (${s.type}, id:${s.id})`).join('\n');
+      const batchInfo = batchContext ? `\nYou are analyzing sequence ${batchContext.batchIndex + 1} of ${batchContext.totalBatches}, covering ${batchContext.timeRange[0].toFixed(1)}s to ${batchContext.timeRange[1].toFixed(1)}s of the video.` : '';
 
       // Build content blocks: text prompt + images
       const content = [];
       content.push({
         type: 'text',
-        text: `You are an elite-level ice skating judge and coach with 20+ years of experience analyzing ${discipline || 'general'} skating. You are reviewing sequential video frames from a skating session.
+        text: `You are an elite-level ice skating judge and coach with 20+ years of experience analyzing ${discipline || 'general'} skating. You are reviewing sequential video frames extracted at ~1 frame per second from a skating session.${batchInfo}
 
-TASK: Identify SPECIFIC, DISTINCT skating skills being performed. Look across multiple consecutive frames to understand the movement — a single frame alone is often ambiguous.
+TASK: Analyze the SEQUENCE of frames to identify skating skills. These frames are consecutive — use MOTION ANALYSIS across frames to understand what the skater is doing:
+1. First, scan ALL frames to understand the overall movement trajectory
+2. Look for TRANSITIONS between frames: changes in body position, foot placement, direction, and posture
+3. A skill happens over 2-5 consecutive frames — identify the START frame where the skill begins
+4. Report the timestamp of the frame where the skill is most clearly visible
 
-KEY DISTINCTIONS — be precise:
-- A person simply standing on ice or gliding straight = NOT a skill. Skip it.
-- Forward stroking = visible push-off with leg extension, alternating feet rhythmically
-- Crossovers = one foot literally crossing OVER the other while turning
-- 3-turns = visible rotation on one foot from forward to backward (trace a "3")
-- Mohawk = step turn, heel-to-heel, two feet involved in the transition
-- Hockey stop = both feet turned sideways, visible ice spray/shaving
-- Spins = rapid rotation in place, not just turning
-- Jumps = skater is AIRBORNE with visible rotation
-- Spirals = free leg raised to hip height or above while gliding
-- Edges = visible lean/angle on the blade, skating a curve
+MOTION ANALYSIS TECHNIQUE — compare consecutive frames:
+- Body position change: Is the skater rotating? Shifting weight? Extending a leg?
+- Foot tracking: Are feet crossing over? Turning? Leaving the ice?
+- Direction change: Forward→backward = turn. Straight→curved = edge work.
+- Height change: Lower position = preparation. Higher = jump/extension.
+- Speed indicators: Motion blur = fast movement. Sharp = slow/stationary.
 
-COMMON MISTAKES TO AVOID:
-- Do NOT label someone just standing or slowly moving as "Two-Foot Glide" or "Marching"
-- Do NOT report the same skill for every frame — only report when you see a CLEAR skill
-- Do NOT guess — if the image is unclear or just shows general skating, SKIP that frame
-- Do NOT identify skills from spectators, people in background, or non-skaters
-- Fewer accurate detections are MUCH better than many wrong ones
+SKILL IDENTIFICATION — be precise:
+- Forward stroking = visible push-off with leg extension, alternating feet rhythmically, body moves forward between frames
+- Backward stroking = same as forward but traveling backward (watch for body facing camera but moving away)
+- Crossovers = one foot literally crossing OVER the other while on a curve — look for leg crossing in 2-3 consecutive frames
+- 3-turns = skater faces one direction then faces opposite direction on same foot in next 2-3 frames
+- Mohawk = step turn, heel-to-heel, two feet involved — watch for foot swap at turn point
+- Hockey stop = both feet turned perpendicular to travel direction, ice spray visible, rapid deceleration across 2-3 frames
+- Spins = same location across 3+ frames but body orientation rotates significantly between each
+- Jumps = skater is AIRBORNE — feet clearly off ice in at least one frame, with preparation (knee bend) and landing visible in adjacent frames
+- Spirals = free leg raised to hip height or above while gliding — sustained position across 3+ frames
+- Edges = visible lean/angle of body into a curve, sustained arc across multiple frames
+- Stops = any controlled deceleration technique (snowplow, T-stop, hockey stop)
+- Turns = any change of direction or facing (3-turn, mohawk, bracket, rocker)
+
+WHAT IS NOT A SKILL — skip these:
+- Standing still or waiting
+- Slow straight gliding without technique
+- Walking on ice (no glide)
+- Spectators, coaches, or background skaters
+- Unclear/blurry frames where technique cannot be determined
 
 Available skills to match:
 ${skillList}
 
-RESPOND with a JSON array. Each detection:
-[{"timestamp": <seconds>, "skillId": "<exact id>", "skillName": "<name>", "confidence": <0.0-1.0>, "note": "<what specifically you see that identifies this skill>"}]
+RESPOND with a JSON array. Each detection MUST include:
+[{"timestamp": <seconds from the frame label>, "skillId": "<exact id from list>", "skillName": "<name>", "confidence": <0.0-1.0>, "note": "<describe the specific motion you see across frames: e.g. 'frames at 3s-5s show left foot crossing over right on counterclockwise curve'>"}]
 
 CONFIDENCE GUIDE:
-- 0.9+ = unmistakable (airborne jump, fast spin, clear crossover)
-- 0.7-0.9 = very likely (clear body position matches skill)
-- 0.5-0.7 = probable (matches but angle/quality makes it hard to confirm)
+- 0.9+ = unmistakable: multi-frame evidence clearly shows the skill (airborne jump, fast spin with rotation visible across frames, clear crossover sequence)
+- 0.7-0.89 = very likely: body position strongly matches across 2+ frames but angle or quality limits certainty
+- 0.5-0.69 = probable: single frame shows matching position, or motion is partially obscured
 - Below 0.5 = do NOT report
 
-If no clear skills are visible in any frame, return an empty array: []
+QUALITY RULES:
+- Fewer accurate detections are MUCH better than many wrong ones
+- A skill must be supported by evidence across at least 2 frames when possible
+- Report the timestamp of the frame where the skill is most clearly visible
+- Include specific frame references in your note (e.g. "visible in frames at 4.0s and 5.0s")
+
+If no clear skills are visible, return an empty array: []
 Return ONLY the JSON array, nothing else.`
       });
 
-      frames.forEach(f => {
+      frames.forEach((f, i) => {
+        const dt = i > 0 ? (f.timestamp - frames[i-1].timestamp).toFixed(1) : '0.0';
         content.push({
           type: 'text',
-          text: `Frame at ${f.timeLabel} (${f.timestamp.toFixed(1)}s):`
+          text: `Frame ${i + 1}/${frames.length} at ${f.timeLabel} (${f.timestamp.toFixed(1)}s, +${dt}s since prev):`
         });
         // Extract base64 data from data URL
         const base64Match = f.data.match(/^data:image\/(.*?);base64,(.*)$/);
@@ -378,7 +399,7 @@ Return ONLY the JSON array, nothing else.`
       // Call Claude API
       const apiBody = JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [{ role: 'user', content }]
       });
 
@@ -401,7 +422,7 @@ Return ONLY the JSON array, nothing else.`
           });
         });
         apiReq.on('error', reject);
-        apiReq.setTimeout(120000, () => { apiReq.destroy(); reject(new Error('API timeout')); });
+        apiReq.setTimeout(180000, () => { apiReq.destroy(); reject(new Error('API timeout')); });
         apiReq.write(apiBody);
         apiReq.end();
       });

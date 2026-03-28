@@ -3028,11 +3028,11 @@ async function extractVideoFrames(videoEntry, onProgress) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
-      // Determine frame extraction interval: ~1 frame per 2 seconds, max 30 frames
-      const maxFrames = 30;
-      const interval = Math.max(2, duration / maxFrames);
+      // Dense extraction: 1 frame/sec for short videos, up to 60 frames
+      const maxFrames = 60;
+      const interval = Math.max(1, duration / maxFrames);
       const timestamps = [];
-      for (let t = 0.5; t < duration - 0.5; t += interval) {
+      for (let t = 0.3; t < duration - 0.3; t += interval) {
         timestamps.push(t);
       }
       if (timestamps.length === 0) timestamps.push(duration / 2);
@@ -3050,13 +3050,13 @@ async function extractVideoFrames(videoEntry, onProgress) {
       }
 
       vid.onseeked = () => {
-        // Size down for API — max 720px wide
-        const scale = Math.min(1, 720 / vid.videoWidth);
+        // Higher quality: max 960px wide, JPEG quality 0.85
+        const scale = Math.min(1, 960 / vid.videoWidth);
         canvas.width = Math.round(vid.videoWidth * scale);
         canvas.height = Math.round(vid.videoHeight * scale);
         ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         frames.push({
           timestamp: timestamps[idx],
           timeLabel: fmtTime(timestamps[idx]),
@@ -3079,16 +3079,21 @@ async function extractVideoFrames(videoEntry, onProgress) {
 }
 
 async function analyzeFramesWithAI(frames, skillNames, onProgress) {
-  // Send frames in batches to avoid request size limits
-  const batchSize = 5;
+  // Two-pass analysis: larger overlapping batches for motion context
+  const batchSize = 10;
+  const overlap = 2; // overlap frames between batches for continuity
+  const step = batchSize - overlap;
   const allResults = [];
+  const batches = [];
 
-  for (let i = 0; i < frames.length; i += batchSize) {
-    const batch = frames.slice(i, i + batchSize);
-    const batchNum = Math.floor(i / batchSize) + 1;
-    const totalBatches = Math.ceil(frames.length / batchSize);
+  for (let i = 0; i < frames.length; i += step) {
+    batches.push(frames.slice(i, Math.min(i + batchSize, frames.length)));
+    if (i + batchSize >= frames.length) break;
+  }
 
-    onProgress(i / frames.length, `Analyzing batch ${batchNum}/${totalBatches}...`);
+  for (let b = 0; b < batches.length; b++) {
+    const batch = batches[b];
+    onProgress(b / batches.length, `Analyzing sequence ${b + 1}/${batches.length} (${batch.length} frames)...`);
 
     const response = await fetch('/api/analyze-video', {
       method: 'POST',
@@ -3096,7 +3101,12 @@ async function analyzeFramesWithAI(frames, skillNames, onProgress) {
       body: JSON.stringify({
         frames: batch.map(f => ({ timestamp: f.timestamp, timeLabel: f.timeLabel, data: f.data })),
         skills: skillNames,
-        discipline: APP.discipline || 'foundations'
+        discipline: APP.discipline || 'foundations',
+        batchContext: {
+          batchIndex: b,
+          totalBatches: batches.length,
+          timeRange: [batch[0].timestamp, batch[batch.length - 1].timestamp]
+        }
       })
     });
 
@@ -3111,12 +3121,18 @@ async function analyzeFramesWithAI(frames, skillNames, onProgress) {
     }
   }
 
-  // Deduplicate: merge skills that are very close in time (< 3s apart)
+  // Deduplicate: merge same skills within 2s, keep highest confidence
   allResults.sort((a, b) => a.timestamp - b.timestamp);
   const deduped = [];
   for (const r of allResults) {
-    const existing = deduped.find(d => d.skillId === r.skillId && Math.abs(d.timestamp - r.timestamp) < 3);
-    if (!existing) deduped.push(r);
+    const existing = deduped.find(d => d.skillId === r.skillId && Math.abs(d.timestamp - r.timestamp) < 2);
+    if (existing) {
+      if (r.confidence > existing.confidence) {
+        Object.assign(existing, r);
+      }
+    } else {
+      deduped.push(r);
+    }
   }
 
   return deduped;
