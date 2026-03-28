@@ -9,8 +9,8 @@ echo "📦 Copying web assets to www/..."
 cp index.html www/
 cp manifest.json www/
 cp sw.js www/
-[ -f icon-192.png ] && cp icon-192.png www/
-[ -f icon-512.png ] && cp icon-512.png www/
+[ -f icon-192.svg ] && cp icon-192.svg www/
+[ -f icon-512.svg ] && cp icon-512.svg www/
 
 echo "🔄 Syncing Capacitor..."
 npx cap sync

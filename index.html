@@ -25,8 +25,8 @@
     .logo svg{width:28px;height:28px}
     .header-right{display:flex;align-items:center;gap:8px}
     .streak-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:0.75rem;color:var(--warning);font-weight:600}
-    .discipline-toggle{display:flex;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-    .disc-btn{padding:6px 14px;border:none;background:none;color:var(--text-dim);font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+    .discipline-toggle{display:inline-flex;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+    .disc-btn{padding:7px 18px;border:none;background:none;color:var(--text-dim);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s}
     .disc-btn.active{background:var(--accent);color:white}
     .nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
     .nav::-webkit-scrollbar{display:none}
@@ -982,8 +982,8 @@
   <div class="section" id="sec-skills">
     <div class="guide-callout" id="skillGuide"></div>
     <div class="card">
-      <div class="card-title">Skill Progression <span style="flex:1"></span><span style="font-size:0.72rem;color:var(--text-dim);font-weight:400" id="skillDiscLabel">Figure Skating</span></div>
-      <div class="discipline-toggle" id="discToggle" style="margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:12px">Skill Progression</div>
+      <div class="discipline-toggle" id="discToggle" style="margin-bottom:14px">
         <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
         <button class="disc-btn active" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
         <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
@@ -1902,7 +1902,8 @@ function renderSkillTree() {
     expert:'Elite-level elements'
   };
 
-  document.getElementById('skillDiscLabel').textContent = APP.discipline === 'hockey' ? 'Hockey Skating' : APP.discipline === 'foundations' ? 'Foundations' : 'Figure Skating';
+  const discLabel = document.getElementById('skillDiscLabel');
+  if (discLabel) discLabel.textContent = APP.discipline === 'hockey' ? 'Hockey Skating' : APP.discipline === 'foundations' ? 'Foundations' : 'Figure Skating';
 
   let html = '';
   levels.forEach(lv => {
