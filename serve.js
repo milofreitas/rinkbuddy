@@ -476,12 +476,21 @@ MOTION ANALYSIS — compare consecutive frames:
 
 ${visualGuide}
 
+FRAME QUALITY — handle these common issues:
+- SKIP frames where the camera is blocked by a body/hand/clothing filling most of the frame
+- SKIP selfie-style frames showing only the skater's face/upper body with no view of skating
+- SKIP upside-down or severely tilted frames (phone orientation issue)
+- SKIP frames that are entirely blurry with no identifiable content
+- If the skater is SMALL in a wide-angle rink shot, you CAN still detect skills — focus on body posture, leg angles, and motion between frames even at a distance
+- When MULTIPLE skaters are visible, focus on the PRIMARY subject (typically the most centered or closest skater). Ignore background skaters at the far end of the rink
+
 WHAT IS NOT A SKILL — skip:
 - Standing still, waiting, or chatting
 - Slow straight gliding without visible technique
 - Walking without glide
-- Spectators, coaches, or background skaters
+- Spectators, coaches, or background skaters (focus on primary subject only)
 - Unclear/blurry frames where technique cannot be determined
+- Skater just coasting with no active technique
 
 Available skills to match:
 ${skillList}

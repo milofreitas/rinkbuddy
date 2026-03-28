@@ -883,8 +883,8 @@
   <button class="nav-btn active" data-section="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
   <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
   <button class="nav-btn nav-btn-primary" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
-  <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
-  <button class="nav-btn" data-section="coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
+  <button class="nav-btn" data-section="training" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
+  <button class="nav-btn" data-section="coach" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
 </nav>
 
 <main class="content">
@@ -915,10 +915,10 @@
     </div>
     <div class="card"><div class="card-title">What To Work On Next</div><div id="dashNextSkills"></div></div>
     <div class="card"><div class="card-title">Skills Radar</div><div class="radar-container"><canvas id="radarChart" width="260" height="260"></canvas></div></div>
-    <div class="card"><div class="card-title">Goals</div><div id="goalsList"></div>
+    <div class="card" style="display:none"><div class="card-title">Goals</div><div id="goalsList"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="openGoalModal()">+ Add Goal</button>
     </div>
-    <div class="card"><div class="card-title">Recent Sessions</div><div id="recentSessions"></div></div>
+    <div class="card" style="display:none"><div class="card-title">Recent Sessions</div><div id="recentSessions"></div></div>
   </div>
 
   <!-- ═══ VIDEO ═══ -->
@@ -1007,7 +1007,7 @@
       <div id="skillTree"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="openElementModal()">+ Custom Skill</button>
     </div>
-    <div class="card">
+    <div class="card" style="display:none">
       <div class="card-title">Quick Log</div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Skill</label><select class="form-select" id="logElement"></select></div>
@@ -1022,7 +1022,7 @@
       <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="logNotes" placeholder="What went well? What to fix?"></div>
       <button class="btn btn-primary" onclick="logAttempt()">Log</button>
     </div>
-    <div class="card"><div class="card-title">Recent Logs</div><div id="elementLogs"></div></div>
+    <div class="card" style="display:none"><div class="card-title">Recent Logs</div><div id="elementLogs"></div></div>
   </div>
 
   <!-- ═══ SESSIONS (hidden for now) ═══ -->
