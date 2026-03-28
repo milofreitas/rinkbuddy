@@ -893,13 +893,17 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-title" style="margin-bottom:10px">My Discipline</div>
-      <div class="discipline-toggle" id="dashDiscToggle">
-        <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
-        <button class="disc-btn" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
-        <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div class="card-title" style="margin-bottom:4px">My Discipline</div>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin:0" id="discDescription">Choose your discipline to customize skills, radar, and training plans.</p>
+        </div>
+        <div class="discipline-toggle" id="dashDiscToggle">
+          <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
+          <button class="disc-btn" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
+          <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
+        </div>
       </div>
-      <p style="font-size:0.72rem;color:var(--text-dim);margin-top:8px" id="discDescription">Choose your discipline to customize skills, radar, and training plans.</p>
     </div>
     <div class="card"><div class="card-title">What To Work On Next</div><div id="dashNextSkills"></div></div>
     <div class="card"><div class="card-title">Skills Radar</div><div class="radar-container"><canvas id="radarChart" width="260" height="260"></canvas></div></div>
@@ -1192,24 +1196,75 @@
     <!-- Reports Sub-view -->
     <div id="coach-reports" style="display:none">
       <div class="card">
-        <div class="card-title">Progress Reports</div>
-        <div class="form-group">
-          <label class="form-label">Select Student</label>
-          <select class="form-select" id="reportStudent" onchange="generateProgressReport()"></select>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="card-title" style="margin:0">Progress Reports</div>
+          <select class="form-select" id="reportStudent" onchange="generateProgressReport()" style="width:auto;min-width:160px;font-size:0.82rem"></select>
+        </div>
+        <div id="reportEmptyState" style="text-align:center;padding:30px 10px">
+          <div style="font-size:2.5rem;margin-bottom:10px">📊</div>
+          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px">No Report Yet</div>
+          <div style="font-size:0.78rem;color:var(--text-dim);max-width:280px;margin:0 auto">Select a student above. Log lessons and rate progress to generate detailed reports.</div>
         </div>
         <div id="progressReportArea" style="display:none">
-          <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-top:10px;white-space:pre-wrap;font-size:0.82rem;line-height:1.6" id="progressReportText"></div>
-          <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="copyProgressReport()">Copy Report</button>
+          <!-- Report Header Card -->
+          <div id="reportHeaderCard" style="background:linear-gradient(135deg,var(--accent),#6366f1);border-radius:12px;padding:18px;margin-bottom:14px;color:white">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+              <div id="reportAvatar" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700"></div>
+              <div>
+                <div id="reportStudentName" style="font-size:1rem;font-weight:700"></div>
+                <div id="reportStudentMeta" style="font-size:0.72rem;opacity:0.85"></div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center">
+                <div id="reportTotalLessons" style="font-size:1.3rem;font-weight:700">0</div>
+                <div style="font-size:0.65rem;opacity:0.8">Lessons</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center">
+                <div id="reportTotalTime" style="font-size:1.3rem;font-weight:700">0m</div>
+                <div style="font-size:0.65rem;opacity:0.8">Total Time</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center">
+                <div id="reportAvgRating" style="font-size:1.3rem;font-weight:700">--</div>
+                <div style="font-size:0.65rem;opacity:0.8">Avg Rating</div>
+              </div>
+            </div>
+          </div>
+          <!-- Recent Lessons Timeline -->
+          <div class="card" style="margin-bottom:0">
+            <div class="card-title" style="font-size:0.85rem">Recent Lessons</div>
+            <div id="reportLessonsTimeline"></div>
+          </div>
+          <!-- Top Skills -->
+          <div class="card" style="margin-bottom:0;margin-top:10px">
+            <div class="card-title" style="font-size:0.85rem">Top Skills Practiced</div>
+            <div id="reportTopSkills"></div>
+          </div>
+          <!-- Focus Areas -->
+          <div class="card" style="margin-bottom:0;margin-top:10px">
+            <div class="card-title" style="font-size:0.85rem">Areas To Work On</div>
+            <div id="reportFocusAreas"></div>
+          </div>
+          <!-- Export -->
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-primary btn-sm" style="flex:1" onclick="copyProgressReport()">📋 Copy Report</button>
+            <button class="btn btn-secondary btn-sm" style="flex:1" onclick="shareProgressReport()">📤 Share</button>
+          </div>
         </div>
       </div>
+
       <div class="card">
-        <div class="card-title">Skill Assessments</div>
-        <div class="form-group">
-          <label class="form-label">Select Student</label>
-          <select class="form-select" id="assessStudent" onchange="renderAssessment()"></select>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="card-title" style="margin:0">Skill Assessments</div>
+          <select class="form-select" id="assessStudent" onchange="renderAssessment()" style="width:auto;min-width:160px;font-size:0.82rem"></select>
+        </div>
+        <div id="assessEmptyState" style="text-align:center;padding:30px 10px">
+          <div style="font-size:2.5rem;margin-bottom:10px">🎯</div>
+          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px">No Assessment Yet</div>
+          <div style="font-size:0.78rem;color:var(--text-dim);max-width:280px;margin:0 auto">Select a student to rate their skills across 10 key categories.</div>
         </div>
         <div id="assessmentArea"></div>
-        <button class="btn btn-primary btn-sm" style="margin-top:10px;display:none" id="saveAssessBtn" onclick="saveAssessment()">Save Assessment</button>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;display:none" id="saveAssessBtn" onclick="saveAssessment()">💾 Save Assessment</button>
       </div>
     </div>
   </div>
@@ -1711,61 +1766,61 @@ const DRILLS = {
 const SKILL_GUIDES = {
   // Foundations — Beginner
   'f-fall-getup': { visual:'Skater bends knees and falls safely to the side onto hip, then gets up via hands-and-knees position.', focus:['Bend knees before falling','Fall to the side, not backward','Get up: knees, one foot, push'], balance:'Controlled descent. Never reach back with hands to catch yourself.', yt:'podMeBJnBbY' },
-  'f-march': { visual:'Skater marches in place on ice, lifting knees high, then marches forward with small steps.', focus:['Lift knees high','Small steps forward','Arms out for balance'], balance:'Weight transfers from foot to foot. Stay upright, core engaged.' },
-  'f-2ft-glide': { visual:'Skater stands on both feet, gliding forward with no pushing. Arms out for balance.', focus:['Knees soft and slightly bent','Arms out at shoulder height','Core engaged, back straight'], balance:'Weight evenly distributed. Practice shifting weight side to side.' },
-  'f-dip': { visual:'Skater performs a deep knee bend while gliding forward on two feet.', focus:['Bend knees deeply','Arms forward for counterbalance','Keep back straight'], balance:'Weight stays centered over both feet. Core engaged throughout.' },
+  'f-march': { visual:'Skater marches in place on ice, lifting knees high, then marches forward with small steps.', focus:['Lift knees high','Small steps forward','Arms out for balance'], balance:'Weight transfers from foot to foot. Stay upright, core engaged.', yt:'podMeBJnBbY' },
+  'f-2ft-glide': { visual:'Skater stands on both feet, gliding forward with no pushing. Arms out for balance.', focus:['Knees soft and slightly bent','Arms out at shoulder height','Core engaged, back straight'], balance:'Weight evenly distributed. Practice shifting weight side to side.', yt:'podMeBJnBbY' },
+  'f-dip': { visual:'Skater performs a deep knee bend while gliding forward on two feet.', focus:['Bend knees deeply','Arms forward for counterbalance','Keep back straight'], balance:'Weight stays centered over both feet. Core engaged throughout.', yt:'podMeBJnBbY' },
   'f-fwd-swizzle': { visual:'Feet push apart in a V then pull together, tracing a lemon shape on the ice repeatedly.', focus:['Toes out on the push','Toes in to close','6-8 in a row'], balance:'Weight shifts from inside edges (push) to outside edges (close). Stay centered.', yt:'5MKsMkOrSME' },
-  'f-bwd-swizzle': { visual:'Same lemon shape as forward swizzles but moving backward. Heels drive the motion.', focus:['Heels out on the push','Heels in to close','Weight on balls of feet'], balance:'Lean slightly forward to prevent falling backward. Core tight.' },
-  'f-fwd-stroke': { visual:'Skater pushes off one foot, glides on the other, alternating in smooth rhythm. Arms held steady at side.', focus:['Full leg extension on push','Smooth weight transfer','Knees bent, core engaged'], balance:'Maintain center of gravity over skating foot. Arms out for stability.' },
+  'f-bwd-swizzle': { visual:'Same lemon shape as forward swizzles but moving backward. Heels drive the motion.', focus:['Heels out on the push','Heels in to close','Weight on balls of feet'], balance:'Lean slightly forward to prevent falling backward. Core tight.', yt:'5MKsMkOrSME' },
+  'f-fwd-stroke': { visual:'Skater pushes off one foot, glides on the other, alternating in smooth rhythm. Arms held steady at side.', focus:['Full leg extension on push','Smooth weight transfer','Knees bent, core engaged'], balance:'Maintain center of gravity over skating foot. Arms out for stability.', yt:'mCOqpXaKsWg' },
   'f-snowplow': { visual:'Both feet angle inward in a V-shape, shaving ice to slow down and stop.', focus:['Angle both toes inward','Bend knees and press gently','Equal pressure both feet'], balance:'Weight centered between both feet. Lean slightly back.', yt:'rhQY1_bTjVs' },
-  'f-bwd-2ft-glide': { visual:'Skater glides backward on two feet, weight on balls of feet, looking over shoulder.', focus:['Weight on balls of feet','Knees bent','Look over shoulder periodically'], balance:'Slight forward lean prevents falling backward. Keep core engaged.' },
-  'f-2ft-hop': { visual:'Skater bends knees on two feet, jumps straight up, and lands on two feet.', focus:['Deep knee bend before jump','Arms assist the lift','Soft knees on landing'], balance:'Land with knees bent to absorb. Weight centered over both feet.' },
-  'f-rocking-horse': { visual:'Skater alternates one forward swizzle with one backward swizzle in a rocking motion.', focus:['Smooth transition fwd to bwd','Maintain rhythm','Keep arms steady'], balance:'Weight shifts forward and back. Core stabilizes the rocking motion.' },
-  'f-bwd-stroke': { visual:'Skater moves backward using C-shaped pushes. Head occasionally looks over shoulder.', focus:['C-cut pushes with each foot','Weight on ball of foot','Keep head up'], balance:'Lean slightly back over heels. Keep core tight to prevent tipping forward.' },
+  'f-bwd-2ft-glide': { visual:'Skater glides backward on two feet, weight on balls of feet, looking over shoulder.', focus:['Weight on balls of feet','Knees bent','Look over shoulder periodically'], balance:'Slight forward lean prevents falling backward. Keep core engaged.', yt:'ZgTtxBCBTHs' },
+  'f-2ft-hop': { visual:'Skater bends knees on two feet, jumps straight up, and lands on two feet.', focus:['Deep knee bend before jump','Arms assist the lift','Soft knees on landing'], balance:'Land with knees bent to absorb. Weight centered over both feet.', yt:'podMeBJnBbY' },
+  'f-rocking-horse': { visual:'Skater alternates one forward swizzle with one backward swizzle in a rocking motion.', focus:['Smooth transition fwd to bwd','Maintain rhythm','Keep arms steady'], balance:'Weight shifts forward and back. Core stabilizes the rocking motion.', yt:'5MKsMkOrSME' },
+  'f-bwd-stroke': { visual:'Skater moves backward using C-shaped pushes. Head occasionally looks over shoulder.', focus:['C-cut pushes with each foot','Weight on ball of foot','Keep head up'], balance:'Lean slightly back over heels. Keep core tight to prevent tipping forward.', yt:'ZgTtxBCBTHs' },
   'f-fwd-crossover': { visual:'Skater crosses outside foot over inside foot while turning in a circle. Body leans into the curve.', focus:['Cross outside foot fully over','Lean into the circle','Push with under-foot'], balance:'Lean into turn center. Keep shoulders level — dropping inside shoulder causes falls.', yt:'tqICXjFdeXA' },
-  'f-bwd-crossover': { visual:'Moving backward in a circle, skater crosses feet. Inside foot pushes under.', focus:['Push with inside edge','Cross-under is the power move','Arms steady'], balance:'Center of gravity inside the circle. Look in direction of travel.' },
-  'f-t-stop': { visual:'One foot trails behind perpendicular to the skating direction, dragging to stop.', focus:['Back foot 90 degrees to front','Most weight on front foot','Drag gently'], balance:'Keep hips square. All balance on front foot.' },
+  'f-bwd-crossover': { visual:'Moving backward in a circle, skater crosses feet. Inside foot pushes under.', focus:['Push with inside edge','Cross-under is the power move','Arms steady'], balance:'Center of gravity inside the circle. Look in direction of travel.', yt:'tqICXjFdeXA' },
+  'f-t-stop': { visual:'One foot trails behind perpendicular to the skating direction, dragging to stop.', focus:['Back foot 90 degrees to front','Most weight on front foot','Drag gently'], balance:'Keep hips square. All balance on front foot.', yt:'U6lXVhi4rSE' },
   // Foundations — Intermediate
   'f-fwd-outside-edge': { visual:'Skater glides on one foot on the outside edge, tracing a curve on the ice.', focus:['Lean slightly outward','Hold the edge through the curve','Practice both feet'], balance:'Body weight over the outside of the blade. Free leg extended for counterbalance.', yt:'FR9RsC9nNH8' },
-  'f-fwd-inside-edge': { visual:'Skater glides on one foot on the inside edge, tracing a curve on the ice.', focus:['Lean slightly inward','Hold the edge through the curve','Practice both feet'], balance:'Body weight over the inside of the blade. Hip and shoulder alignment controls the curve.' },
-  'f-bwd-outside-edge': { visual:'Skater glides backward on one foot, outside edge, tracing a curve.', focus:['Control curve with hip position','Keep free leg extended','Look over shoulder'], balance:'Weight over outside edge. Shoulder and hip alignment dictate the curve radius.' },
-  'f-bwd-inside-edge': { visual:'Skater glides backward on one foot, inside edge, tracing a curve.', focus:['Control curve with shoulder position','Keep free leg extended','Maintain balance over blade'], balance:'Weight over inside edge. Core stability is critical for clean edge hold.' },
-  'f-edge-control': { visual:'Skater traces curves on inside and outside edges, alternating feet in serpentine patterns.', focus:['Feel blade angle on each edge','Alternate inside/outside edges','Maintain steady speed through curves'], balance:'Shift weight precisely over the edge. Core engaged to maintain body position.' },
-  'f-fwd-slalom': { visual:'Skater weaves side to side on two feet, using edge pressure to change direction.', focus:['Knees drive direction changes','Stay on edges, not flats','Smooth rhythm side to side'], balance:'Weight shifts from edge to edge. Upper body stays quiet while legs do the work.' },
-  'f-2ft-spin': { visual:'Skater enters from a small circle and rotates on both feet, pulling arms in.', focus:['Enter from crossover circle','Pull arms in tight','Aim for 2-4 revolutions'], balance:'Weight on balls of both feet. Tight core prevents travel across the ice.' },
+  'f-fwd-inside-edge': { visual:'Skater glides on one foot on the inside edge, tracing a curve on the ice.', focus:['Lean slightly inward','Hold the edge through the curve','Practice both feet'], balance:'Body weight over the inside of the blade. Hip and shoulder alignment controls the curve.', yt:'FR9RsC9nNH8' },
+  'f-bwd-outside-edge': { visual:'Skater glides backward on one foot, outside edge, tracing a curve.', focus:['Control curve with hip position','Keep free leg extended','Look over shoulder'], balance:'Weight over outside edge. Shoulder and hip alignment dictate the curve radius.', yt:'FR9RsC9nNH8' },
+  'f-bwd-inside-edge': { visual:'Skater glides backward on one foot, inside edge, tracing a curve.', focus:['Control curve with shoulder position','Keep free leg extended','Maintain balance over blade'], balance:'Weight over inside edge. Core stability is critical for clean edge hold.', yt:'FR9RsC9nNH8' },
+  'f-edge-control': { visual:'Skater traces curves on inside and outside edges, alternating feet in serpentine patterns.', focus:['Feel blade angle on each edge','Alternate inside/outside edges','Maintain steady speed through curves'], balance:'Shift weight precisely over the edge. Core engaged to maintain body position.', yt:'FR9RsC9nNH8' },
+  'f-fwd-slalom': { visual:'Skater weaves side to side on two feet, using edge pressure to change direction.', focus:['Knees drive direction changes','Stay on edges, not flats','Smooth rhythm side to side'], balance:'Weight shifts from edge to edge. Upper body stays quiet while legs do the work.', yt:'FR9RsC9nNH8' },
+  'f-2ft-spin': { visual:'Skater enters from a small circle and rotates on both feet, pulling arms in.', focus:['Enter from crossover circle','Pull arms in tight','Aim for 2-4 revolutions'], balance:'Weight on balls of both feet. Tight core prevents travel across the ice.', yt:'49zi_73pm1Q' },
   'f-hockey-stop': { visual:'Both feet turn 90 degrees sideways, shaving the ice to stop. Ice spray visible.', focus:['Turn both feet together','Lean away from travel direction','Bend knees deep'], balance:'Weight shifts away from direction of travel. Practice both sides equally.', yt:'iCyKRom_IEM' },
-  'f-transition': { visual:'Pivoting from forward to backward skating without losing speed.', focus:['Open hips','Pivot on both feet','Maintain speed through transition'], balance:'Hips and shoulders must rotate together. Stay low through the pivot.' },
+  'f-transition': { visual:'Pivoting from forward to backward skating without losing speed.', focus:['Open hips','Pivot on both feet','Maintain speed through transition'], balance:'Hips and shoulders must rotate together. Stay low through the pivot.', yt:'9zUUwG1VkmY' },
   // Foundations — Advanced
   'f-fwd-outside-3turn': { visual:'Skater turns from forward outside edge to backward inside edge, tracing a "3" on the ice.', focus:['Rotate shoulders first','Check with opposite arm after turn','Practice R and L'], balance:'All weight on one foot throughout. Stay centered over the blade during the turn.', yt:'Lyw2i92aYaA' },
-  'f-fwd-inside-3turn': { visual:'Skater turns from forward inside edge to backward outside edge on one foot.', focus:['Enter on inside edge','Rotate shoulders into turn','Check firmly after turn'], balance:'Maintain balance on one foot. The check after the turn prevents over-rotation.' },
-  'f-fwd-spiral': { visual:'Skater glides on one foot with free leg extended behind at hip height or higher, arms out.', focus:['Free leg at hip height or above','Back arched, chest up','Hold position 3+ seconds'], balance:'All weight on skating foot. Core strength holds the position. Slight forward lean.' },
-  'f-bwd-stroking-adv': { visual:'Powerful backward skating with full extension on each stroke and controlled edge work.', focus:['Full leg extension on push','Smooth crossovers','Control edges through turns'], balance:'Strong core engagement. Weight centered over skating foot on each stroke.' },
+  'f-fwd-inside-3turn': { visual:'Skater turns from forward inside edge to backward outside edge on one foot.', focus:['Enter on inside edge','Rotate shoulders into turn','Check firmly after turn'], balance:'Maintain balance on one foot. The check after the turn prevents over-rotation.', yt:'Lyw2i92aYaA' },
+  'f-fwd-spiral': { visual:'Skater glides on one foot with free leg extended behind at hip height or higher, arms out.', focus:['Free leg at hip height or above','Back arched, chest up','Hold position 3+ seconds'], balance:'All weight on skating foot. Core strength holds the position. Slight forward lean.', yt:'k9MOjnsAilo' },
+  'f-bwd-stroking-adv': { visual:'Powerful backward skating with full extension on each stroke and controlled edge work.', focus:['Full leg extension on push','Smooth crossovers','Control edges through turns'], balance:'Strong core engagement. Weight centered over skating foot on each stroke.', yt:'ZgTtxBCBTHs' },
   'f-1ft-spin': { visual:'Skater spins on one foot, free foot pulled to ankle, arms in tight, 4+ revolutions.', focus:['Enter from back crossover','Snap free foot to ankle','Arms in tight for speed'], balance:'All weight on ball of spinning foot. Tight core minimizes travel.', yt:'49zi_73pm1Q' },
-  'f-lunge': { visual:'Skater performs a deep forward lunge while gliding, back knee nearly touching the ice.', focus:['Deep bend in front knee','Back leg trails behind','Arms out for balance'], balance:'Weight centered over front foot. Core stability prevents tipping.' },
-  'f-shoot-the-duck': { visual:'Skater squats deeply on one foot while gliding, free leg extended forward.', focus:['Deep squat on skating leg','Free leg straight forward','Arms forward for balance'], balance:'Weight entirely on skating foot in deep squat. Extreme quad strength required.' },
+  'f-lunge': { visual:'Skater performs a deep forward lunge while gliding, back knee nearly touching the ice.', focus:['Deep bend in front knee','Back leg trails behind','Arms out for balance'], balance:'Weight centered over front foot. Core stability prevents tipping.', yt:'k9MOjnsAilo' },
+  'f-shoot-the-duck': { visual:'Skater squats deeply on one foot while gliding, free leg extended forward.', focus:['Deep squat on skating leg','Free leg straight forward','Arms forward for balance'], balance:'Weight entirely on skating foot in deep squat. Extreme quad strength required.', yt:'k9MOjnsAilo' },
   // Figure Skating
-  '2ft-spin': { visual:'Skater rotates on both feet in one spot, pulling arms in to speed up.', focus:['Start from a small circle','Pull arms in tight','Spot with your eyes'], balance:'Keep weight on balls of feet. Tight core prevents wobble.' },
-  '3turn': { visual:'Skater traces a "3" shape on ice — forward to backward on one foot with a half-turn.', focus:['Shoulders rotate first','Hips follow the turn','Check with opposite arm'], balance:'Critical — all on one foot during the turn. Stay over the blade.' },
-  'mohawk': { visual:'Skater transitions forward to backward by stepping from one foot to the other, heel-to-heel.', focus:['Open hip of free foot','Keep shoulders square','Smooth step, no bounce'], balance:'Weight transfers quickly between feet. Keep low.' },
+  '2ft-spin': { visual:'Skater rotates on both feet in one spot, pulling arms in to speed up.', focus:['Start from a small circle','Pull arms in tight','Spot with your eyes'], balance:'Keep weight on balls of feet. Tight core prevents wobble.', yt:'49zi_73pm1Q' },
+  '3turn': { visual:'Skater traces a "3" shape on ice — forward to backward on one foot with a half-turn.', focus:['Shoulders rotate first','Hips follow the turn','Check with opposite arm'], balance:'Critical — all on one foot during the turn. Stay over the blade.', yt:'Lyw2i92aYaA' },
+  'mohawk': { visual:'Skater transitions forward to backward by stepping from one foot to the other, heel-to-heel.', focus:['Open hip of free foot','Keep shoulders square','Smooth step, no bounce'], balance:'Weight transfers quickly between feet. Keep low.', yt:'9zUUwG1VkmY' },
   'waltz': { visual:'Half-rotation jump — step onto left foot, swing right leg up, land on right foot backward.', focus:['Strong forward edge entry','Swing free leg up','Land on one foot backward'], balance:'Arms and free leg control rotation. Land with knee bent to absorb.', yt:'Vcj3q_lTOxk' },
-  'toe': { visual:'Skater picks with toe pick, rotates from back outside edge, lands on back outside edge.', focus:['Clean toe pick','Rotate from back outside edge','Arms tight on landing'], balance:'Strong checking position on landing. Free leg extended behind.' },
-  'sal': { visual:'Skater enters from back inside edge, scoops free leg through to jump.', focus:['Back inside edge entry','Scoop free leg through','Arms pull in for rotation'], balance:'Edge quality on entry determines jump quality. Check landing firmly.' },
-  'loop': { visual:'Skater loads the back outside edge, crosses ankles, and springs up to rotate.', focus:['Load back outside edge','Cross ankles tightly','Spring upward'], balance:'Weight stays over the skating hip. Land on same back outside edge.' },
+  'toe': { visual:'Skater picks with toe pick, rotates from back outside edge, lands on back outside edge.', focus:['Clean toe pick','Rotate from back outside edge','Arms tight on landing'], balance:'Strong checking position on landing. Free leg extended behind.', yt:'Vcj3q_lTOxk' },
+  'sal': { visual:'Skater enters from back inside edge, scoops free leg through to jump.', focus:['Back inside edge entry','Scoop free leg through','Arms pull in for rotation'], balance:'Edge quality on entry determines jump quality. Check landing firmly.', yt:'Vcj3q_lTOxk' },
+  'loop': { visual:'Skater loads the back outside edge, crosses ankles, and springs up to rotate.', focus:['Load back outside edge','Cross ankles tightly','Spring upward'], balance:'Weight stays over the skating hip. Land on same back outside edge.', yt:'oh4EIzmvmYk' },
   'uspin': { visual:'Skater spins upright on one foot, free foot pulled in, arms close to body.', focus:['Enter from back crossover','Snap free foot in quickly','Keep body aligned'], balance:'Weight on ball of spinning foot. Tight core minimizes travel across ice.', yt:'yfqurlbmsTQ' },
   'sspin': { visual:'Skater squats into a sitting position while spinning, free leg extended forward.', focus:['Push free leg forward','Thigh parallel to ice','Keep spinning centered'], balance:'Weight on ball of foot in deep squat position. Core strength holds the sit.', yt:'EHjE-1I7Fw8' },
-  'bracket': { visual:'Like a three turn but the skater turns against the curve direction on one foot.', focus:['Rotate counter to edge direction','Maintain edge quality','Strong check after turn'], balance:'Harder than three turn because rotation opposes natural curve. Stay centered.' },
-  'flip': { visual:'Skater enters from back inside edge, picks with toe, rotates and lands on back outside.', focus:['Clean back inside edge','Toe pick assists takeoff','Check landing'], balance:'Edge quality distinguishes flip from lutz. Watch for edge change before toe pick.' },
-  'lutz': { visual:'Long backward glide on outside edge, then counter-rotate and pick with toe to jump.', focus:['Hold outside edge on entry','Counter-rotate into jump','No edge change before pick'], balance:'Most common error is flutz (changing to inside edge). Hold the outside edge.' },
+  'bracket': { visual:'Like a three turn but the skater turns against the curve direction on one foot.', focus:['Rotate counter to edge direction','Maintain edge quality','Strong check after turn'], balance:'Harder than three turn because rotation opposes natural curve. Stay centered.', yt:'9zUUwG1VkmY' },
+  'flip': { visual:'Skater enters from back inside edge, picks with toe, rotates and lands on back outside.', focus:['Clean back inside edge','Toe pick assists takeoff','Check landing'], balance:'Edge quality distinguishes flip from lutz. Watch for edge change before toe pick.', yt:'Vcj3q_lTOxk' },
+  'lutz': { visual:'Long backward glide on outside edge, then counter-rotate and pick with toe to jump.', focus:['Hold outside edge on entry','Counter-rotate into jump','No edge change before pick'], balance:'Most common error is flutz (changing to inside edge). Hold the outside edge.', yt:'Vcj3q_lTOxk' },
   'axel': { visual:'Forward takeoff, 1.5 rotations in air, land backward. The only forward-entry jump.', focus:['Forward outside edge takeoff','Strong H-position in air','1.5 rotations'], balance:'Explosive upward from forward edge. Arms and free leg drive the rotation.', yt:'HkcAmGCkjtA' },
   'cspin': { visual:'Skater spins with free leg extended behind at hip height in arabesque position.', focus:['Free leg at hip height','Hold back and head up','Maintain spin speed'], balance:'Weight on ball of spinning foot. Strong back muscles hold the camel position.', yt:'Gi4wH5f1Sa8' },
-  'combospin': { visual:'Skater transitions between upright, sit, and camel positions during one spin.', focus:['Smooth position changes','Minimize travel','Maintain speed through changes'], balance:'Each transition is a balance challenge. Core must adapt to each new position.' },
-  'stseq': { visual:'Skater performs a sequence of turns, steps, and edges covering the full ice surface.', focus:['Variety of turns and steps','Cover full ice surface','Expression and flow'], balance:'Continuous balance challenges as turns and edges change rapidly.' },
+  'combospin': { visual:'Skater transitions between upright, sit, and camel positions during one spin.', focus:['Smooth position changes','Minimize travel','Maintain speed through changes'], balance:'Each transition is a balance challenge. Core must adapt to each new position.', yt:'M-jYGnm5zRc' },
+  'stseq': { visual:'Skater performs a sequence of turns, steps, and edges covering the full ice surface.', focus:['Variety of turns and steps','Cover full ice surface','Expression and flow'], balance:'Continuous balance challenges as turns and edges change rapidly.', yt:'9zUUwG1VkmY' },
   'layback': { visual:'Skater arches back while spinning upright, head and shoulders dropped back.', focus:['Arch back gradually','Free leg behind','Arms frame the face'], balance:'Extreme back flexibility. Core engaged to prevent losing the spin center.', yt:'d7KTVwsSxXU' },
-  'spread-eagle': { visual:'Both feet on ice, toes turned out 180 degrees, gliding on a curve with arms wide.', focus:['Both feet on ice, turned out','Glide on a curve','Arms wide for balance'], balance:'Requires hip turnout flexibility. Weight distributed between both feet on edges.' },
-  'ina-bauer': { visual:'One foot glides forward, the other backward, knees bent, often with a dramatic back bend.', focus:['One foot forward, one back','Deep knee bend','Optional back arch'], balance:'Weight split between both feet. Back arch adds difficulty and drama.' },
-  'fcamel': { visual:'Skater jumps into the air in camel position, lands and continues spinning in camel.', focus:['Jump entry into camel','Maintain free leg height','Land spinning centered'], balance:'Must maintain camel position through the jump landing. Core and back strength critical.' },
-  'biellmann': { visual:'Skater grabs free foot behind and pulls it overhead while spinning.', focus:['Grab free foot behind','Pull overhead gradually','Maintain spin speed'], balance:'Requires extreme flexibility in back and legs. Core holds the spin center.' },
-  'chsq': { visual:'Creative choreographic sequence with spirals, spread eagles, movements expressing the music.', focus:['Creative expression','Variety of movements','Connect with the music'], balance:'Artistic challenge as much as physical. Balance through diverse movement patterns.' },
+  'spread-eagle': { visual:'Both feet on ice, toes turned out 180 degrees, gliding on a curve with arms wide.', focus:['Both feet on ice, turned out','Glide on a curve','Arms wide for balance'], balance:'Requires hip turnout flexibility. Weight distributed between both feet on edges.', yt:'k9MOjnsAilo' },
+  'ina-bauer': { visual:'One foot glides forward, the other backward, knees bent, often with a dramatic back bend.', focus:['One foot forward, one back','Deep knee bend','Optional back arch'], balance:'Weight split between both feet. Back arch adds difficulty and drama.', yt:'k9MOjnsAilo' },
+  'fcamel': { visual:'Skater jumps into the air in camel position, lands and continues spinning in camel.', focus:['Jump entry into camel','Maintain free leg height','Land spinning centered'], balance:'Must maintain camel position through the jump landing. Core and back strength critical.', yt:'M-jYGnm5zRc' },
+  'biellmann': { visual:'Skater grabs free foot behind and pulls it overhead while spinning.', focus:['Grab free foot behind','Pull overhead gradually','Maintain spin speed'], balance:'Requires extreme flexibility in back and legs. Core holds the spin center.', yt:'M-jYGnm5zRc' },
+  'chsq': { visual:'Creative choreographic sequence with spirals, spread eagles, movements expressing the music.', focus:['Creative expression','Variety of movements','Connect with the music'], balance:'Artistic challenge as much as physical. Balance through diverse movement patterns.', yt:'9zUUwG1VkmY' },
   // Hockey Skating
   'h-ready-stance': { visual:'Athletic position with knees bent, back straight, stick in both hands, weight forward.', focus:['Knees bent at 90 degrees','Back straight, head up','Weight on balls of feet'], balance:'Low center of gravity. Ready to move in any direction instantly.' },
   'h-fall-recovery': { visual:'Skater falls safely to the side with gear on, then uses stick to push up from knees.', focus:['Fall to side, tuck chin','Get to knees first','Push up with stick assist'], balance:'Gear changes the center of gravity. Practice getting up quickly.' },
@@ -4540,82 +4595,121 @@ function generateProgressReport() {
   initCoachData();
   const studentId = document.getElementById('reportStudent').value;
   const area = document.getElementById('progressReportArea');
-  const textEl = document.getElementById('progressReportText');
-  if (!studentId) { area.style.display = 'none'; return; }
+  const emptyState = document.getElementById('reportEmptyState');
+  if (!studentId) { area.style.display = 'none'; emptyState.style.display = 'block'; return; }
 
   const student = APP.coach.students.find(s => s.id === studentId);
-  if (!student) { area.style.display = 'none'; return; }
+  if (!student) { area.style.display = 'none'; emptyState.style.display = 'block'; return; }
 
   const lessons = APP.coach.lessonLog
     .filter(l => l.studentId === studentId)
-    .sort((a,b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
+    .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  const recentLessons = lessons.slice(0, 8);
 
   if (lessons.length === 0) {
-    area.style.display = 'block';
-    textEl.textContent = 'No lessons recorded for this student yet.';
+    emptyState.style.display = 'block';
+    emptyState.innerHTML = `<div style="font-size:2.5rem;margin-bottom:10px">📊</div>
+      <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px">No Lessons for ${student.name}</div>
+      <div style="font-size:0.78rem;color:var(--text-dim);max-width:280px;margin:0 auto">Start logging lessons to see progress reports here.</div>`;
+    area.style.display = 'none';
     return;
   }
+
+  emptyState.style.display = 'none';
+  area.style.display = 'block';
 
   const allSkills = [...(SKILLS.foundations||[]),...(SKILLS.figure||[]),...(SKILLS.hockey||[])];
   const skillNameMap = {};
   allSkills.forEach(s => skillNameMap[s.id] = s.name);
 
-  // Compile skill frequency
-  const skillCount = {};
-  lessons.forEach(l => l.skillsFocused.forEach(sid => {
-    skillCount[sid] = (skillCount[sid] || 0) + 1;
-  }));
-  const topSkills = Object.entries(skillCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+  // Stats
   const avgRating = (lessons.reduce((s,l) => s + l.rating, 0) / lessons.length).toFixed(1);
   const totalTime = lessons.reduce((s,l) => s + l.duration, 0);
 
-  // Build next focus items from most recent lessons
-  const nextItems = [];
-  lessons.forEach(l => { if (l.nextFocus && !nextItems.includes(l.nextFocus)) nextItems.push(l.nextFocus); });
+  // Header
+  const initials = student.name.split(' ').map(w=>w[0]).join('').toUpperCase();
+  document.getElementById('reportAvatar').textContent = initials;
+  document.getElementById('reportStudentName').textContent = student.name;
+  document.getElementById('reportStudentMeta').textContent = `${student.level.charAt(0).toUpperCase()+student.level.slice(1)} · ${student.discipline.charAt(0).toUpperCase()+student.discipline.slice(1)} · Since ${new Date(lessons[lessons.length-1].date).toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;
+  document.getElementById('reportTotalLessons').textContent = lessons.length;
+  document.getElementById('reportTotalTime').textContent = totalTime >= 60 ? Math.floor(totalTime/60)+'h '+totalTime%60+'m' : totalTime+'m';
+  document.getElementById('reportAvgRating').textContent = avgRating + '/5';
 
-  // Assessment info
-  const assessKeys = Object.keys(student.assessments || {});
-  let assessSection = '';
-  if (assessKeys.length > 0) {
-    assessSection = '\n--- Skill Assessment ---\n';
-    assessKeys.forEach(k => {
-      assessSection += `${k}: ${'■'.repeat(student.assessments[k])}${'□'.repeat(5 - student.assessments[k])} (${student.assessments[k]}/5)\n`;
-    });
+  // Lessons timeline
+  const timelineEl = document.getElementById('reportLessonsTimeline');
+  timelineEl.innerHTML = recentLessons.map((l, i) => {
+    const d = new Date(l.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const stars = '★'.repeat(l.rating) + '☆'.repeat(5-l.rating);
+    const skillNames = (l.skillsFocused||[]).slice(0,3).map(sid => skillNameMap[sid]||sid);
+    return `<div style="display:flex;gap:12px;padding:10px 0;${i < recentLessons.length-1 ? 'border-bottom:1px solid rgba(255,255,255,0.05)':''}">
+      <div style="min-width:50px;text-align:center">
+        <div style="font-size:0.78rem;font-weight:600;color:var(--accent)">${d.split(' ')[0]}</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--text)">${d.split(' ')[1]}</div>
+      </div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:0.78rem;color:var(--warning)">${stars}</span>
+          <span style="font-size:0.72rem;color:var(--text-dim)">${l.duration}min</span>
+        </div>
+        ${skillNames.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:4px">${skillNames.map(n=>`<span style="font-size:0.68rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text-dim)">${n}</span>`).join('')}</div>` : ''}
+        ${l.notes ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;font-style:italic">"${l.notes}"</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Top skills
+  const skillCount = {};
+  lessons.forEach(l => (l.skillsFocused||[]).forEach(sid => { skillCount[sid] = (skillCount[sid]||0)+1; }));
+  const topSkills = Object.entries(skillCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxCount = topSkills.length > 0 ? topSkills[0][1] : 1;
+  const topSkillsEl = document.getElementById('reportTopSkills');
+  if (topSkills.length === 0) {
+    topSkillsEl.innerHTML = '<div style="font-size:0.78rem;color:var(--text-dim);padding:10px 0">No skills logged yet.</div>';
+  } else {
+    topSkillsEl.innerHTML = topSkills.map(([sid, count]) => {
+      const pct = Math.round((count/maxCount)*100);
+      return `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:3px">
+          <span style="font-weight:500">${skillNameMap[sid]||sid}</span>
+          <span style="color:var(--text-dim)">${count}x</span>
+        </div>
+        <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),#6366f1);border-radius:3px;transition:width 0.3s"></div>
+        </div>
+      </div>`;
+    }).join('');
   }
 
-  const report = `═══ PROGRESS REPORT ═══
-Student: ${student.name}
-Level: ${student.level.charAt(0).toUpperCase() + student.level.slice(1)}
-Discipline: ${student.discipline.charAt(0).toUpperCase() + student.discipline.slice(1)}
-Report Date: ${new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'})}
+  // Focus areas
+  const nextItems = [];
+  lessons.slice(0,5).forEach(l => { if (l.nextFocus && !nextItems.includes(l.nextFocus)) nextItems.push(l.nextFocus); });
+  const focusEl = document.getElementById('reportFocusAreas');
+  if (nextItems.length === 0) {
+    focusEl.innerHTML = '<div style="font-size:0.78rem;color:var(--text-dim);padding:10px 0">No focus areas noted. Add them when logging lessons.</div>';
+  } else {
+    focusEl.innerHTML = nextItems.map(n => `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <span style="color:var(--accent);font-size:0.85rem">→</span>
+      <span style="font-size:0.82rem">${n}</span>
+    </div>`).join('');
+  }
 
---- Last ${lessons.length} Lessons ---
-${lessons.map(l => {
-  const d = new Date(l.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  return `${d} | ${l.duration}min | Rating: ${'★'.repeat(l.rating)}${'☆'.repeat(5-l.rating)}${l.notes ? '\n  ' + l.notes : ''}`;
-}).join('\n')}
-
---- Summary ---
-Total Lessons: ${lessons.length}
-Total Time: ${totalTime} minutes
-Average Rating: ${avgRating}/5
-
---- Skills Practiced ---
-${topSkills.map(([sid, count]) => `• ${skillNameMap[sid] || sid} (${count}x)`).join('\n')}
-${assessSection}
---- Areas To Work On ---
-${nextItems.length > 0 ? nextItems.map(n => `• ${n}`).join('\n') : '• No specific focus areas noted'}
-
-Generated by RinkBuddy Coach`;
-
-  area.style.display = 'block';
-  textEl.textContent = report;
+  // Store plain text for copy
+  area.dataset.plainReport = `═══ PROGRESS REPORT ═══\nStudent: ${student.name}\nLevel: ${student.level}\nDiscipline: ${student.discipline}\nReport Date: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}\n\nTotal Lessons: ${lessons.length}\nTotal Time: ${totalTime} min\nAvg Rating: ${avgRating}/5\n\nTop Skills:\n${topSkills.map(([sid,c])=>`• ${skillNameMap[sid]||sid} (${c}x)`).join('\n')}\n\nFocus Areas:\n${nextItems.length>0?nextItems.map(n=>`• ${n}`).join('\n'):'• None noted'}\n\nGenerated by RinkBuddy Coach`;
 }
 
 function copyProgressReport() {
-  const text = document.getElementById('progressReportText').textContent;
+  const text = document.getElementById('progressReportArea').dataset.plainReport || 'No report generated';
   navigator.clipboard.writeText(text).then(() => showToast('Report copied to clipboard')).catch(() => showToast('Failed to copy'));
+}
+
+function shareProgressReport() {
+  const text = document.getElementById('progressReportArea').dataset.plainReport || 'No report generated';
+  if (navigator.share) {
+    navigator.share({ title: 'RinkBuddy Progress Report', text }).catch(() => {});
+  } else {
+    copyProgressReport();
+  }
 }
 
 // ═══ SKILL ASSESSMENTS ═══
@@ -4630,10 +4724,12 @@ function renderAssessment() {
   const studentId = document.getElementById('assessStudent').value;
   const area = document.getElementById('assessmentArea');
   const saveBtn = document.getElementById('saveAssessBtn');
-  if (!studentId) { area.innerHTML = ''; saveBtn.style.display = 'none'; return; }
+  const emptyState = document.getElementById('assessEmptyState');
+  if (!studentId) { area.innerHTML = ''; saveBtn.style.display = 'none'; if(emptyState) emptyState.style.display = 'block'; return; }
 
   const student = APP.coach.students.find(s => s.id === studentId);
-  if (!student) { area.innerHTML = ''; saveBtn.style.display = 'none'; return; }
+  if (!student) { area.innerHTML = ''; saveBtn.style.display = 'none'; if(emptyState) emptyState.style.display = 'block'; return; }
+  if(emptyState) emptyState.style.display = 'none';
 
   const cats = ASSESS_CATEGORIES[student.discipline] || ASSESS_CATEGORIES.foundations;
   const assessments = student.assessments || {};
