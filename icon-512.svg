@@ -1,10 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0b1120"/><stop offset="100%" stop-color="#1a2744"/></linearGradient>
-    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#818cf8"/></linearGradient>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#818cf8"/></linearGradient>
   </defs>
-  <rect width="512" height="512" rx="92.16" fill="url(#bg)"/>
-  <text x="256" y="215.04" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="143.36" fill="white">⛸</text>
-  <text x="256" y="368.64" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="92.16" fill="white">RB</text>
-  <line x1="179.2" y1="399.36" x2="332.8" y2="399.36" stroke="url(#acc)" stroke-width="7.68" stroke-linecap="round"/>
+  <rect width="512" height="512" rx="102" fill="url(#bg)"/>
+  <!-- Ice skate silhouette -->
+  <g transform="translate(74, 85) scale(2.27)">
+    <path d="M145 58c-5-12-16-22-28-28-8-4-18-6-27-5-6 1-12 3-16 7-5 5-8 12-8 19v18c0 4-2 8-5 11l-8 8c-3 3-7 5-11 5H22c-4 0-7 3-7 7v10c0 4 3 7 7 7h12l6 3c2 1 3 3 3 5v4c0 3 2 5 5 5h90c3 0 5-2 5-5v-4c0-5 2-9 5-12l4-4c6-6 9-14 9-22V72c0-5-2-10-5-14h-11z" fill="white"/>
+    <path d="M130 52c-4-10-13-18-23-23-7-3-15-5-22-4-5 1-10 3-13 6-4 4-6 10-6 16v18c0 6-2 11-6 15l-8 8c-4 4-9 6-15 6H22c-1 0-2 1-2 2v10c0 1 1 2 2 2h14l8 4c3 2 5 5 5 9v2c0 1 1 2 2 2h86c1 0 2-1 2-2v-2c0-7 3-13 7-18l4-4c5-5 7-11 7-18V66c0-4-1-8-4-12l-3-2z" fill="url(#acc)" opacity="0.15"/>
+    <!-- Blade -->
+    <rect x="15" y="130" width="130" height="5" rx="2.5" fill="url(#acc)"/>
+    <rect x="15" y="136" width="130" height="2" rx="1" fill="url(#acc)" opacity="0.5"/>
+  </g>
 </svg>
