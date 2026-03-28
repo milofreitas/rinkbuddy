@@ -311,34 +311,49 @@ async function handleAPI(req, res) {
       const { frames, skills, discipline } = await readBody(req);
       if (!frames || !frames.length) return jsonRes(res, 400, { error: 'No frames provided' });
 
-      const skillList = (skills || []).map(s => `${s.name} (${s.type}, id:${s.id})`).join('\n');
+      const skillList = (skills || []).map(s => `- ${s.name} (${s.type}, id:${s.id})`).join('\n');
 
       // Build content blocks: text prompt + images
       const content = [];
       content.push({
         type: 'text',
-        text: `You are an expert ice skating coach analyzing video frames from a ${discipline || 'general'} skating session. Each frame has a timestamp.
+        text: `You are an elite-level ice skating judge and coach with 20+ years of experience analyzing ${discipline || 'general'} skating. You are reviewing sequential video frames from a skating session.
 
-Identify any skating skills being performed in each frame. Look for:
-- Body position, edge angles, arm positions, leg extensions
-- Jumps (takeoff, rotation, landing)
-- Spins (positions, speed)
-- Footwork, crossovers, stops, turns, transitions
-- Hockey-specific: skating stride, stops, crossovers, edge work, stick handling
+TASK: Identify SPECIFIC, DISTINCT skating skills being performed. Look across multiple consecutive frames to understand the movement — a single frame alone is often ambiguous.
 
-Available skills to match against:
+KEY DISTINCTIONS — be precise:
+- A person simply standing on ice or gliding straight = NOT a skill. Skip it.
+- Forward stroking = visible push-off with leg extension, alternating feet rhythmically
+- Crossovers = one foot literally crossing OVER the other while turning
+- 3-turns = visible rotation on one foot from forward to backward (trace a "3")
+- Mohawk = step turn, heel-to-heel, two feet involved in the transition
+- Hockey stop = both feet turned sideways, visible ice spray/shaving
+- Spins = rapid rotation in place, not just turning
+- Jumps = skater is AIRBORNE with visible rotation
+- Spirals = free leg raised to hip height or above while gliding
+- Edges = visible lean/angle on the blade, skating a curve
+
+COMMON MISTAKES TO AVOID:
+- Do NOT label someone just standing or slowly moving as "Two-Foot Glide" or "Marching"
+- Do NOT report the same skill for every frame — only report when you see a CLEAR skill
+- Do NOT guess — if the image is unclear or just shows general skating, SKIP that frame
+- Do NOT identify skills from spectators, people in background, or non-skaters
+- Fewer accurate detections are MUCH better than many wrong ones
+
+Available skills to match:
 ${skillList}
 
-For each skill you detect, respond with a JSON array of objects:
-[{"timestamp": <seconds>, "skillId": "<id from list>", "skillName": "<name>", "confidence": <0.0-1.0>, "note": "<brief observation>"}]
+RESPOND with a JSON array. Each detection:
+[{"timestamp": <seconds>, "skillId": "<exact id>", "skillName": "<name>", "confidence": <0.0-1.0>, "note": "<what specifically you see that identifies this skill>"}]
 
-Rules:
-- Only report skills you're reasonably confident about (>0.3)
-- Use the exact skillId from the list when possible
-- If you see a skill not in the list, use skillId "" and provide a descriptive skillName
-- Be specific about what you observe in the note field
-- If a frame shows no clear skating skill, skip it
-- Return ONLY the JSON array, no other text`
+CONFIDENCE GUIDE:
+- 0.9+ = unmistakable (airborne jump, fast spin, clear crossover)
+- 0.7-0.9 = very likely (clear body position matches skill)
+- 0.5-0.7 = probable (matches but angle/quality makes it hard to confirm)
+- Below 0.5 = do NOT report
+
+If no clear skills are visible in any frame, return an empty array: []
+Return ONLY the JSON array, nothing else.`
       });
 
       frames.forEach(f => {
