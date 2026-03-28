@@ -47,6 +47,134 @@ function jsonRes(res, code, obj) {
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
+// ═══════════════════════════════════════════════════════════════
+// VISUAL SKILL IDENTIFICATION GUIDES — fed to Claude Vision API
+// ═══════════════════════════════════════════════════════════════
+
+const FOUNDATIONS_VISUAL_GUIDE = `VISUAL SKILL IDENTIFICATION GUIDE — FOUNDATIONS:
+
+LOCOMOTION SKILLS:
+• Marching on Ice: Skater lifts feet up/down like walking but on ice. Knees come up high, arms out to sides for balance. Feet alternate. No glide — choppy steps. Distinguish from stroking by lack of glide.
+• Forward Stroking: Skater pushes off to the side (not backward) with one foot while gliding on the other. Look for: full leg extension of the pushing leg to the side/behind, smooth weight transfer, alternating feet rhythmically. Arms relaxed at sides. Knee of gliding leg is bent. Between frames: skater covers distance, alternating which leg extends.
+• Backward Stroking: Same as forward but traveling backward. Skater faces camera but moves away. C-cut pushes — foot traces a C-shape on ice. Weight on balls of feet. Look over shoulder periodically. Between frames: skater's back is to direction of travel.
+• Forward Swizzles: Both feet on ice, toes point outward, feet push apart making a lemon/diamond shape, then toes point inward to bring feet together. Repeated pattern. Between frames: feet go wide then narrow in a rhythmic pattern. No feet leave the ice.
+• Backward Swizzles: Same as forward but reversed — heels point outward, feet push apart, heels in to close. Traveling backward.
+• Forward Crossovers: Skater on a curve. Outside foot literally lifts and crosses OVER the inside foot, placing it down on the other side. Look for: one foot visibly on top of/crossing the other, body leaning into the circle, pumping motion. In 2-3 frames you see: normal stance → foot lifting over → foot placed on far side. Distinguish from stroking by the crossing motion and circular path.
+• Backward Crossovers: Same crossing motion but traveling backward on a curve. Cross-under push is key — the inside foot pushes under and extends while the outside foot crosses over.
+• Rocking Horse: One forward swizzle then one backward swizzle, rocking back and forth. Feet stay on ice, making alternating lemon shapes.
+• Forward Slalom: Skater weaves side-to-side on two feet. Both feet parallel, knees drive direction changes. S-pattern on ice.
+
+BALANCE SKILLS:
+• Two-Foot Glide: Both feet on ice, parallel, gliding forward. Knees slightly bent, arms out to sides. No pushing — just gliding. Distinguish from stroking: no leg extension or push-off visible.
+• Backward Two-Foot Glide: Same but traveling backward. Weight on balls of feet, knees bent.
+• One-Foot Glide: One foot on ice, other foot lifted off. Gliding on single blade. Free leg may be extended or beside skating leg. Arms out for balance.
+• Dip: Deep knee bend while gliding on two feet. Skater gets very low — almost sitting. Arms forward. Both feet on ice. Between frames: skater descends then rises.
+• Two-Foot Hop: Skater bends knees then jumps straight up, both feet leave ice simultaneously, lands on both feet. Small jump, not traveling far. Arms help with lift.
+• Falling & Getting Up: Skater bends knees and goes down to side onto hip. Gets up via hands-and-knees position, one foot up, push to stand.
+• Forward Spiral: One foot on ice, free leg extended BEHIND at hip height or ABOVE while gliding forward. Back arched, arms extended. Sustained position for 3+ seconds. Very distinctive — looks like an arabesque. Distinguish from simple one-foot glide by the high free leg.
+• Lunge: Deep forward lunge while gliding. Front knee deeply bent, back leg extended behind with knee nearly touching ice. Arms out. Very low position.
+• Shoot the Duck: Gliding on one foot in a DEEP squat — thigh nearly parallel to ice. Free leg extended straight forward. Arms forward for balance. Very distinctive low position.
+
+STOPS:
+• Snowplow Stop: Both feet on ice, toes angled inward (pigeon-toed), forming a V or pizza shape. Knees bent, pressing inside edges into ice. Gradual deceleration. Between frames: feet angle in, skater slows.
+• T-Stop: One foot glides forward, other foot drags PERPENDICULAR behind (forming a T shape). Weight mostly on front foot. Back foot scrapes ice. Between frames: back foot visible dragging sideways.
+• Hockey Stop: Both feet turn 90° sideways to direction of travel SIMULTANEOUSLY. Body leans away from travel direction. Ice spray/shavings visible. Rapid stop — dramatic deceleration in 2-3 frames. Very distinctive sideways body position with spray.
+
+EDGES:
+• Forward Outside Edge: Gliding on one foot, blade tilted to outer edge. Body leans slightly outward from the curve being traced. Sustained arc. Free leg may be extended.
+• Forward Inside Edge: Gliding on one foot, blade tilted to inner edge. Body leans slightly inward toward center of curve. Sustained arc.
+• Backward Outside/Inside Edge: Same as forward edges but traveling backward.
+• Edge Control: Alternating between inside and outside edges. Weaving serpentine pattern.
+
+TURNS:
+• Forward-to-Backward Transition: Skater faces forward, then pivots on both feet to face backward. Open hips, rotate. Between frames: facing forward → rotating → facing backward. Speed maintained through transition.
+• Forward Outside 3-Turn: On one foot, forward outside edge, skater rotates upper body, then turns on the blade from forward to backward. The trace on ice looks like the number "3." Between frames: forward glide → rotation → now skating backward on same foot. Key: single foot throughout.
+• Forward Inside 3-Turn: Same as outside but starting on inside edge, ending on backward outside edge.`;
+
+const FIGURE_VISUAL_GUIDE = `VISUAL SKILL IDENTIFICATION GUIDE — FIGURE SKATING:
+(Also includes all foundation skills above)
+
+JUMPS — All jumps land the same way: backward, on one foot, outside edge, free leg extended behind.
+Two categories: TOE JUMPS (toe pick stabs ice for launch) and EDGE JUMPS (no toe pick, launch from edge only).
+Key: if free leg reaches BACK and STABS ice before takeoff = toe jump. If free leg SWINGS FORWARD = edge jump.
+
+• Waltz Jump (edge, easiest): Forward outside edge takeoff, half rotation (180°), land backward. Skater steps forward, swings free leg up and forward, small hop with half turn, lands backward. Low height, graceful. Between frames: forward step → airborne facing sideways → landed backward.
+• Toe Loop (toe): Backward outside edge + toe pick. Skater reaches back with free foot and picks into ice, vaults up. Lands on SAME foot. Often used as 2nd jump in combinations. Between frames: skating backward → toe stab → airborne → landed backward same foot.
+• Salchow (edge): Backward INSIDE edge takeoff. Free leg swings forward in a scooping motion from behind. Legs form triangular shape at takeoff. Lands on OTHER foot. Between frames: backward glide → free leg scoops forward → airborne → landed on opposite foot.
+• Loop (edge): Backward OUTSIDE edge, legs crossed/close together in almost seated position at takeoff. Springs up from the edge. Lands on SAME foot, same edge. Between frames: seated-looking position → springs up → airborne → landed same foot. Distinctive crossed-leg takeoff.
+• Flip (toe): Backward INSIDE edge + toe pick with other foot. Between frames: backward glide on inside edge → reaches back with toe pick → airborne → lands on other foot. Similar to Lutz but different entry edge.
+• Lutz (toe): Long backward OUTSIDE edge entry, then toe pick. Counter-rotational — skater curves one way but rotates the other. Distinctive long backward entry. Between frames: long backward curve → toe stab → rotates AGAINST the curve direction → lands. Hardest toe jump.
+• Axel (edge, hardest): The ONLY forward-takeoff jump. Forward outside edge, 1.5 rotations for single. Skater faces forward, steps onto forward edge, swings free leg up, rotates 1.5 times. EASY TO IDENTIFY: only jump where skater faces forward at takeoff. Between frames: forward step → big upward swing → 1.5 rotations → landed backward.
+• Double/Triple versions: Same entries but more rotations. Higher, faster, tighter air position (arms pulled in tight, legs crossed in air). Double = 2 rotations (axel = 2.5). Triple = 3 (axel = 3.5).
+
+SPINS — Skater rotates in place. Between frames: same location on ice but body orientation changes dramatically.
+• Two-Foot Spin: Both feet on ice, rotating in place. Simpler, slower. Arms may be wide then pulled in.
+• Upright Spin (Scratch Spin): One foot, standing tall, arms pulled in tight against body. Very fast rotation. Free foot pressed against ankle/calf. Between frames: same spot, body blurs from rotation speed.
+• Sit Spin: Low squatting position on one foot while spinning. Skating leg deeply bent (thigh parallel to ice), free leg extended forward. Arms may be forward or wrapped. Very distinctive low position while spinning.
+• Camel Spin: Free leg extended BEHIND at hip height or above, torso horizontal — body forms a T-shape. Spinning on one foot. Very distinctive horizontal body position. Between frames: T-shape rotates in place.
+• Layback Spin: Upright spin but back arches backward, head tilts back. Free leg behind. Arms may frame face or extend. Distinctive backward lean while spinning.
+• Combination Spin: Changes positions during one spin — e.g., starts camel, transitions to sit, finishes upright. Look for position changes while maintaining the spin.
+• Flying Spin: Enters with a JUMP into spin position. Airborne briefly then lands spinning. Between frames: preparation → jump → airborne in spin position → spinning on ice.
+
+STEPS & TURNS:
+• 3-Turn: Single foot, turns from forward to backward (or vice versa) — blade traces a "3" on ice. Upper body rotates first, then hips follow. Between frames: gliding one direction → rotation on single foot → now facing opposite direction, same foot.
+• Mohawk: Two-foot turn. Weight transfers from one foot to the other, heel-to-heel, changing direction. Both feet briefly on ice during turn. Between frames: forward on one foot → both feet on ice briefly → backward on other foot.
+• Bracket: Like a 3-turn but AGAINST the curve (counter-rotational). Harder. Same single-foot turn but body rotates against the direction of the curve.
+• Step Sequence: Rapid series of turns, steps, and edges covering the full ice surface. Multiple skills in quick succession — 3-turns, mohawks, crossovers, edges all combined. Very busy footwork, changing direction frequently.
+
+OTHER MOVES:
+• Spread Eagle: Both feet on ice, toes turned outward (180° turnout), gliding on a curve. Looks like a ballet second position on ice. Arms wide. Distinctive wide stance with extreme turnout.
+• Ina Bauer: One foot forward, one backward, knees bent, gliding on a curve. Often with dramatic back arch. Distinctive split-stance position.`;
+
+const HOCKEY_VISUAL_GUIDE = `VISUAL SKILL IDENTIFICATION GUIDE — HOCKEY:
+(Skaters wear full hockey gear: helmet, gloves, pads, carry a stick)
+
+SKATING STANCE & MOVEMENT:
+• Hockey Ready Stance: Athletic position — knees bent ~90°, back straight but leaning forward, hands on stick in front. Weight on balls of feet. Head up. Stick blade on ice. Looks like a quarterback under center. Distinguish from casual standing by deep knee bend.
+• Forward Stride: Powerful side-push with full leg extension, skating leg deeply bent. Arms swing diagonally (not side-to-side). Stick in one hand or two during stride. Between frames: alternating leg extension with forward travel. Look for: deep knee bend on gliding leg, full extension of pushing leg, diagonal arm swing. More powerful/lower than figure skating stroking.
+• Backward Stride: Facing forward but traveling backward. C-cut pushes — feet trace C-shapes. Weight on balls of feet. Stick on ice in front for defense. Between frames: moving backward while facing forward, alternating C-cut pushes.
+
+STARTS:
+• V-Start: From standstill, toes point outward in V-shape. Short choppy strides, body very low. First 3 steps build speed. Between frames: wide V stance → explosive short steps → gradually lengthening strides.
+• Power Start: From standstill, first 3 strides explosive. Body extremely low, almost horizontal. Full blade digs into ice. Between frames: dramatic forward lean → powerful short pushes → body rises as speed builds. Key: body angle nearly 45° to ice on first steps.
+• Crossover Start: First step crosses over for lateral explosion. Starting from standstill, one foot crosses over the other to generate sideways then forward momentum. Between frames: standstill → crossover step → explosive acceleration.
+
+STOPS:
+• Hockey Stop: Both feet turn 90° to travel direction simultaneously. Shaving/spraying ice. Weight shifts away from direction of travel. Upper body stays facing forward while lower body turns sideways. ICE SPRAY is the key visual indicator. Between frames: skating forward → feet rotate sideways → ice spray → stopped. Very dramatic and fast.
+• One-Foot Stop: All weight on one stopping foot, angled to direction of travel. Other foot may be slightly lifted. Less spray than two-foot stop.
+• Power Slide Stop: Full body turns, both feet slide. Maximum ice spray. More dramatic than regular hockey stop.
+• Snowplow Stop: Toes angled inward, gentle pressure. Slower stop. No dramatic spray.
+• Backward Snowplow Stop: Moving backward, push toes outward. Gentle stop.
+
+CROSSOVERS:
+• Forward Crossovers: On a curve/circle, outside foot lifts and crosses over inside foot. Body leans into the turn. Used for acceleration on curves. Pumping action generates speed. Between frames: normal stance on curve → outside foot crossing over → push under with inside foot → repeat. Key: visible crossing of feet + circular path.
+• Backward Crossovers: Same motion but traveling backward. Cross-under push generates power. Important for defensive skating. Between frames: backward on curve → feet cross → push and separate → repeat.
+
+TRANSITIONS & TURNS:
+• Forward-to-Backward Pivot: Hips open, feet pivot from forward to backward skating without losing speed. Upper body may stay facing same direction. Stick stays on ice. Between frames: skating forward → hip rotation → now traveling backward. Smooth, speed maintained.
+• Backward-to-Forward Pivot: Reverse — from backward to forward. Explosive forward stride usually follows immediately. Between frames: backward skating → pivot → explodes forward.
+• Mohawk Turn: Heel-to-heel step turn. Quick direction change. Stay low through the turn. Between frames: forward → brief two-foot moment → backward. Quick and low.
+• Tight Turns: Deep edge work on a very small radius. Extreme knee bend, body leans significantly into turn. Between frames: straight skating → dramatic lean → tight curve → exit. Edge angle is extreme.
+
+EDGE WORK & AGILITY:
+• Inside/Outside Edges: Slalom-like weaving. Body alternates leaning left and right. Serpentine pattern. Between frames: lean one way → straight → lean other way.
+• Lateral Movement: Defensive shuffles — moving sideways without turning. Pushing with inside edges. Low stance maintained. Between frames: moving sideways while facing same direction. Used when defending.
+• Quick Feet Agility: Rapid short strides, direction changes. Very quick foot movement, low body. Between frames: rapid foot position changes.
+
+STICK & PUCK SKILLS:
+• Stick Grip & Stance: Top hand at butt end, bottom hand halfway down shaft. Blade flat on ice. Arms in front of body. Distinctive hockey-player posture.
+• Puck Handling/Dribble: Stick moves puck side-to-side with wrist rolls. Head UP (not looking down). Puck visible on stick blade moving forehand to backhand. Between frames: puck shifts from one side of blade to other.
+• Wrist Shot: Puck pulled back toward body, then wrists snap forward. Follow-through toward target. Weight transfers from back to front foot. Stick blade stays low. Between frames: wind-up → release → follow-through pointing at target.
+• Slap Shot: Big wind-up — stick goes UP behind/above shoulder. Stick comes down and hits ice BEHIND puck, then follows through high. Most dramatic shooting motion. Between frames: high backswing → stick strikes ice → follow-through overhead.
+• Snap Shot: Quick release with minimal backswing. Stick flexes and snaps. Less dramatic than slap shot but faster release. Between frames: slight backswing → quick snap → puck gone.
+• Passing (Forehand/Backhand): Sweeping motion with follow-through toward target. Forehand = blade faces target naturally. Backhand = blade reversed, wrist rolled.
+• Receiving: Soft hands — stick blade cushions incoming puck. Blade gives with the pass rather than being rigid. Between frames: puck approaching → blade makes contact → puck controlled.
+
+DEFENSIVE SKILLS:
+• Gap Control: Skating backward maintaining distance from attacker. Not too close, not too far. Between frames: backward skating, mirroring forward skater's movements.
+• Angling: Body positioned to steer puck carrier toward boards. Cutting off skating lanes with body position. Between frames: lateral positioning, closing angles.`;
+
+
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -316,64 +444,55 @@ async function handleAPI(req, res) {
 
       // Build content blocks: text prompt + images
       const content = [];
+      // Build discipline-specific visual guide
+      const disc = discipline || 'foundations';
+      const visualGuide = disc === 'hockey' ? HOCKEY_VISUAL_GUIDE : (disc === 'figure' ? FIGURE_VISUAL_GUIDE : FOUNDATIONS_VISUAL_GUIDE);
+
       content.push({
         type: 'text',
-        text: `You are an elite-level ice skating judge and coach with 20+ years of experience analyzing ${discipline || 'general'} skating. You are reviewing sequential video frames extracted at ~1 frame per second from a skating session.${batchInfo}
+        text: `You are an elite-level ice skating judge and coach with 20+ years of experience analyzing ${disc} skating. You are reviewing sequential video frames extracted at ~1 frame per second from a skating session.${batchInfo}
 
-TASK: Analyze the SEQUENCE of frames to identify skating skills. These frames are consecutive — use MOTION ANALYSIS across frames to understand what the skater is doing:
-1. First, scan ALL frames to understand the overall movement trajectory
-2. Look for TRANSITIONS between frames: changes in body position, foot placement, direction, and posture
-3. A skill happens over 2-5 consecutive frames — identify the START frame where the skill begins
-4. Report the timestamp of the frame where the skill is most clearly visible
+TASK: Analyze the SEQUENCE of frames to identify skating skills. These frames are consecutive — use MOTION ANALYSIS across frames:
+1. Scan ALL frames to understand the overall movement trajectory
+2. Look for TRANSITIONS between frames: changes in body position, foot placement, direction, posture
+3. A skill happens over 2-5 consecutive frames — identify the START frame
+4. Report the timestamp where the skill is most clearly visible
 
-MOTION ANALYSIS TECHNIQUE — compare consecutive frames:
-- Body position change: Is the skater rotating? Shifting weight? Extending a leg?
-- Foot tracking: Are feet crossing over? Turning? Leaving the ice?
-- Direction change: Forward→backward = turn. Straight→curved = edge work.
-- Height change: Lower position = preparation. Higher = jump/extension.
-- Speed indicators: Motion blur = fast movement. Sharp = slow/stationary.
+MOTION ANALYSIS — compare consecutive frames:
+- Body position change: rotating? shifting weight? extending a leg?
+- Foot tracking: crossing over? turning? leaving the ice?
+- Direction change: forward→backward = turn. straight→curved = edge work
+- Height change: lower = preparation/sit spin. higher = jump/extension
+- Speed: motion blur = fast. sharp/clear = slow/stationary
+- Ice spray/shavings = stopping or sharp edge work
 
-SKILL IDENTIFICATION — be precise:
-- Forward stroking = visible push-off with leg extension, alternating feet rhythmically, body moves forward between frames
-- Backward stroking = same as forward but traveling backward (watch for body facing camera but moving away)
-- Crossovers = one foot literally crossing OVER the other while on a curve — look for leg crossing in 2-3 consecutive frames
-- 3-turns = skater faces one direction then faces opposite direction on same foot in next 2-3 frames
-- Mohawk = step turn, heel-to-heel, two feet involved — watch for foot swap at turn point
-- Hockey stop = both feet turned perpendicular to travel direction, ice spray visible, rapid deceleration across 2-3 frames
-- Spins = same location across 3+ frames but body orientation rotates significantly between each
-- Jumps = skater is AIRBORNE — feet clearly off ice in at least one frame, with preparation (knee bend) and landing visible in adjacent frames
-- Spirals = free leg raised to hip height or above while gliding — sustained position across 3+ frames
-- Edges = visible lean/angle of body into a curve, sustained arc across multiple frames
-- Stops = any controlled deceleration technique (snowplow, T-stop, hockey stop)
-- Turns = any change of direction or facing (3-turn, mohawk, bracket, rocker)
+${visualGuide}
 
-WHAT IS NOT A SKILL — skip these:
-- Standing still or waiting
-- Slow straight gliding without technique
-- Walking on ice (no glide)
+WHAT IS NOT A SKILL — skip:
+- Standing still, waiting, or chatting
+- Slow straight gliding without visible technique
+- Walking without glide
 - Spectators, coaches, or background skaters
 - Unclear/blurry frames where technique cannot be determined
 
 Available skills to match:
 ${skillList}
 
-RESPOND with a JSON array. Each detection MUST include:
-[{"timestamp": <seconds from the frame label>, "skillId": "<exact id from list>", "skillName": "<name>", "confidence": <0.0-1.0>, "note": "<describe the specific motion you see across frames: e.g. 'frames at 3s-5s show left foot crossing over right on counterclockwise curve'>"}]
+RESPOND with a JSON array:
+[{"timestamp": <seconds>, "skillId": "<exact id>", "skillName": "<name>", "confidence": <0.0-1.0>, "note": "<specific visual evidence: what you see in which frames>"}]
 
-CONFIDENCE GUIDE:
-- 0.9+ = unmistakable: multi-frame evidence clearly shows the skill (airborne jump, fast spin with rotation visible across frames, clear crossover sequence)
-- 0.7-0.89 = very likely: body position strongly matches across 2+ frames but angle or quality limits certainty
-- 0.5-0.69 = probable: single frame shows matching position, or motion is partially obscured
+CONFIDENCE:
+- 0.9+ = unmistakable multi-frame evidence (airborne jump, fast spin, clear crossover sequence)
+- 0.7-0.89 = body position strongly matches across 2+ frames
+- 0.5-0.69 = single frame match or partially obscured
 - Below 0.5 = do NOT report
 
-QUALITY RULES:
-- Fewer accurate detections are MUCH better than many wrong ones
-- A skill must be supported by evidence across at least 2 frames when possible
-- Report the timestamp of the frame where the skill is most clearly visible
-- Include specific frame references in your note (e.g. "visible in frames at 4.0s and 5.0s")
-
-If no clear skills are visible, return an empty array: []
-Return ONLY the JSON array, nothing else.`
+RULES:
+- Fewer accurate detections >> many wrong ones
+- Must cite frame evidence in note (e.g. "frames 3.0s-5.0s show...")
+- Do NOT label every frame — only report CLEAR skills
+- If nothing is clear, return []
+Return ONLY the JSON array.`
       });
 
       frames.forEach((f, i) => {
