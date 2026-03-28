@@ -264,6 +264,9 @@
     .guide-step{display:flex;align-items:start;gap:10px;margin-bottom:8px}
     .guide-num{background:var(--accent);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0}
 
+    /* Coach session items need relative positioning for delete btn */
+    #lessonLogList .session-item{position:relative;padding-right:40px}
+
     @media(max-width:600px){.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}}
     ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -873,7 +876,7 @@
   <button class="nav-btn" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
   <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
   <button class="nav-btn" data-section="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Sessions</button>
-
+  <button class="nav-btn" data-section="coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
   <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
 </nav>
 
@@ -1083,6 +1086,106 @@
     <div class="card"><div class="card-title">This Week</div><div id="trainingPlan"></div></div>
   </div>
 
+  <!-- ═══ COACH ═══ -->
+  <div class="section" id="sec-coach">
+    <div class="card">
+      <div class="card-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Coach Dashboard</div>
+      <div class="sub-tabs" id="coachSubTabs">
+        <button class="sub-tab active" onclick="switchCoachTab('roster')">Roster</button>
+        <button class="sub-tab" onclick="switchCoachTab('lessons')">Lessons</button>
+        <button class="sub-tab" onclick="switchCoachTab('reports')">Reports</button>
+      </div>
+    </div>
+
+    <!-- Roster Sub-view -->
+    <div id="coach-roster">
+      <div class="card">
+        <div class="card-title">Student Roster <span style="flex:1"></span><span style="font-size:0.72rem;color:var(--text-dim);font-weight:400" id="studentCount">0 students</span></div>
+        <button class="btn btn-primary btn-sm" style="margin-bottom:12px" onclick="openAddStudentModal()">+ Add Student</button>
+        <div id="studentRoster"></div>
+      </div>
+    </div>
+
+    <!-- Lessons Sub-view -->
+    <div id="coach-lessons" style="display:none">
+      <div class="card">
+        <div class="card-title">Quick Session Notes</div>
+        <p style="font-size:0.75rem;color:var(--text-dim);margin-bottom:10px">Fast 60-second entry between students</p>
+        <div class="form-group">
+          <label class="form-label">Student</label>
+          <select class="form-select" id="lessonStudent" onchange="updateLessonSkills()"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input class="form-input" type="date" id="lessonDate">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration: <span id="lessonDurLabel">30</span> min</label>
+            <input type="range" min="10" max="120" step="5" value="30" id="lessonDuration" oninput="document.getElementById('lessonDurLabel').textContent=this.value" style="width:100%;accent-color:var(--accent)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Skills Worked On</label>
+          <div id="lessonSkillChecks" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-textarea" id="lessonNotes" placeholder="What was covered, how they did..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Next Focus Areas</label>
+          <textarea class="form-textarea" id="lessonNextFocus" placeholder="What to work on next time..." style="min-height:50px"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Overall Rating</label>
+          <select class="form-select" id="lessonRating">
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Good</option>
+            <option value="3" selected>3 - Average</option>
+            <option value="2">2 - Needs Work</option>
+            <option value="1">1 - Struggled</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="saveLesson()">Save Lesson</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Lesson History</div>
+        <div class="form-group">
+          <label class="form-label">Filter by Student</label>
+          <select class="form-select" id="lessonFilterStudent" onchange="renderLessonLog()">
+            <option value="">All Students</option>
+          </select>
+        </div>
+        <div id="lessonLogList"></div>
+      </div>
+    </div>
+
+    <!-- Reports Sub-view -->
+    <div id="coach-reports" style="display:none">
+      <div class="card">
+        <div class="card-title">Progress Reports</div>
+        <div class="form-group">
+          <label class="form-label">Select Student</label>
+          <select class="form-select" id="reportStudent" onchange="generateProgressReport()"></select>
+        </div>
+        <div id="progressReportArea" style="display:none">
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-top:10px;white-space:pre-wrap;font-size:0.82rem;line-height:1.6" id="progressReportText"></div>
+          <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="copyProgressReport()">Copy Report</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Skill Assessments</div>
+        <div class="form-group">
+          <label class="form-label">Select Student</label>
+          <select class="form-select" id="assessStudent" onchange="renderAssessment()"></select>
+        </div>
+        <div id="assessmentArea"></div>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;display:none" id="saveAssessBtn" onclick="saveAssessment()">Save Assessment</button>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <!-- Modals -->
@@ -1209,6 +1312,22 @@
     <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('feedbackModal').classList.remove('active')">Cancel</button>
     <button class="btn btn-primary" style="flex:1" onclick="submitAppFeedback()">Send Feedback</button>
   </div>
+</div></div>
+
+<div class="modal-overlay" id="studentModal"><div class="modal">
+  <div class="modal-title" id="studentModalTitle">Add Student</div>
+  <input type="hidden" id="editStudentId">
+  <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="studentName" placeholder="Student name"></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Level</label>
+      <select class="form-select" id="studentLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="expert">Expert</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">Discipline</label>
+      <select class="form-select" id="studentDisc"><option value="foundations">Foundations</option><option value="figure">Figure</option><option value="hockey">Hockey</option></select>
+    </div>
+  </div>
+  <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="studentNotes" placeholder="Any notes about this student..."></textarea></div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button><button class="btn btn-primary" onclick="saveStudent()">Save</button></div>
 </div></div>
 
 </div><!-- end #appContainer -->
@@ -4020,6 +4139,389 @@ async function submitAppFeedback() {
     showToast('Thanks for your feedback!');
   } catch(e) { showToast('Failed to send feedback'); }
 }
+
+// ═══════════════════════════════════════════
+//  COACH DASHBOARD
+// ═══════════════════════════════════════════
+function initCoachData() {
+  if (!APP.coach) APP.coach = { students: [], lessonLog: [] };
+  if (!APP.coach.students) APP.coach.students = [];
+  if (!APP.coach.lessonLog) APP.coach.lessonLog = [];
+}
+
+function switchCoachTab(tab) {
+  document.querySelectorAll('#coachSubTabs .sub-tab').forEach(b => b.classList.remove('active'));
+  document.querySelector(`#coachSubTabs .sub-tab[onclick*="${tab}"]`).classList.add('active');
+  ['roster','lessons','reports'].forEach(t => {
+    document.getElementById('coach-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  if (tab === 'roster') renderStudentRoster();
+  if (tab === 'lessons') { populateStudentDropdowns(); renderLessonLog(); }
+  if (tab === 'reports') { populateStudentDropdowns(); }
+}
+
+function populateStudentDropdowns() {
+  initCoachData();
+  const students = APP.coach.students;
+  const selects = ['lessonStudent','lessonFilterStudent','reportStudent','assessStudent'];
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isFilter = id === 'lessonFilterStudent';
+    const val = el.value;
+    el.innerHTML = isFilter ? '<option value="">All Students</option>' : '';
+    if (!isFilter && students.length === 0) {
+      el.innerHTML = '<option value="">No students yet</option>';
+    }
+    students.forEach(s => {
+      el.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+    });
+    if (val && el.querySelector(`option[value="${val}"]`)) el.value = val;
+  });
+  updateLessonSkills();
+}
+
+// ═══ STUDENT ROSTER ═══
+function openAddStudentModal() {
+  document.getElementById('studentModalTitle').textContent = 'Add Student';
+  document.getElementById('editStudentId').value = '';
+  document.getElementById('studentName').value = '';
+  document.getElementById('studentLevel').value = 'beginner';
+  document.getElementById('studentDisc').value = 'foundations';
+  document.getElementById('studentNotes').value = '';
+  document.getElementById('studentModal').classList.add('active');
+}
+
+function openEditStudentModal(studentId) {
+  initCoachData();
+  const s = APP.coach.students.find(x => x.id === studentId);
+  if (!s) return;
+  document.getElementById('studentModalTitle').textContent = 'Edit Student';
+  document.getElementById('editStudentId').value = s.id;
+  document.getElementById('studentName').value = s.name;
+  document.getElementById('studentLevel').value = s.level;
+  document.getElementById('studentDisc').value = s.discipline;
+  document.getElementById('studentNotes').value = s.notes || '';
+  document.getElementById('studentModal').classList.add('active');
+}
+
+function saveStudent() {
+  initCoachData();
+  const name = document.getElementById('studentName').value.trim();
+  if (!name) return showToast('Please enter a name');
+  const editId = document.getElementById('editStudentId').value;
+  const level = document.getElementById('studentLevel').value;
+  const discipline = document.getElementById('studentDisc').value;
+  const notes = document.getElementById('studentNotes').value.trim();
+
+  if (editId) {
+    const s = APP.coach.students.find(x => x.id === editId);
+    if (s) { s.name = name; s.level = level; s.discipline = discipline; s.notes = notes; }
+  } else {
+    APP.coach.students.push({
+      id: Date.now().toString(36),
+      name, level, discipline, notes,
+      created: new Date().toISOString(),
+      assessments: {}
+    });
+  }
+  saveData(APP);
+  closeModal('studentModal');
+  renderStudentRoster();
+  showToast(editId ? 'Student updated' : 'Student added');
+}
+
+function deleteStudent(studentId) {
+  if (!confirm('Remove this student and all their lessons?')) return;
+  initCoachData();
+  APP.coach.students = APP.coach.students.filter(s => s.id !== studentId);
+  APP.coach.lessonLog = APP.coach.lessonLog.filter(l => l.studentId !== studentId);
+  saveData(APP);
+  renderStudentRoster();
+  showToast('Student removed');
+}
+
+function getLastLessonDate(studentId) {
+  initCoachData();
+  const lessons = APP.coach.lessonLog.filter(l => l.studentId === studentId).sort((a,b) => new Date(b.date) - new Date(a.date));
+  return lessons.length > 0 ? lessons[0].date : null;
+}
+
+function renderStudentRoster() {
+  initCoachData();
+  const el = document.getElementById('studentRoster');
+  const students = APP.coach.students;
+  document.getElementById('studentCount').textContent = students.length + ' student' + (students.length !== 1 ? 's' : '');
+
+  if (students.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p>No students yet. Add your first student to get started.</p></div>';
+    return;
+  }
+
+  const levelColors = { beginner: 'level-beginner', intermediate: 'level-intermediate', advanced: 'level-advanced', expert: 'level-expert' };
+
+  el.innerHTML = students.map(s => {
+    const lastDate = getLastLessonDate(s.id);
+    const lastStr = lastDate ? new Date(lastDate).toLocaleDateString('en-US', {month:'short',day:'numeric'}) : 'No lessons';
+    const lessonCount = APP.coach.lessonLog.filter(l => l.studentId === s.id).length;
+    return `<div class="session-item" style="cursor:default">
+      <div style="min-width:40px;height:40px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--accent)">${s.name.charAt(0).toUpperCase()}</div>
+      <div class="session-info">
+        <div class="session-title">${s.name}</div>
+        <div class="session-meta">
+          <span class="level-badge ${levelColors[s.level]}" style="font-size:0.6rem;padding:1px 6px">${s.level}</span>
+          <span style="margin-left:4px">${s.discipline}</span>
+          <span style="margin-left:8px">${lessonCount} lesson${lessonCount !== 1 ? 's' : ''}</span>
+          <span style="margin-left:8px">Last: ${lastStr}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-secondary btn-sm" onclick="openEditStudentModal('${s.id}')" title="Edit">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')" title="Remove">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══ LESSON LOG ═══
+function updateLessonSkills() {
+  initCoachData();
+  const studentId = document.getElementById('lessonStudent').value;
+  const student = APP.coach.students.find(s => s.id === studentId);
+  const container = document.getElementById('lessonSkillChecks');
+  if (!student) { container.innerHTML = '<span style="font-size:0.75rem;color:var(--text-dim)">Select a student first</span>'; return; }
+
+  const skills = SKILLS[student.discipline] || SKILLS.foundations;
+  container.innerHTML = skills.map(sk =>
+    `<label style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;background:var(--surface2);border-radius:6px;font-size:0.72rem;cursor:pointer;border:1px solid var(--border)">
+      <input type="checkbox" value="${sk.id}" style="accent-color:var(--accent)"> ${sk.name}
+    </label>`
+  ).join('');
+}
+
+function saveLesson() {
+  initCoachData();
+  const studentId = document.getElementById('lessonStudent').value;
+  if (!studentId) return showToast('Please select a student');
+  const date = document.getElementById('lessonDate').value;
+  if (!date) return showToast('Please select a date');
+  const duration = parseInt(document.getElementById('lessonDuration').value);
+  const notes = document.getElementById('lessonNotes').value.trim();
+  const nextFocus = document.getElementById('lessonNextFocus').value.trim();
+  const rating = parseInt(document.getElementById('lessonRating').value);
+  const skillsFocused = [];
+  document.querySelectorAll('#lessonSkillChecks input:checked').forEach(cb => skillsFocused.push(cb.value));
+
+  APP.coach.lessonLog.push({
+    id: Date.now().toString(36),
+    studentId, date, duration, skillsFocused, notes, nextFocus, rating
+  });
+  saveData(APP);
+
+  // Reset form
+  document.getElementById('lessonNotes').value = '';
+  document.getElementById('lessonNextFocus').value = '';
+  document.getElementById('lessonRating').value = '3';
+  document.querySelectorAll('#lessonSkillChecks input:checked').forEach(cb => cb.checked = false);
+
+  renderLessonLog();
+  showToast('Lesson saved');
+}
+
+function renderLessonLog() {
+  initCoachData();
+  const el = document.getElementById('lessonLogList');
+  const filterStudent = document.getElementById('lessonFilterStudent').value;
+  let lessons = [...APP.coach.lessonLog].sort((a,b) => new Date(b.date) - new Date(a.date));
+  if (filterStudent) lessons = lessons.filter(l => l.studentId === filterStudent);
+
+  if (lessons.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p>No lessons logged yet.</p></div>';
+    return;
+  }
+
+  el.innerHTML = lessons.map(l => {
+    const student = APP.coach.students.find(s => s.id === l.studentId);
+    const studentName = student ? student.name : 'Unknown';
+    const d = new Date(l.date);
+    const ratingStars = '★'.repeat(l.rating) + '☆'.repeat(5 - l.rating);
+    const skillNames = l.skillsFocused.map(sid => {
+      const allSkills = [...(SKILLS.foundations||[]),...(SKILLS.figure||[]),...(SKILLS.hockey||[])];
+      const sk = allSkills.find(s => s.id === sid);
+      return sk ? sk.name : sid;
+    });
+    return `<div class="session-item" style="flex-wrap:wrap;cursor:default">
+      <div class="session-date"><div class="session-day">${d.getDate()}</div><div class="session-month">${d.toLocaleDateString('en-US',{month:'short'})}</div></div>
+      <div class="session-info" style="min-width:120px">
+        <div class="session-title">${studentName}</div>
+        <div class="session-meta">${l.duration}min &middot; <span style="color:var(--warning)">${ratingStars}</span></div>
+      </div>
+      <div style="width:100%;padding-left:56px;margin-top:4px">
+        ${skillNames.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${skillNames.map(n => `<span style="font-size:0.65rem;padding:2px 6px;background:rgba(56,189,248,0.1);border-radius:4px;color:var(--accent)">${n}</span>`).join('')}</div>` : ''}
+        ${l.notes ? `<div style="font-size:0.78rem;color:var(--text-dim)">${l.notes}</div>` : ''}
+        ${l.nextFocus ? `<div style="font-size:0.72rem;color:var(--accent2);margin-top:2px">Next: ${l.nextFocus}</div>` : ''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteLesson('${l.id}')" style="position:absolute;right:10px;top:10px" title="Delete">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteLesson(lessonId) {
+  if (!confirm('Delete this lesson?')) return;
+  initCoachData();
+  APP.coach.lessonLog = APP.coach.lessonLog.filter(l => l.id !== lessonId);
+  saveData(APP);
+  renderLessonLog();
+  showToast('Lesson deleted');
+}
+
+// ═══ PROGRESS REPORTS ═══
+function generateProgressReport() {
+  initCoachData();
+  const studentId = document.getElementById('reportStudent').value;
+  const area = document.getElementById('progressReportArea');
+  const textEl = document.getElementById('progressReportText');
+  if (!studentId) { area.style.display = 'none'; return; }
+
+  const student = APP.coach.students.find(s => s.id === studentId);
+  if (!student) { area.style.display = 'none'; return; }
+
+  const lessons = APP.coach.lessonLog
+    .filter(l => l.studentId === studentId)
+    .sort((a,b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+
+  if (lessons.length === 0) {
+    area.style.display = 'block';
+    textEl.textContent = 'No lessons recorded for this student yet.';
+    return;
+  }
+
+  const allSkills = [...(SKILLS.foundations||[]),...(SKILLS.figure||[]),...(SKILLS.hockey||[])];
+  const skillNameMap = {};
+  allSkills.forEach(s => skillNameMap[s.id] = s.name);
+
+  // Compile skill frequency
+  const skillCount = {};
+  lessons.forEach(l => l.skillsFocused.forEach(sid => {
+    skillCount[sid] = (skillCount[sid] || 0) + 1;
+  }));
+  const topSkills = Object.entries(skillCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+  const avgRating = (lessons.reduce((s,l) => s + l.rating, 0) / lessons.length).toFixed(1);
+  const totalTime = lessons.reduce((s,l) => s + l.duration, 0);
+
+  // Build next focus items from most recent lessons
+  const nextItems = [];
+  lessons.forEach(l => { if (l.nextFocus && !nextItems.includes(l.nextFocus)) nextItems.push(l.nextFocus); });
+
+  // Assessment info
+  const assessKeys = Object.keys(student.assessments || {});
+  let assessSection = '';
+  if (assessKeys.length > 0) {
+    assessSection = '\n--- Skill Assessment ---\n';
+    assessKeys.forEach(k => {
+      assessSection += `${k}: ${'■'.repeat(student.assessments[k])}${'□'.repeat(5 - student.assessments[k])} (${student.assessments[k]}/5)\n`;
+    });
+  }
+
+  const report = `═══ PROGRESS REPORT ═══
+Student: ${student.name}
+Level: ${student.level.charAt(0).toUpperCase() + student.level.slice(1)}
+Discipline: ${student.discipline.charAt(0).toUpperCase() + student.discipline.slice(1)}
+Report Date: ${new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'})}
+
+--- Last ${lessons.length} Lessons ---
+${lessons.map(l => {
+  const d = new Date(l.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  return `${d} | ${l.duration}min | Rating: ${'★'.repeat(l.rating)}${'☆'.repeat(5-l.rating)}${l.notes ? '\n  ' + l.notes : ''}`;
+}).join('\n')}
+
+--- Summary ---
+Total Lessons: ${lessons.length}
+Total Time: ${totalTime} minutes
+Average Rating: ${avgRating}/5
+
+--- Skills Practiced ---
+${topSkills.map(([sid, count]) => `• ${skillNameMap[sid] || sid} (${count}x)`).join('\n')}
+${assessSection}
+--- Areas To Work On ---
+${nextItems.length > 0 ? nextItems.map(n => `• ${n}`).join('\n') : '• No specific focus areas noted'}
+
+Generated by RinkBuddy Coach`;
+
+  area.style.display = 'block';
+  textEl.textContent = report;
+}
+
+function copyProgressReport() {
+  const text = document.getElementById('progressReportText').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Report copied to clipboard')).catch(() => showToast('Failed to copy'));
+}
+
+// ═══ SKILL ASSESSMENTS ═══
+const ASSESS_CATEGORIES = {
+  foundations: ['Balance','Edges','Stops','Forward Skating','Backward Skating','Crossovers','Turns','Speed','Confidence','Posture'],
+  figure: ['Jumps','Spins','Footwork','Edges','Musicality','Presentation','Stamina','Flexibility','Jump Technique','Spin Centering'],
+  hockey: ['Skating Speed','Stops','Crossovers','Edges','Puck Handling','Backward Skating','Agility','Transitions','Power','Endurance']
+};
+
+function renderAssessment() {
+  initCoachData();
+  const studentId = document.getElementById('assessStudent').value;
+  const area = document.getElementById('assessmentArea');
+  const saveBtn = document.getElementById('saveAssessBtn');
+  if (!studentId) { area.innerHTML = ''; saveBtn.style.display = 'none'; return; }
+
+  const student = APP.coach.students.find(s => s.id === studentId);
+  if (!student) { area.innerHTML = ''; saveBtn.style.display = 'none'; return; }
+
+  const cats = ASSESS_CATEGORIES[student.discipline] || ASSESS_CATEGORIES.foundations;
+  const assessments = student.assessments || {};
+
+  area.innerHTML = cats.map(cat => {
+    const val = assessments[cat] || 0;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <span style="font-size:0.82rem;min-width:120px;font-weight:500">${cat}</span>
+      <div style="display:flex;gap:4px" data-assess-cat="${cat}">
+        ${[1,2,3,4,5].map(n => `<button class="btn btn-sm" style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;${n <= val ? 'background:var(--accent);color:white;border:none' : 'background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)'}" onclick="setAssessRating('${cat}',${n},'${studentId}')">${n}</button>`).join('')}
+      </div>
+      <span style="font-size:0.72rem;color:var(--text-dim);min-width:30px">${val}/5</span>
+    </div>`;
+  }).join('');
+  saveBtn.style.display = 'inline-flex';
+}
+
+function setAssessRating(cat, rating, studentId) {
+  initCoachData();
+  const student = APP.coach.students.find(s => s.id === studentId);
+  if (!student) return;
+  if (!student.assessments) student.assessments = {};
+  student.assessments[cat] = rating;
+  renderAssessment();
+}
+
+function saveAssessment() {
+  saveData(APP);
+  showToast('Assessment saved');
+}
+
+// Initialize coach on section switch
+(function() {
+  const origNav = document.querySelectorAll('.nav-btn');
+  origNav.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.section === 'coach') {
+        initCoachData();
+        renderStudentRoster();
+        populateStudentDropdowns();
+        // Set today's date for lesson form
+        const today = new Date().toISOString().split('T')[0];
+        const dateEl = document.getElementById('lessonDate');
+        if (dateEl && !dateEl.value) dateEl.value = today;
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>
