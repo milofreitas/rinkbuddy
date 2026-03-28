@@ -41,6 +41,7 @@ const MIME = {
   '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.mp4': 'video/mp4',
   '.mov': 'video/quicktime', '.webm': 'video/webm',
+  '.md': 'text/markdown',
 };
 
 // ── Helpers ──
