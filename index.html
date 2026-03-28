@@ -102,7 +102,7 @@
     .status-new{background:rgba(148,163,184,0.2);color:var(--text-dim)}
     .status-locked{background:rgba(148,163,184,0.1);color:var(--text-dim)}
     .skill-prereq{font-size:0.6rem;color:var(--text-dim);margin-top:3px;font-style:italic}
-    .start-here{position:absolute;top:-6px;right:-6px;background:var(--success);color:#000;font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase}
+    .start-here{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:var(--success);color:#000;font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase;white-space:nowrap;z-index:1}
 
     /* Video */
     .video-library{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:12px}
@@ -2170,6 +2170,7 @@ function renderSkillTree() {
 
       html += `<div class="skill-card ${status}" onclick="showSkillDetail('${sk.id}')" title="${sk.tip||''}">
         ${startHere ? '<div class="start-here">START HERE</div>' : ''}
+        ${startHere ? '<div style="height:10px"></div>' : ''}
         <div class="skill-name">${sk.name}</div>
         <div class="skill-rate" style="color:${rateColor}">${d.attempts > 0 ? rate+'%' : '--'}</div>
         <div class="skill-attempts">${d.attempts} att / ${d.landed} landed</div>
