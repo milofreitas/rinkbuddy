@@ -39,9 +39,16 @@ const MIME = {
 };
 
 // ── Helpers ──
+const ALLOWED_ORIGINS = ['https://www.rinkbuddy.com', 'https://rinkbuddy.com', 'http://localhost:8080', 'https://localhost:8443'];
+
+function getCorsOrigin(req) {
+  const origin = req?.headers?.origin;
+  return (origin && ALLOWED_ORIGINS.includes(origin)) ? origin : ALLOWED_ORIGINS[0];
+}
+
 function jsonRes(res, code, obj) {
   const body = JSON.stringify(obj);
-  res.writeHead(code, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+  res.writeHead(code, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': res._corsOrigin || '*' });
   res.end(body);
 }
 
@@ -208,10 +215,11 @@ async function handleAPI(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const route = url.pathname;
 
-  // CORS preflight
+  // CORS
+  res._corsOrigin = getCorsOrigin(req);
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': res._corsOrigin,
       'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type,Authorization'
     });

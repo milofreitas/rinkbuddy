@@ -4,6 +4,7 @@
   "description": "RinkBuddy — Skating Performance Analyzer",
   "main": "serve.js",
   "scripts": {
+    "start": "node serve.js",
     "serve": "node serve.js",
     "cap:sync": "npx cap sync",
     "cap:open:ios": "npx cap open ios",

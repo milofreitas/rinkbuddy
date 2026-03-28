@@ -3156,7 +3156,7 @@ async function analyzeFramesWithAI(frames, skillNames, onProgress) {
     const batch = batches[b];
     onProgress(b / batches.length, `Analyzing sequence ${b + 1}/${batches.length} (${batch.length} frames)...`);
 
-    const response = await fetch('/api/analyze-video', {
+    const response = await fetch(CloudAccount.apiBase + '/api/analyze-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -3596,8 +3596,11 @@ const CloudAccount = {
   clearSession() { localStorage.removeItem('rinkbuddy_cloud_session'); },
   isLoggedIn() { return !!this.getSession()?.token; },
 
+  apiBase: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? '' : 'https://rinkbuddy-production.up.railway.app',
+
   async request(endpoint, body) {
-    const res = await fetch('/api/' + endpoint, {
+    const res = await fetch(this.apiBase + '/api/' + endpoint, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
@@ -3621,7 +3624,7 @@ const CloudAccount = {
   async pullData() {
     const session = this.getSession();
     if (!session?.token) return { error: 'Not logged in' };
-    const res = await fetch('/api/sync', {
+    const res = await fetch(this.apiBase + '/api/sync', {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: session.token })
     });
@@ -3720,7 +3723,7 @@ function googleSignIn() {
 async function handleGoogleResponse(response) {
   if (!response.credential) return showToast('Google sign-in failed');
   try {
-    const res = await fetch('/api/google-auth', {
+    const res = await fetch(CloudAccount.apiBase + '/api/google-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ credential: response.credential })
@@ -3875,7 +3878,7 @@ async function doSubscribe() {
   if (!session?.token) return showToast('Please log in first');
   try {
     // Try Stripe Checkout first
-    const res = await fetch('/api/create-checkout-session', {
+    const res = await fetch(CloudAccount.apiBase + '/api/create-checkout-session', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: session.token })
     });
@@ -3902,7 +3905,7 @@ async function doCancelSubscription() {
   if (!session?.token) return;
   try {
     // Try Stripe billing portal first
-    const res = await fetch('/api/create-portal-session', {
+    const res = await fetch(CloudAccount.apiBase + '/api/create-portal-session', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: session.token })
     });
@@ -3914,7 +3917,7 @@ async function doCancelSubscription() {
     }
     // If Stripe not configured, fall back to direct cancel for local dev
     if (data.error && (data.error.includes('not configured') || data.error.includes('No billing account'))) {
-      const fallback = await fetch('/api/cancel', {
+      const fallback = await fetch(CloudAccount.apiBase + '/api/cancel', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: session.token })
       });
@@ -4035,7 +4038,7 @@ async function checkSubscriptionStatus() {
   const session = CloudAccount.getSession();
   if (!session?.token) return;
   try {
-    const res = await fetch('/api/check-subscription', {
+    const res = await fetch(CloudAccount.apiBase + '/api/check-subscription', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: session.token })
     });
@@ -4325,7 +4328,7 @@ async function submitLandingFeedback() {
   if (!message) return showToast('Please write a message');
 
   try {
-    await fetch('/api/feedback', {
+    await fetch(CloudAccount.apiBase + '/api/feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, rating: feedbackRating || null, email: email || null })
@@ -4353,7 +4356,7 @@ async function submitAppFeedback() {
 
   const session = CloudAccount.getSession();
   try {
-    await fetch('/api/feedback', {
+    await fetch(CloudAccount.apiBase + '/api/feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: session?.token, message, rating: appFeedbackRating || null })
@@ -4774,7 +4777,7 @@ async function analyzeCoachVideo() {
       fill.style.width = batchPct + '%';
       status.textContent = `AI analyzing batch ${batchNum}/${totalBatches}...`;
 
-      const response = await fetch('/api/analyze-video', {
+      const response = await fetch(CloudAccount.apiBase + '/api/analyze-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
