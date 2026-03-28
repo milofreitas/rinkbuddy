@@ -36,10 +36,12 @@ function jsonRes(res, code, obj) {
   res.end(body);
 }
 
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
-    req.on('data', c => { body += c; if (body.length > 50e6) reject('Too large'); });
+    req.on('data', c => { body += c; if (body.length > 200e6) reject('Too large'); });
     req.on('end', () => { try { resolve(JSON.parse(body)); } catch { reject('Invalid JSON'); } });
   });
 }
@@ -291,6 +293,114 @@ async function handleAPI(req, res) {
         return_url: APP_URL + '/',
       });
       return jsonRes(res, 200, { ok: true, url: portalSession.url });
+    }
+
+    // ── Analyze Video Frames with Claude Vision ──
+    if (route === '/api/analyze-video' && req.method === 'POST') {
+      if (!ANTHROPIC_API_KEY) return jsonRes(res, 400, { error: 'ANTHROPIC_API_KEY not configured on server' });
+
+      const { frames, skills, discipline } = await readBody(req);
+      if (!frames || !frames.length) return jsonRes(res, 400, { error: 'No frames provided' });
+
+      const skillList = (skills || []).map(s => `${s.name} (${s.type}, id:${s.id})`).join('\n');
+
+      // Build content blocks: text prompt + images
+      const content = [];
+      content.push({
+        type: 'text',
+        text: `You are an expert ice skating coach analyzing video frames from a ${discipline || 'general'} skating session. Each frame has a timestamp.
+
+Identify any skating skills being performed in each frame. Look for:
+- Body position, edge angles, arm positions, leg extensions
+- Jumps (takeoff, rotation, landing)
+- Spins (positions, speed)
+- Footwork, crossovers, stops, turns, transitions
+- Hockey-specific: skating stride, stops, crossovers, edge work, stick handling
+
+Available skills to match against:
+${skillList}
+
+For each skill you detect, respond with a JSON array of objects:
+[{"timestamp": <seconds>, "skillId": "<id from list>", "skillName": "<name>", "confidence": <0.0-1.0>, "note": "<brief observation>"}]
+
+Rules:
+- Only report skills you're reasonably confident about (>0.3)
+- Use the exact skillId from the list when possible
+- If you see a skill not in the list, use skillId "" and provide a descriptive skillName
+- Be specific about what you observe in the note field
+- If a frame shows no clear skating skill, skip it
+- Return ONLY the JSON array, no other text`
+      });
+
+      frames.forEach(f => {
+        content.push({
+          type: 'text',
+          text: `Frame at ${f.timeLabel} (${f.timestamp.toFixed(1)}s):`
+        });
+        // Extract base64 data from data URL
+        const base64Match = f.data.match(/^data:image\/(.*?);base64,(.*)$/);
+        if (base64Match) {
+          content.push({
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: `image/${base64Match[1]}`,
+              data: base64Match[2]
+            }
+          });
+        }
+      });
+
+      // Call Claude API
+      const apiBody = JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{ role: 'user', content }]
+      });
+
+      const apiRes = await new Promise((resolve, reject) => {
+        const apiReq = https.request({
+          hostname: 'api.anthropic.com',
+          path: '/v1/messages',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01'
+          }
+        }, apiResponse => {
+          let data = '';
+          apiResponse.on('data', chunk => { data += chunk; });
+          apiResponse.on('end', () => {
+            try { resolve({ status: apiResponse.statusCode, body: JSON.parse(data) }); }
+            catch { reject(new Error('Invalid API response')); }
+          });
+        });
+        apiReq.on('error', reject);
+        apiReq.setTimeout(120000, () => { apiReq.destroy(); reject(new Error('API timeout')); });
+        apiReq.write(apiBody);
+        apiReq.end();
+      });
+
+      if (apiRes.status !== 200) {
+        const errMsg = apiRes.body?.error?.message || 'Claude API error';
+        return jsonRes(res, 502, { error: errMsg });
+      }
+
+      // Extract JSON from Claude's response
+      const responseText = (apiRes.body.content || []).map(c => c.text || '').join('');
+      let detectedSkills = [];
+      try {
+        // Try to parse the response as JSON (Claude might wrap it in markdown code blocks)
+        const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          detectedSkills = JSON.parse(jsonMatch[0]);
+        }
+      } catch (e) {
+        console.error('Failed to parse Claude response:', responseText.substring(0, 200));
+      }
+
+      return jsonRes(res, 200, { skills: detectedSkills });
     }
 
     // ── Submit Feedback ──
