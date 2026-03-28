@@ -1282,6 +1282,35 @@ const SKILLS = {
 
 // Drill database
 const DRILLS = {
+  foundations: {
+    balance: [
+      {name:'One-foot balance hold',desc:'Stand on one foot on the ice for 10 seconds. Alternate feet. 5 reps each.'},
+      {name:'Dip and hold drill',desc:'Glide on two feet, dip low and hold for 3 seconds. Repeat 10 times.'},
+      {name:'Glide and coast',desc:'Push once, glide as far as possible on two feet. Focus on stillness and balance.'},
+    ],
+    locomotion: [
+      {name:'Swizzle laps',desc:'Do full laps using only forward swizzles. Then backward swizzles. 2 laps each.'},
+      {name:'Stroking for distance',desc:'Count how many strokes it takes to cross the rink. Try to reduce the number.'},
+      {name:'Crossover circles',desc:'Forward crossovers around a circle. 5 times CW, 5 times CCW. Both directions.'},
+    ],
+    edge: [
+      {name:'Edge serpentine',desc:'Alternate inside and outside edges in a serpentine pattern. Full ice length.'},
+      {name:'Circle edge holds',desc:'Glide on one foot around a circle on each edge. 4 edges, both feet.'},
+      {name:'Edge transition drill',desc:'Alternate between inside and outside edges on one foot. Smooth transitions.'},
+    ],
+    turn: [
+      {name:'Two-foot turn practice',desc:'Glide forward, turn to backward on two feet. Repeat across the ice. Both directions.'},
+      {name:'Three-turn repetition',desc:'Forward outside three turns across the ice. Then forward inside. Alternate feet.'},
+    ],
+    stop: [
+      {name:'Progressive stops',desc:'Build speed gradually, snowplow stop. Increase speed each round. 6 reps.'},
+      {name:'Stop on command',desc:'Skate freely, stop immediately on a signal. Practice different stop types.'},
+    ],
+    spin: [
+      {name:'Two-foot spin entry',desc:'Enter from crossovers, spin on two feet. Count revolutions. Try for more each time.'},
+      {name:'One-foot spin centering',desc:'Enter spin, mark start spot. After spinning, check how far you traveled. Minimize.'},
+    ],
+  },
   figure: {
     jump: [
       {name:'Off-ice jump rotation drill',desc:'Stand on ground, practice arm pull-in and rotation. 3 sets of 10.'},
@@ -1299,6 +1328,11 @@ const DRILLS = {
       {name:'Turn combination drill',desc:'Three turns, mohawks, brackets in sequence. Alternate feet.'},
       {name:'Power stroking circuit',desc:'Full rink laps focusing on deep knee bend and full push extension.'},
     ],
+    move: [
+      {name:'Spread eagle hold',desc:'Hold spread eagle position along the boards for support. Build hip flexibility.'},
+      {name:'Spiral position practice',desc:'Glide on one foot, gradually raise free leg. Hold 5 seconds. Both legs.'},
+      {name:'Ina Bauer entry drill',desc:'Practice the foot position at the boards. Gradually add glide and back bend.'},
+    ],
   },
   hockey: {
     skating: [
@@ -1310,9 +1344,16 @@ const DRILLS = {
       {name:'Stop & start drill',desc:'Alternate hockey stops at each line. Both sides. 4 lengths.'},
       {name:'Progressive stopping',desc:'Build speed gradually, stop at each line. Increase speed each round.'},
     ],
-    step: [
-      {name:'Edge control slalom',desc:'Place pucks in a line. Weave through on one foot, alternating edges.'},
-      {name:'Tight circle edges',desc:'Smallest circles possible on each edge. Both feet, both edges.'},
+    start: [
+      {name:'V-start acceleration',desc:'V-start from standstill, sprint to the blue line. 5 reps. Time yourself.'},
+      {name:'Crossover start drill',desc:'Practice crossover starts in both directions. 5 reps each side.'},
+      {name:'Reaction start drill',desc:'Partner gives signal, explode from ready stance. Vary the start type.'},
+    ],
+    defensive: [
+      {name:'Mirror skating drill',desc:'Partner skates forward, you match backward. Switch roles. 5 reps each.'},
+      {name:'Gap control practice',desc:'Skate backward maintaining 2 stick-lengths from a forward skater. Full ice.'},
+      {name:'Angling to boards',desc:'Practice steering a partner toward the boards using body position. Both sides.'},
+      {name:'Box-out battles',desc:'1-on-1 in front of net. Maintain position against partner for 10 seconds.'},
     ],
     stick: [
       {name:'Stationary stickhandling',desc:'Stand still, roll puck side to side for 60 seconds. Head up. Widen gradually.'},
@@ -2437,7 +2478,7 @@ function openAnnotationModal(type) {
   const sel = document.getElementById('annoElement'); sel.innerHTML = '';
   const skills = getSkills();
   if (type === 'other') { sel.innerHTML = '<option value="">General Note</option>'; }
-  else { skills.filter(s => s.type === type || (type === 'step' && (s.type === 'skating' || s.type === 'stop')) || (type === 'stick' && s.type === 'stick')).forEach(s => { sel.innerHTML += `<option value="${s.id}">${s.name}</option>`; }); }
+  else { skills.filter(s => s.type === type || (type === 'step' && (s.type === 'skating' || s.type === 'stop' || s.type === 'balance' || s.type === 'locomotion' || s.type === 'edge' || s.type === 'turn' || s.type === 'start' || s.type === 'defensive' || s.type === 'move')) || (type === 'stick' && s.type === 'stick')).forEach(s => { sel.innerHTML += `<option value="${s.id}">${s.name}</option>`; }); }
   document.getElementById('annotationModal').classList.add('active');
 }
 
