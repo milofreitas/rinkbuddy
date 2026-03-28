@@ -890,6 +890,15 @@
         <div class="stat-box"><div class="stat-value" id="avgSuccess">--%</div><div class="stat-label">Avg Success</div></div>
       </div>
     </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px">My Discipline</div>
+      <div class="discipline-toggle" id="dashDiscToggle">
+        <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
+        <button class="disc-btn" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
+        <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text-dim);margin-top:8px" id="discDescription">Choose your discipline to customize skills, radar, and training plans.</p>
+    </div>
     <div class="card"><div class="card-title">What To Work On Next</div><div id="dashNextSkills"></div></div>
     <div class="card"><div class="card-title">Skills Radar</div><div class="radar-container"><canvas id="radarChart" width="260" height="260"></canvas></div></div>
     <div class="card"><div class="card-title">Goals</div><div id="goalsList"></div>
@@ -1822,6 +1831,8 @@ function switchDiscipline(d) {
   APP.discipline = d;
   saveData(APP);
   document.querySelectorAll('.disc-btn').forEach(b => b.classList.toggle('active', b.dataset.disc === d));
+  const desc = document.getElementById('discDescription');
+  if (desc) desc.textContent = d === 'hockey' ? 'Hockey skating skills — edges, stops, starts, and defensive moves.' : d === 'figure' ? 'Figure skating — jumps, spins, turns, and artistic elements.' : 'Foundational skills shared by all skaters — balance, edges, and basic moves.';
   renderAll();
 }
 
