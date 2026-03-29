@@ -91,7 +91,10 @@
     .skill-grid::-webkit-scrollbar-track{background:transparent}
     .skill-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
     .skill-grid .skill-card{width:155px;flex:0 0 155px;scroll-snap-align:start}
-    .skill-card{background:var(--surface2);border-radius:10px;padding:12px;text-align:center;border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative}
+    .skill-card{background:var(--surface2);border-radius:10px;padding:0;text-align:center;border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative;overflow:hidden}
+    .skill-card-thumb{width:100%;aspect-ratio:16/9;background:#000;overflow:hidden}
+    .skill-card-thumb img{width:100%;height:100%;object-fit:cover}
+    .skill-card-body{padding:10px 12px 12px}
     .skill-card:hover{border-color:var(--accent)}
     .skill-card.mastered{border-color:var(--success);background:rgba(52,211,153,0.05)}
     .skill-card.learning{border-color:var(--warning);background:rgba(251,191,36,0.05)}
@@ -2165,7 +2168,19 @@ function renderSkillTree() {
       const statusLabels = {mastered:'Mastered',learning:'Learning',new:'Ready',locked:'Locked'};
       const startHere = isStartHere(sk);
 
+      // Find best video clip for this skill
+      let bestClip = null;
+      videoFiles.forEach((v, vi) => {
+        v.annotations.filter(a => a.element === sk.id).forEach(a => {
+          if (!bestClip || a.quality > bestClip.quality) {
+            bestClip = { videoIdx: vi, time: a.time, quality: a.quality, blob: v._blob, url: v.url };
+          }
+        });
+      });
+
       html += `<div class="skill-card ${status}" onclick="showSkillDetail('${sk.id}')" title="${sk.tip||''}">
+        ${bestClip ? `<div class="skill-card-thumb" id="thumb-${sk.id}"></div>` : ''}
+        <div class="skill-card-body">
         ${startHere ? '<div class="start-here">START HERE</div>' : ''}
         ${startHere ? '<div style="height:10px"></div>' : ''}
         <div class="skill-name">${sk.name}</div>
@@ -2173,12 +2188,39 @@ function renderSkillTree() {
         <div class="skill-attempts">${d.attempts} att / ${d.landed} landed</div>
         <div class="skill-status status-${status}">${statusLabels[status]}</div>
         ${status === 'locked' && sk.prereqs.length ? `<div class="skill-prereq">Needs: ${sk.prereqs.map(p => skills.find(s=>s.id===p)?.name||p).join(', ')}</div>` : ''}
+        </div>
       </div>`;
     });
     html += '</div></div>';
   });
 
   document.getElementById('skillTree').innerHTML = html;
+
+  // Extract thumbnails for skill cards with video clips
+  requestAnimationFrame(() => {
+    const allSkills = getSkills();
+    allSkills.forEach(sk => {
+      const thumbEl = document.getElementById('thumb-' + sk.id);
+      if (!thumbEl) return;
+      let bestClip = null;
+      videoFiles.forEach(v => {
+        v.annotations.filter(a => a.element === sk.id).forEach(a => {
+          if (!bestClip || a.quality > bestClip.quality) {
+            bestClip = { time: a.time, blob: v._blob, url: v.url };
+          }
+        });
+      });
+      if (bestClip) {
+        extractFrameThumbnail(bestClip.blob || bestClip.url, bestClip.time, (dataUrl) => {
+          if (dataUrl) {
+            thumbEl.innerHTML = `<img src="${dataUrl}" alt="${sk.name}">`;
+          } else {
+            thumbEl.remove();
+          }
+        });
+      }
+    });
+  });
 
   // skill guide
   const totalSkills = skills.length;
