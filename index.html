@@ -941,6 +941,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
               <span id="camLabel">Rear Camera</span>
             </button>
+            <button class="btn btn-secondary btn-sm" id="camCloseBtn" onclick="closeWebcam()" style="display:none">Close Camera</button>
             <button class="btn btn-primary" id="recStartBtn" onclick="startRecording()" style="background:var(--danger)">Start Recording</button>
             <button class="btn btn-danger" id="recStopBtn" onclick="stopRecording()" style="display:none">Stop & Analyze</button>
           </div>
@@ -2592,11 +2593,22 @@ async function openWebcam() {
     document.getElementById('webcamPreviewWrap').style.display = 'block';
     document.getElementById('webcamStartWrap').style.display = 'none';
     document.getElementById('camSwitchBtn').style.display = '';
+    document.getElementById('camCloseBtn').style.display = '';
     document.getElementById('camLabel').textContent = currentFacingMode === 'user' ? 'Front Camera' : 'Rear Camera';
   } catch(e) {
     showToast('Camera access denied or unavailable');
     console.warn('Webcam error:', e);
   }
+}
+
+function closeWebcam() {
+  if (webcamStream) { webcamStream.getTracks().forEach(t => t.stop()); webcamStream = null; }
+  const preview = document.getElementById('webcamPreview');
+  if (preview) preview.srcObject = null;
+  document.getElementById('webcamPreviewWrap').style.display = 'none';
+  document.getElementById('webcamStartWrap').style.display = '';
+  document.getElementById('camSwitchBtn').style.display = 'none';
+  document.getElementById('camCloseBtn').style.display = 'none';
 }
 
 function switchCamera() {
