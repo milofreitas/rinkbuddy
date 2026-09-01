@@ -886,8 +886,10 @@
   <button class="nav-btn active" data-section="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
   <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
   <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
+  <button class="nav-btn" data-section="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Sessions</button>
+  <button class="nav-btn" data-section="compete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 22V2h4v20"/></svg>Compete</button>
   <button class="nav-btn nav-btn-primary" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
-  <button class="nav-btn" data-section="coach" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
+  <button class="nav-btn" data-section="coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
 </nav>
 
 <main class="content">
@@ -918,10 +920,13 @@
     </div>
     <div class="card"><div class="card-title">What To Work On Next</div><div id="dashNextSkills"></div></div>
     <div class="card"><div class="card-title">Skills Radar</div><div class="radar-container"><canvas id="radarChart" width="260" height="260"></canvas></div></div>
-    <div class="card" style="display:none"><div class="card-title">Goals</div><div id="goalsList"></div>
+    <div class="card"><div class="card-title">Progress Timeline</div><div id="progressTimeline" style="min-height:120px"></div></div>
+    <div class="card"><div class="card-title">Achievements</div><div id="achievementsList"></div></div>
+    <div class="card"><div class="card-title">Weekly Challenge</div><div id="weeklyChallenge"></div></div>
+    <div class="card"><div class="card-title">Goals</div><div id="goalsList"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="openGoalModal()">+ Add Goal</button>
     </div>
-    <div class="card" style="display:none"><div class="card-title">Recent Sessions</div><div id="recentSessions"></div></div>
+    <div class="card"><div class="card-title">Recent Sessions</div><div id="recentSessions"></div></div>
   </div>
 
   <!-- ═══ VIDEO ═══ -->
@@ -972,7 +977,9 @@
         <div class="video-controls">
           <button class="btn btn-sm btn-secondary" onclick="skipVideo(-5)">-5s</button>
           <button class="btn btn-sm btn-secondary" onclick="skipVideo(-1)">-1s</button>
+          <button class="btn btn-sm btn-secondary" onclick="stepFrame(-1)" title="Previous frame">&#9664;&#9664;</button>
           <div class="timeline-bar" id="timelineBar"><div class="timeline-progress" id="timelineProgress"></div></div>
+          <button class="btn btn-sm btn-secondary" onclick="stepFrame(1)" title="Next frame">&#9654;&#9654;</button>
           <button class="btn btn-sm btn-secondary" onclick="skipVideo(1)">+1s</button>
           <button class="btn btn-sm btn-secondary" onclick="skipVideo(5)">+5s</button>
           <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
@@ -1030,7 +1037,7 @@
   </div>
 
   <!-- ═══ SESSIONS (hidden for now) ═══ -->
-  <div class="section" id="sec-sessions" style="display:none !important">
+  <div class="section" id="sec-sessions">
     <div class="card">
       <div class="card-title">Log Session</div>
       <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="sessionTitle" placeholder="e.g., Morning practice"></div>
@@ -1052,7 +1059,7 @@
   </div>
 
   <!-- ═══ COMPETE (hidden for now) ═══ -->
-  <div class="section" id="sec-compete" style="display:none !important">
+  <div class="section" id="sec-compete">
     <div class="card">
       <div class="card-title">Add Result</div>
       <div class="form-group"><label class="form-label">Event</label><input class="form-input" id="compName" placeholder="e.g., Regional Championships"></div>
@@ -2291,10 +2298,22 @@ function showSkillDetail(id) {
     const best = clips[0];
     const clipStart = Math.max(0, best.time - 1);
     const clipEnd = best.time + 4;
+    const hasYT = guide && guide.yt;
     html += `<div style="margin-bottom:12px">
-      <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px">${status === 'mastered' ? 'Your best performance:' : 'Your clips:'}</div>
-      <video id="skillClipPlayer" src="${best.url}" controls playsinline style="width:100%;border-radius:8px;max-height:300px;background:#000"></video>
-      <div style="font-size:0.72rem;color:var(--text-dim);margin-top:4px">${best.videoName} — clip ${fmtTime(clipStart)}–${fmtTime(clipEnd)} — Quality: ${best.quality}/5${best.note ? ' — '+best.note : ''}</div>
+      <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px">${hasYT ? 'Compare: You vs. Tutorial' : status === 'mastered' ? 'Your best performance:' : 'Your clips:'}</div>
+      <div style="display:${hasYT?'grid':'block'};grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          ${hasYT?'<div style="font-size:0.68rem;color:var(--accent);font-weight:600;margin-bottom:4px">Your Clip</div>':''}
+          <video id="skillClipPlayer" src="${best.url}" controls playsinline style="width:100%;border-radius:8px;max-height:250px;background:#000"></video>
+          <div style="font-size:0.68rem;color:var(--text-dim);margin-top:3px">${best.videoName} — ${fmtTime(clipStart)}–${fmtTime(clipEnd)} Q${best.quality}/5</div>
+        </div>
+        ${hasYT ? `<div>
+          <div style="font-size:0.68rem;color:var(--accent3);font-weight:600;margin-bottom:4px">Reference</div>
+          <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:8px;overflow:hidden;background:#000">
+            <iframe src="https://www.youtube.com/embed/${guide.yt}?rel=0" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen loading="lazy"></iframe>
+          </div>
+        </div>` : ''}
+      </div>
     </div>`;
     // Set video to exact clip segment and auto-stop at end
     setTimeout(() => {
@@ -2993,6 +3012,16 @@ timelineBar.addEventListener('click', e => { const r=timelineBar.getBoundingClie
 function skipVideo(s) { videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime + s); }
 function cycleSpeed() { speedIdx=(speedIdx+1)%speeds.length; videoPlayer.playbackRate=speeds[speedIdx]; document.getElementById('speedBtn').textContent=speeds[speedIdx]+'x'; }
 
+function stepFrame(dir) {
+  const vp = document.getElementById('videoPlayer');
+  if (!vp || !vp.duration) return;
+  vp.pause();
+  // Assume ~30fps if we can't determine exact framerate
+  const frameTime = 1 / 30;
+  vp.currentTime = Math.max(0, Math.min(vp.duration, vp.currentTime + dir * frameTime));
+}
+
+
 function openAnnotationModal(type) {
   document.getElementById('annoType').value = type;
   document.getElementById('annoTime').textContent = fmtTime(videoPlayer.currentTime);
@@ -3563,7 +3592,7 @@ function renderDashboard() {
   document.getElementById('totalSkills').textContent = tracked;
   const wa = getSkills().filter(s=>getSkillData(s.id).attempts>0);
   if (wa.length) { const avg=wa.reduce((s,sk)=>{const d=getSkillData(sk.id);return s+(d.landed/d.attempts);},0)/wa.length; document.getElementById('avgSuccess').textContent=Math.round(avg*100)+'%'; }
-  renderRecentSessions(); renderNextSkills(); drawRadarChart();
+  renderRecentSessions(); renderNextSkills(); drawRadarChart(); renderProgressTimeline(); renderAchievements(); renderWeeklyChallenge();
 }
 
 function renderRecentSessions() {
@@ -3573,6 +3602,131 @@ function renderRecentSessions() {
     return `<div class="session-item"><div class="session-date"><div class="session-day">${d.getDate()}</div><div class="session-month">${d.toLocaleDateString('en',{month:'short'})}</div></div>
     <div class="session-info"><div class="session-title">${s.title}</div><div class="session-meta">${s.type} &bull; ${s.duration}min</div></div>
     ${s.rating?'<div class="session-score">'+s.rating+'/10</div>':''}</div>`; }).join('');
+}
+
+function renderProgressTimeline() {
+  const el = document.getElementById('progressTimeline');
+  if (!el) return;
+  const logs = [...(APP.elementLogs || [])].sort((a, b) => a.date.localeCompare(b.date));
+  if (!logs.length) { el.innerHTML = '<div class="empty-state"><p>Log skills to see your progress over time</p></div>'; return; }
+
+  // Group by week
+  const weeks = {};
+  logs.forEach(log => {
+    const d = new Date(log.date + 'T00:00:00');
+    const weekStart = new Date(d); weekStart.setDate(d.getDate() - d.getDay());
+    const key = weekStart.toISOString().split('T')[0];
+    if (!weeks[key]) weeks[key] = { skills: new Set(), attempts: 0, landed: 0 };
+    if (log.elementId) weeks[key].skills.add(log.elementId);
+    weeks[key].attempts += log.attempts || 0;
+    weeks[key].landed += log.landed || 0;
+  });
+
+  const entries = Object.entries(weeks).sort((a, b) => a[0].localeCompare(b[0])).slice(-8);
+  const maxAttempts = Math.max(...entries.map(([, w]) => w.attempts), 1);
+
+  el.innerHTML = `<div style="display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px">` +
+    entries.map(([key, w]) => {
+      const d = new Date(key + 'T00:00:00');
+      const label = d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+      const h = Math.max(8, (w.attempts / maxAttempts) * 80);
+      const rate = w.attempts > 0 ? Math.round((w.landed / w.attempts) * 100) : 0;
+      const color = rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--accent)';
+      return `<div style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+        <div style="font-size:0.6rem;color:var(--text-dim);margin-bottom:2px">${rate}%</div>
+        <div style="width:100%;max-width:32px;height:${h}px;background:${color};border-radius:4px 4px 0 0;opacity:0.8" title="${w.attempts} attempts, ${w.skills.size} skills"></div>
+        <div style="font-size:0.55rem;color:var(--text-dim);margin-top:3px;white-space:nowrap">${label}</div>
+      </div>`;
+    }).join('') + '</div>' +
+    `<div style="font-size:0.65rem;color:var(--text-dim);text-align:center;margin-top:6px">Weekly success rate (last ${entries.length} weeks)</div>`;
+}
+
+// ═══════════════════════════════════════════
+//  ACHIEVEMENTS
+// ═══════════════════════════════════════════
+const ACHIEVEMENTS = [
+  { id: 'first-log', icon: '⭐', name: 'First Steps', desc: 'Log your first skill attempt', check: () => (APP.elementLogs || []).length >= 1 },
+  { id: 'five-skills', icon: '🎯', name: 'Getting Serious', desc: 'Track 5 different skills', check: () => getSkills().filter(s => getSkillData(s.id).attempts > 0).length >= 5 },
+  { id: 'first-master', icon: '🏆', name: 'Mastery!', desc: 'Master your first skill', check: () => getSkills().some(s => getStatus(s) === 'mastered') },
+  { id: 'ten-masters', icon: '👑', name: 'Skill Collector', desc: 'Master 10 skills', check: () => getSkills().filter(s => getStatus(s) === 'mastered').length >= 10 },
+  { id: 'first-video', icon: '📹', name: 'Lights Camera Action', desc: 'Upload your first video', check: () => videoFiles.length >= 1 },
+  { id: 'ai-scan', icon: '🤖', name: 'AI Powered', desc: 'Run AI Scan on a video', check: () => videoFiles.some(v => v.annotations.some(a => a.note && a.note.includes('[AI detected]'))) },
+  { id: 'streak-3', icon: '🔥', name: 'On Fire', desc: '3-day practice streak', check: () => (APP.settings.streak || 0) >= 3 },
+  { id: 'streak-7', icon: '💎', name: 'Diamond Streak', desc: '7-day practice streak', check: () => (APP.settings.streak || 0) >= 7 },
+  { id: 'first-session', icon: '📝', name: 'Session Logger', desc: 'Log a practice session', check: () => APP.sessions.length >= 1 },
+  { id: 'first-comp', icon: '🥇', name: 'Competitor', desc: 'Log a competition result', check: () => (APP.competitions || []).length >= 1 },
+];
+
+function renderAchievements() {
+  const el = document.getElementById('achievementsList');
+  if (!el) return;
+  const earned = ACHIEVEMENTS.filter(a => a.check());
+  const locked = ACHIEVEMENTS.filter(a => !a.check());
+
+  if (!earned.length && !locked.length) { el.innerHTML = '<div class="empty-state"><p>Start skating to earn badges!</p></div>'; return; }
+
+  el.innerHTML = (earned.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:${locked.length?10:0}px">` +
+    earned.map(a => `<div style="background:rgba(52,211,153,0.1);border:1px solid var(--success);border-radius:8px;padding:6px 10px;text-align:center;min-width:70px" title="${a.desc}">
+      <div style="font-size:1.2rem">${a.icon}</div>
+      <div style="font-size:0.6rem;font-weight:600;color:var(--success)">${a.name}</div>
+    </div>`).join('') + '</div>' : '') +
+    (locked.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px">` +
+    locked.map(a => `<div style="background:var(--surface2);border-radius:8px;padding:6px 10px;text-align:center;min-width:70px;opacity:0.4" title="${a.desc}">
+      <div style="font-size:1.2rem">🔒</div>
+      <div style="font-size:0.6rem;color:var(--text-dim)">${a.name}</div>
+    </div>`).join('') + '</div>' : '');
+}
+
+// ═══════════════════════════════════════════
+//  WEEKLY CHALLENGE
+// ═══════════════════════════════════════════
+function renderWeeklyChallenge() {
+  const el = document.getElementById('weeklyChallenge');
+  if (!el) return;
+
+  // Pick a challenge based on current week number
+  const now = new Date();
+  const weekNum = Math.floor((now - new Date(now.getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
+
+  const skills = getSkills();
+  const learning = skills.filter(s => getStatus(s) === 'learning');
+  const ready = skills.filter(s => getStatus(s) === 'new');
+  const targetSkills = learning.length ? learning : ready;
+
+  if (!targetSkills.length) {
+    el.innerHTML = '<div class="empty-state"><p>Start tracking skills to get weekly challenges!</p></div>';
+    return;
+  }
+
+  const target = targetSkills[weekNum % targetSkills.length];
+  const d = getSkillData(target.id);
+  const goalAttempts = 10;
+  const goalRate = 80;
+  const currentRate = d.attempts > 0 ? Math.round((d.landed / d.attempts) * 100) : 0;
+  const attemptProgress = Math.min(100, Math.round((d.attempts / goalAttempts) * 100));
+  const rateProgress = Math.min(100, Math.round((currentRate / goalRate) * 100));
+
+  el.innerHTML = `<div style="margin-bottom:10px">
+    <div style="font-size:0.82rem;font-weight:600;color:var(--accent)">This Week: ${target.name}</div>
+    <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px">Log ${goalAttempts} attempts and hit ${goalRate}% success rate</div>
+  </div>
+  <div style="margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);margin-bottom:3px">
+      <span>Attempts: ${d.attempts}/${goalAttempts}</span><span>${attemptProgress}%</span>
+    </div>
+    <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+      <div style="height:100%;width:${attemptProgress}%;background:var(--accent);border-radius:3px;transition:width 0.3s"></div>
+    </div>
+  </div>
+  <div>
+    <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-dim);margin-bottom:3px">
+      <span>Success Rate: ${currentRate}%/${goalRate}%</span><span>${rateProgress}%</span>
+    </div>
+    <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+      <div style="height:100%;width:${rateProgress}%;background:${currentRate>=goalRate?'var(--success)':'var(--warning)'};border-radius:3px;transition:width 0.3s"></div>
+    </div>
+  </div>
+  ${attemptProgress >= 100 && currentRate >= goalRate ? '<div style="text-align:center;margin-top:8px;font-size:0.82rem;color:var(--success);font-weight:600">🎉 Challenge Complete!</div>' : ''}`;
 }
 
 function drawRadarChart() {
