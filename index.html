@@ -885,11 +885,7 @@
 <nav class="nav">
   <button class="nav-btn active" data-section="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
   <button class="nav-btn" data-section="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Skills</button>
-  <button class="nav-btn" data-section="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Training</button>
-  <button class="nav-btn" data-section="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Sessions</button>
-  <button class="nav-btn" data-section="compete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 22V2h4v20"/></svg>Compete</button>
   <button class="nav-btn nav-btn-primary" data-section="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video</button>
-  <button class="nav-btn" data-section="coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Coach</button>
 </nav>
 
 <main class="content">
@@ -899,8 +895,8 @@
     <div id="onboardingArea"></div>
     <div class="card"><div class="card-title">Overview</div>
       <div class="card-grid">
-        <div class="stat-box"><div class="stat-value" id="totalSessions">0</div><div class="stat-label">Sessions</div></div>
-        <div class="stat-box"><div class="stat-value" id="totalIceTime">0m</div><div class="stat-label">Ice Time</div></div>
+        <div class="stat-box"><div class="stat-value" id="totalVideos">0</div><div class="stat-label">Videos</div></div>
+        <div class="stat-box"><div class="stat-value" id="totalTags">0</div><div class="stat-label">Skills Tagged</div></div>
         <div class="stat-box"><div class="stat-value" id="totalSkills">0</div><div class="stat-label">Skills Tracked</div></div>
         <div class="stat-box"><div class="stat-value" id="avgSuccess">--%</div><div class="stat-label">Avg Success</div></div>
       </div>
@@ -909,7 +905,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div>
           <div class="card-title" style="margin-bottom:4px">My Discipline</div>
-          <p style="font-size:0.72rem;color:var(--text-dim);margin:0" id="discDescription">Choose your discipline to customize skills, radar, and training plans.</p>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin:0" id="discDescription">Choose your discipline to customize your skills and radar.</p>
         </div>
         <div class="discipline-toggle" id="dashDiscToggle">
           <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
@@ -926,11 +922,16 @@
     <div class="card"><div class="card-title">Goals</div><div id="goalsList"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="openGoalModal()">+ Add Goal</button>
     </div>
-    <div class="card"><div class="card-title">Recent Sessions</div><div id="recentSessions"></div></div>
+    <div class="card"><div class="card-title">Recent Videos</div><div id="recentVideos"></div></div>
   </div>
 
   <!-- ═══ VIDEO ═══ -->
   <div class="section" id="sec-video">
+    <div class="card" id="practiceCard">
+      <div class="card-title" style="margin-bottom:6px">What are you practicing?</div>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin:0 0 8px">Optional. Pick the skill before you record or upload and the video is tagged with it, so you only confirm the moment it happens.</p>
+      <select class="form-select" id="practiceSkill"></select>
+    </div>
     <div class="card" id="webcamCard">
       <div class="card-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
@@ -948,7 +949,7 @@
             </button>
             <button class="btn btn-secondary btn-sm" id="camCloseBtn" onclick="closeWebcam()" style="display:none">Close Camera</button>
             <button class="btn btn-primary" id="recStartBtn" onclick="startRecording()" style="background:var(--danger)">Start Recording</button>
-            <button class="btn btn-danger" id="recStopBtn" onclick="stopRecording()" style="display:none">Stop & Analyze</button>
+            <button class="btn btn-danger" id="recStopBtn" onclick="stopRecording()" style="display:none">Stop Recording</button>
           </div>
         </div>
         <div id="webcamStartWrap" style="text-align:center;padding:20px">
@@ -956,7 +957,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             Open Camera
           </button>
-          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px">Record yourself skating for real-time analysis</p>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px">Record yourself, then tag the skills you did</p>
         </div>
       </div>
     </div>
@@ -989,18 +990,12 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg>
             AI Scan
           </button>
+          <button class="btn btn-sm btn-primary" id="tagSkillBtn" onclick="openTagModal()">+ Tag Skill</button>
           <button class="btn btn-sm btn-secondary" id="speedBtn" onclick="cycleSpeed()">1x</button>
         </div>
+        <div id="intentPrompt"></div>
         <div id="scanProgress" style="display:none"></div>
         <div id="annotationList"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Save as Session</div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="videoSessionTitle"></div>
-          <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="videoSessionDate"></div>
-        </div>
-        <button class="btn btn-primary" onclick="saveVideoSession()">Save Session with Annotations</button>
       </div>
     </div>
   </div>
@@ -1308,15 +1303,15 @@
 
 <!-- Modals -->
 <div class="modal-overlay" id="annotationModal"><div class="modal">
-  <div class="modal-title">Add Annotation</div>
-  <input type="hidden" id="annoType">
-  <div class="form-group"><label class="form-label">Time: <span id="annoTime">0:00</span></label></div>
+  <div class="modal-title" id="annoModalTitle">Tag Skill</div>
+  <input type="hidden" id="annoEditIdx" value="">
+  <div class="form-group"><label class="form-label">At <span id="annoTime">0:00</span> in the video</label></div>
   <div class="form-group"><label class="form-label">Skill</label><select class="form-select" id="annoElement"></select></div>
-  <div class="form-group"><label class="form-label">Quality (1-5)</label>
-    <select class="form-select" id="annoQuality"><option value="5">5 - Perfect</option><option value="4">4 - Clean</option><option value="3" selected>3 - Landed</option><option value="2">2 - Shaky</option><option value="1">1 - Fall</option></select>
+  <div class="form-group"><label class="form-label">How did it go?</label>
+    <select class="form-select" id="annoQuality"><option value="5">5 - Perfect</option><option value="4">4 - Clean</option><option value="3" selected>3 - Landed</option><option value="2">2 - Shaky</option><option value="1">1 - Fell / missed</option></select>
   </div>
   <div class="form-group"><label class="form-label">Note</label><input class="form-input" id="annoNote" placeholder="e.g., Good height, under-rotated"></div>
-  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('annotationModal')">Cancel</button><button class="btn btn-primary" onclick="saveAnnotation()">Save</button></div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('annotationModal')">Cancel</button><button class="btn btn-primary" onclick="saveAnnotation()">Save Tag</button></div>
 </div></div>
 
 <div class="modal-overlay" id="elementModal"><div class="modal">
@@ -1396,7 +1391,7 @@
       <div id="accSubscription" style="margin-top:14px;padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
         <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px">Subscription</div>
         <div id="accSubFree">
-          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong>Free</strong> plan. Upgrade to Pro for unlimited videos, auto-analysis, training plans, and more.</p>
+          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong>Free</strong> plan. Upgrade to Pro for unlimited videos and AI skill suggestions.</p>
           <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;background:linear-gradient(135deg,var(--accent3),var(--accent2))" onclick="doSubscribe()">Upgrade to Pro — $9.99/mo</button>
         </div>
         <div id="accSubPro" style="display:none">
@@ -2115,6 +2110,11 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 // ═══════════════════════════════════════════
 //  SKILL TREE
 // ═══════════════════════════════════════════
+function switchTab(section) {
+  const btn = document.querySelector('.nav-btn[data-section="' + section + '"]');
+  if (btn) btn.click();
+}
+
 function isUnlocked(skill) {
   if (!skill.prereqs || !skill.prereqs.length) return true;
   return skill.prereqs.every(pid => {
@@ -2179,7 +2179,7 @@ function renderSkillTree() {
       // Find best video clip for this skill
       let bestClip = null;
       videoFiles.forEach((v, vi) => {
-        v.annotations.filter(a => a.element === sk.id).forEach(a => {
+        v.annotations.filter(a => a.element === sk.id && isConfirmedTag(a)).forEach(a => {
           if (!bestClip || a.quality > bestClip.quality) {
             bestClip = { videoIdx: vi, time: a.time, quality: a.quality, blob: v._blob, url: v.url };
           }
@@ -2212,7 +2212,7 @@ function renderSkillTree() {
       if (!thumbEl) return;
       let bestClip = null;
       videoFiles.forEach(v => {
-        v.annotations.filter(a => a.element === sk.id).forEach(a => {
+        v.annotations.filter(a => a.element === sk.id && isConfirmedTag(a)).forEach(a => {
           if (!bestClip || a.quality > bestClip.quality) {
             bestClip = { time: a.time, blob: v._blob, url: v.url };
           }
@@ -2264,7 +2264,7 @@ function showSkillDetail(id) {
   // Find video clips for this skill
   const clips = [];
   videoFiles.forEach((v, vi) => {
-    v.annotations.filter(a => a.element === id).forEach(a => {
+    v.annotations.filter(a => a.element === id && isConfirmedTag(a)).forEach(a => {
       clips.push({ videoIdx: vi, videoName: v.name, time: a.time, quality: a.quality, note: a.note, url: v.url });
     });
   });
@@ -2343,14 +2343,14 @@ function showSkillDetail(id) {
     }
   } else {
     html += `<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.82rem;background:var(--surface2);border-radius:8px">
-      No video clips yet. Upload a video in the <strong>Video</strong> tab and run <strong>AI Scan</strong> to detect this skill.
+      No video clips yet. Record or upload yourself doing it and tag the moment.
     </div>`;
   }
 
   // Show thumbnail frames from AI-detected annotations
   const frameClips = [];
   videoFiles.forEach((v, vi) => {
-    v.annotations.filter(a => a.element === id).forEach(a => {
+    v.annotations.filter(a => a.element === id && isConfirmedTag(a)).forEach(a => {
       frameClips.push({ videoIdx: vi, videoName: v.name, time: a.time, quality: a.quality, note: a.note || '', blob: v._blob, url: v.url });
     });
   });
@@ -2385,6 +2385,7 @@ function showSkillDetail(id) {
     }, 100);
   }
 
+  html += `<button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="practiceSkill('${sk.id}')">Record / upload this skill</button>`;
   document.getElementById('skillDetailTitle').textContent = sk.name;
   document.getElementById('skillDetailContent').innerHTML = html;
   document.getElementById('skillDetailModal').classList.add('active');
@@ -2508,7 +2509,8 @@ const VideoDB = {
         blob: blob,
         size: videoEntry.size,
         duration: videoEntry.duration,
-        annotations: videoEntry.annotations || []
+        annotations: videoEntry.annotations || [],
+        intentSkill: videoEntry.intentSkill || ''
       });
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
@@ -2558,6 +2560,7 @@ const VideoDB = {
       const entry = {
         id: rec.id, _blob: rec.blob, name: rec.name,
         size: rec.size, duration: rec.duration, annotations: rec.annotations || [],
+        intentSkill: rec.intentSkill || '',
         get url() {
           if (!url) url = URL.createObjectURL(this._blob);
           return url;
@@ -2567,6 +2570,7 @@ const VideoDB = {
       videoFiles.push(entry);
     });
     renderVideoLibrary(); renderUploadArea();
+    if (typeof renderDashboard === 'function') { renderDashboard(); renderSkillTree(); }
   } catch(e) { console.warn('Could not restore videos:', e); }
 })();
 
@@ -2581,7 +2585,7 @@ function renderUploadArea() {
   area.innerHTML = `<div class="upload-zone${hasVids?' compact':''}" id="uploadZone">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:${hasVids?'20px':'48px'};height:${hasVids?'20px':'48px'}"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     <p>${hasVids?'Drop more videos here or <span class="highlight">browse</span>':'Drag & drop skating videos or <span class="highlight">browse</span>'}</p>
-    ${hasVids?'':'<p style="font-size:0.7rem;margin-top:4px">MP4, MOV, WebM — videos are auto-analyzed</p>'}
+    ${hasVids?'':'<p style="font-size:0.7rem;margin-top:4px">MP4, MOV, WebM — then tag the skills you did</p>'}
     <input type="file" id="videoInput" accept="video/*" multiple style="display:none">
   </div>`;
   const zone = document.getElementById('uploadZone');
@@ -2680,14 +2684,13 @@ function processRecording() {
   const now = new Date();
   const name = 'Recording_' + now.toISOString().slice(0,16).replace(/[T:]/g, '-');
   const id = 'vid_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-  const entry = { id, file: blob, url, name, size: blob.size, duration: (Date.now() - recStartTime) / 1000, annotations: [] };
+  const entry = { id, file: blob, url, name, size: blob.size, duration: (Date.now() - recStartTime) / 1000, annotations: [], intentSkill: currentPracticeSkill() };
 
   videoFiles.push(entry);
   VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
   renderVideoLibrary(); renderUploadArea();
 
-  // Auto-process the recording
-  autoProcessVideos([entry]);
+  selectVideo(videoFiles.length - 1);
   recordedChunks = [];
 }
 
@@ -2712,7 +2715,7 @@ function addVideos(fl) {
     if (isDupe) { dupeCount++; return; }
     const url = URL.createObjectURL(f);
     const id = 'vid_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-    const entry = {id,file:f,url,name:cleanName,size:f.size,duration:0,annotations:[]};
+    const entry = {id,file:f,url,name:cleanName,size:f.size,duration:0,annotations:[],intentSkill:currentPracticeSkill()};
     const tmp = document.createElement('video'); tmp.preload='metadata'; tmp.src=url;
     tmp.onloadedmetadata = () => {
       entry.duration = tmp.duration;
@@ -2725,215 +2728,8 @@ function addVideos(fl) {
   });
   if (dupeCount > 0) showToast(dupeCount + ' duplicate video' + (dupeCount > 1 ? 's' : '') + ' skipped');
   renderVideoLibrary(); renderUploadArea();
-  if (videoFiles.length >= 1 && activeVideoIdx < 0) selectVideo(0);
-  // Auto-process new videos (only truly new ones) — Pro only
-  if (newEntries.length > 0 && isProUser()) autoProcessVideos(newEntries);
-}
-
-function autoProcessVideos(entries) {
-  const overlay = document.createElement('div');
-  overlay.className = 'video-processing';
-  overlay.id = 'processingOverlay';
-  overlay.innerHTML = `
-    <div class="processing-spinner"></div>
-    <div class="processing-title">Analyzing Videos...</div>
-    <div class="processing-status">${entries.length} video${entries.length>1?'s':''} detected</div>
-    <ul class="processing-steps">
-      <li class="active" id="step-scan"><span class="check">...</span> Scanning video frames</li>
-      <li id="step-detect"><span class="check">&nbsp;</span> Detecting skating skills</li>
-      <li id="step-match"><span class="check">&nbsp;</span> Matching to skill tree</li>
-      <li id="step-log"><span class="check">&nbsp;</span> Logging performance data</li>
-    </ul>
-    <div id="processingResults"></div>
-  `;
-  document.body.appendChild(overlay);
-
-  // Wait for video metadata to load, then process
-  const metaPromises = entries.map(entry => new Promise(resolve => {
-    const tmp = document.createElement('video');
-    tmp.preload = 'metadata'; tmp.src = entry.url;
-    tmp.onloadedmetadata = () => { entry.duration = tmp.duration; resolve(); };
-    tmp.onerror = () => resolve();
-    setTimeout(resolve, 5000); // fallback timeout
-  }));
-
-  Promise.all(metaPromises).then(() => {
-    setTimeout(() => advanceProcessing(entries, 1), 800);
-  });
-}
-
-function advanceProcessing(entries, step) {
-  const steps = ['step-scan','step-detect','step-match','step-log'];
-  // Mark previous step done
-  if (step > 0) {
-    const prev = document.getElementById(steps[step-1]);
-    if (prev) { prev.className = 'done'; prev.querySelector('.check').textContent = '\u2713'; }
-  }
-  if (step < steps.length) {
-    const cur = document.getElementById(steps[step]);
-    if (cur) { cur.className = 'active'; cur.querySelector('.check').textContent = '...'; }
-    setTimeout(() => advanceProcessing(entries, step + 1), 700 + Math.random() * 400);
-    return;
-  }
-  // All steps done — run actual analysis
-  const results = analyzeAndLogSkills(entries);
-  showProcessingResults(results);
-}
-
-function analyzeAndLogSkills(entries) {
-  const disc = APP.discipline || 'foundations';
-  const discSkills = SKILLS[disc] || SKILLS.foundations;
-  // Always include foundation skills alongside the current discipline's skills
-  const skills = disc === 'foundations' ? discSkills : SKILLS.foundations.concat(discSkills);
-  const totalDuration = entries.reduce((s,e) => s + (e.duration || 60), 0);
-  const results = [];
-
-  // Determine which skills to auto-detect based on progression
-  // 1. Skills currently "learning" — user is practicing them
-  // 2. Skills that are "new" (unlocked, 0 attempts) with no prereqs or mastered prereqs — likely being tried
-  // 3. Already mastered skills get reinforcement attempts
-  const candidateSkills = [];
-
-  skills.forEach(sk => {
-    const status = getStatus(sk);
-    const d = getSkillData(sk.id);
-    if (status === 'mastered') {
-      // Reinforcement: add 1-2 more successful attempts
-      candidateSkills.push({ skill: sk, attempts: 1 + Math.floor(Math.random()*2), successRate: 0.9 + Math.random()*0.1, reason: 'reinforcement' });
-    } else if (status === 'learning') {
-      // Actively working on: add 2-3 attempts at their current rate + slight improvement
-      const curRate = d.attempts > 0 ? d.landed / d.attempts : 0.5;
-      const improvedRate = Math.min(curRate + 0.05 + Math.random()*0.1, 0.95);
-      candidateSkills.push({ skill: sk, attempts: 2 + Math.floor(Math.random()*2), successRate: improvedRate, reason: 'practice' });
-    } else if (status === 'new' && isStartHere(sk)) {
-      // New skill, ready to try: add 1-2 initial attempts at lower success
-      candidateSkills.push({ skill: sk, attempts: 1 + Math.floor(Math.random()*2), successRate: 0.3 + Math.random()*0.3, reason: 'first-try' });
-    }
-  });
-
-  // Scale attempts based on video duration (longer session = more attempts)
-  const durationMinutes = totalDuration / 60;
-  const scaleFactor = Math.max(0.5, Math.min(2, durationMinutes / 3));
-
-  const today = new Date().toISOString().split('T')[0];
-
-  // Check what was already logged today to prevent double-counting
-  const todayLogs = APP.elementLogs.filter(l => l.date === today && l.notes && l.notes.includes('Auto-detected'));
-  const todaySkillAttempts = {};
-  todayLogs.forEach(l => { todaySkillAttempts[l.elementId] = (todaySkillAttempts[l.elementId] || 0) + l.attempts; });
-
-  candidateSkills.forEach(c => {
-    // Cap daily auto-detected attempts per skill to avoid inflation
-    const alreadyToday = todaySkillAttempts[c.skill.id] || 0;
-    const maxPerDay = c.reason === 'reinforcement' ? 3 : 6;
-    if (alreadyToday >= maxPerDay) return; // already logged enough today
-
-    let att = Math.max(1, Math.round(c.attempts * scaleFactor));
-    att = Math.min(att, maxPerDay - alreadyToday); // don't exceed daily cap
-    const landed = Math.round(att * c.successRate);
-    const d = getSkillData(c.skill.id);
-    d.attempts += att;
-    d.landed += landed;
-
-    const quality = Math.round(c.successRate * 5);
-    APP.elementLogs.push({
-      id: Date.now() + Math.random(),
-      elementId: c.skill.id,
-      elementName: c.skill.name,
-      date: today,
-      attempts: att,
-      landed: landed,
-      quality: quality,
-      notes: 'Auto-detected from video: ' + entries.map(e=>e.name).join(', ')
-    });
-
-    // Note: Video annotations are NOT auto-created here — random timestamps
-    // don't match actual skill moments. Users should annotate clips manually
-    // in the Video tab, or use the initial frame-by-frame analysis.
-
-    const newStatus = getStatus(c.skill);
-    results.push({
-      name: c.skill.name,
-      attempts: att,
-      landed: landed,
-      rate: Math.round((d.landed / d.attempts) * 100),
-      status: newStatus,
-      reason: c.reason,
-      justMastered: newStatus === 'mastered' && c.reason !== 'reinforcement'
-    });
-  });
-
-  // Sort annotations by time and persist to IndexedDB
-  entries.forEach(e => {
-    e.annotations.sort((a,b) => a.time - b.time);
-    if (e.id) VideoDB.save(e).catch(()=>{});
-  });
-
-  // Create a session
-  APP.sessions.push({
-    id: Date.now(),
-    title: 'Video Analysis — ' + entries.map(e=>e.name).join(', '),
-    date: today,
-    duration: Math.round(durationMinutes),
-    type: disc === 'hockey' ? 'Hockey Practice' : disc === 'foundations' ? 'Foundations Practice' : 'Freestyle',
-    focus: results.map(r=>r.name).slice(0,5).join(', '),
-    rating: 4,
-    notes: `Auto-analyzed ${entries.length} video${entries.length>1?'s':''} (${Math.round(durationMinutes)}min). ${results.length} skills detected.`
-  });
-
-  updateStreak(today);
-  saveData(APP);
-  renderAll();
-  renderVideoLibrary();
-  renderAnnotations();
-
-  return results;
-}
-
-function showProcessingResults(results) {
-  const container = document.getElementById('processingResults');
-  if (!container) return;
-
-  const mastered = results.filter(r => r.justMastered);
-  const improved = results.filter(r => r.reason === 'practice');
-  const newTries = results.filter(r => r.reason === 'first-try');
-
-  let html = `<div class="processing-results"><h3>\u2705 Analysis Complete</h3>`;
-  html += `<div style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">${results.length} skills detected across your videos</div>`;
-
-  if (mastered.length) {
-    html += `<div style="font-size:0.75rem;color:var(--success);font-weight:600;margin:8px 0 4px">Newly Mastered:</div>`;
-    mastered.forEach(r => {
-      html += `<div class="result-skill"><span>${r.name}</span><span class="result-badge good">${r.rate}% Mastered</span></div>`;
-    });
-  }
-  if (improved.length) {
-    html += `<div style="font-size:0.75rem;color:var(--warning);font-weight:600;margin:8px 0 4px">Improving:</div>`;
-    improved.forEach(r => {
-      html += `<div class="result-skill"><span>${r.name}</span><span class="result-badge ok">${r.rate}% (${r.attempts} att)</span></div>`;
-    });
-  }
-  if (newTries.length) {
-    html += `<div style="font-size:0.75rem;color:var(--accent);font-weight:600;margin:8px 0 4px">First Attempts:</div>`;
-    newTries.forEach(r => {
-      html += `<div class="result-skill"><span>${r.name}</span><span class="result-badge new">${r.landed}/${r.attempts} landed</span></div>`;
-    });
-  }
-
-  html += `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:10px;text-align:center">To link video clips to skills, annotate specific moments in the Video player.</div>`;
-  html += `<button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="document.getElementById('processingOverlay').remove()">Got it</button>`;
-  html += `</div>`;
-  container.innerHTML = html;
-
-  // Update status text
-  const statusEl = document.querySelector('.processing-status');
-  if (statusEl) statusEl.textContent = 'Skills updated in your profile';
-  // Hide spinner
-  const spinner = document.querySelector('.processing-spinner');
-  if (spinner) spinner.style.display = 'none';
-  // Update title
-  const title = document.querySelector('.processing-title');
-  if (title) title.textContent = 'Video Analysis Complete';
+  if (newEntries.length > 0) selectVideo(videoFiles.indexOf(newEntries[newEntries.length - 1]));
+  renderDashboard();
 }
 
 function renderVideoLibrary() {
@@ -2948,10 +2744,11 @@ function renderVideoLibrary() {
       : `<div class="video-thumb-preview"><video src="${v.url}" muted preload="metadata" style="pointer-events:none"></video></div>`;
     return `<div class="video-thumb ${i===activeVideoIdx?'active':''}" onclick="selectVideo(${i})" style="position:relative">
     ${preview}
-    ${v.annotations.length?`<div class="video-thumb-badge">${v.annotations.length} marks</div>`:''}
+    ${v.annotations.length?`<div class="video-thumb-badge">${v.annotations.length} tag${v.annotations.length>1?'s':''}</div>`:''}
     <button onclick="event.stopPropagation();deleteVideo(${i})" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.7);border:none;color:var(--danger);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;z-index:2" title="Delete video">&times;</button>
     <div class="video-thumb-name">${v.name}</div>
     <div class="video-thumb-meta">${fmtDur(v.duration)} &bull; ${fmtSize(v.size)}</div>
+    ${tagSkillNames(v).length ? `<div class="video-thumb-meta" style="color:var(--accent)">${tagSkillNames(v).slice(0,3).map(escHtml).join(', ')}</div>` : ''}
   </div>`;
   }).join('');
   lib.querySelectorAll('video').forEach(v => v.addEventListener('loadeddata', () => { v.currentTime = 1; }));
@@ -2996,8 +2793,6 @@ function selectVideo(i) {
   playerArea.style.display = 'block';
   document.getElementById('activeVideoTitle').textContent = v.name;
   speedIdx = 3; document.getElementById('speedBtn').textContent = '1x'; videoPlayer.playbackRate = 1;
-  document.getElementById('videoSessionDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('videoSessionTitle').value = v.name;
   renderAnnotations(); renderVideoLibrary();
   setTimeout(() => playerArea.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
@@ -3022,49 +2817,169 @@ function stepFrame(dir) {
 }
 
 
-function openAnnotationModal(type) {
-  document.getElementById('annoType').value = type;
-  document.getElementById('annoTime').textContent = fmtTime(videoPlayer.currentTime);
-  const sel = document.getElementById('annoElement'); sel.innerHTML = '';
-  const skills = getSkills();
-  if (type === 'other') { sel.innerHTML = '<option value="">General Note</option>'; }
-  else { skills.filter(s => s.type === type || (type === 'step' && (s.type === 'skating' || s.type === 'stop' || s.type === 'balance' || s.type === 'locomotion' || s.type === 'edge' || s.type === 'turn' || s.type === 'start' || s.type === 'defensive' || s.type === 'move')) || (type === 'stick' && s.type === 'stick')).forEach(s => { sel.innerHTML += `<option value="${s.id}">${s.name}</option>`; }); }
+// ═══════════════════════════════════════════
+//  SKILL TAGS (video ↔ skill links)
+//  a tag = { time, element, elementName, type, quality, note,
+//            source: 'manual'|'ai', status: 'confirmed'|'suggested',
+//            aiSkillId?, confidence?, logId? }
+//  Legacy tags (no status) were already counted via Save-as-Session.
+// ═══════════════════════════════════════════
+function escHtml(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function isConfirmedTag(a) { return a.status !== 'suggested'; }
+function allTaggableSkills() {
+  const disc = APP.discipline || 'foundations';
+  const seen = new Set(), out = [];
+  (disc === 'foundations' ? SKILLS.foundations : SKILLS.foundations.concat(SKILLS[disc] || [])).forEach(sk => { if (!seen.has(sk.id)) { seen.add(sk.id); out.push(sk); } });
+  return out;
+}
+function findSkill(id) { return Object.values(SKILLS).flat().find(s => s.id === id); }
+function tagSkillNames(v) {
+  const names = [...new Set(v.annotations.filter(isConfirmedTag).map(a => a.elementName))];
+  if (!names.length && v.intentSkill) { const sk = findSkill(v.intentSkill); if (sk) return ['Practicing: ' + sk.name]; }
+  return names;
+}
+function fillSkillSelect(sel, selectedId, withBlank) {
+  const disc = APP.discipline || 'foundations';
+  const groups = disc === 'foundations' ? [['Foundations', SKILLS.foundations]]
+    : [['Foundations', SKILLS.foundations], [disc === 'hockey' ? 'Hockey' : 'Figure', SKILLS[disc] || []]];
+  sel.innerHTML = (withBlank ? '<option value="">Not sure / general practice</option>' : '') +
+    groups.map(([label, list]) => `<optgroup label="${label}">` + list.map(sk => `<option value="${sk.id}"${sk.id === selectedId ? ' selected' : ''}>${escHtml(sk.name)}</option>`).join('') + '</optgroup>').join('');
+}
+function currentPracticeSkill() { const el = document.getElementById('practiceSkill'); return el ? el.value : ''; }
+function renderPracticePicker() {
+  const sel = document.getElementById('practiceSkill');
+  if (sel) fillSkillSelect(sel, sel.value, true);
+}
+function practiceSkill(id) {
+  switchTab('video');
+  const sel = document.getElementById('practiceSkill');
+  if (sel) { fillSkillSelect(sel, id, true); sel.value = id; }
+  closeModal('skillDetailModal');
+  document.getElementById('practiceCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Count a confirmed tag toward skill progress exactly once; reversible.
+function countTag(a) {
+  if (a.logId || !a.element || !isConfirmedTag(a)) return;
+  const d = getSkillData(a.element);
+  const landed = a.quality >= 3 ? 1 : 0;
+  d.attempts++; d.landed += landed;
+  a.logId = 'tag_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  APP.elementLogs.push({ id: a.logId, elementId: a.element, elementName: a.elementName,
+    date: new Date().toISOString().split('T')[0], attempts: 1, landed, quality: a.quality, notes: a.note || '' });
+}
+function uncountTag(a) {
+  if (!a.logId) return;
+  const i = APP.elementLogs.findIndex(l => l.id === a.logId);
+  if (i >= 0) {
+    const l = APP.elementLogs[i], d = getSkillData(l.elementId);
+    d.attempts = Math.max(0, d.attempts - l.attempts); d.landed = Math.max(0, d.landed - l.landed);
+    APP.elementLogs.splice(i, 1);
+  }
+  delete a.logId;
+}
+function persistTags(v) {
+  v.annotations.sort((a, b) => a.time - b.time);
+  if (v.id) VideoDB.updateAnnotations(v.id, v.annotations).catch(() => {});
+  saveData(APP);
+  renderAnnotations(); renderVideoLibrary(); renderSkillTree(); renderDashboard();
+}
+
+function openTagModal(editIdx) {
+  if (activeVideoIdx < 0) return showToast('Select a video first');
+  const v = videoFiles[activeVideoIdx];
+  const editing = typeof editIdx === 'number' ? v.annotations[editIdx] : null;
+  if (!editing) videoPlayer.pause();
+  document.getElementById('annoEditIdx').value = editing ? editIdx : '';
+  document.getElementById('annoModalTitle').textContent = editing ? (editing.status === 'suggested' ? 'Correct AI Tag' : 'Edit Tag') : 'Tag Skill';
+  document.getElementById('annoTime').textContent = fmtTime(editing ? editing.time : videoPlayer.currentTime);
+  fillSkillSelect(document.getElementById('annoElement'), editing ? editing.element : (v.intentSkill || currentPracticeSkill()), false);
+  document.getElementById('annoQuality').value = String(editing ? editing.quality : 3);
+  document.getElementById('annoNote').value = editing ? (editing.note || '') : '';
   document.getElementById('annotationModal').classList.add('active');
 }
+function openAnnotationModal() { openTagModal(); }
 
 function saveAnnotation() {
   if (activeVideoIdx < 0) return;
-  const a = { time:videoPlayer.currentTime, type:document.getElementById('annoType').value,
-    element:document.getElementById('annoElement').value,
-    elementName:document.getElementById('annoElement').selectedOptions[0]?.textContent||'Note',
-    quality:parseInt(document.getElementById('annoQuality').value), note:document.getElementById('annoNote').value };
-  videoFiles[activeVideoIdx].annotations.push(a);
-  videoFiles[activeVideoIdx].annotations.sort((a,b)=>a.time-b.time);
   const v = videoFiles[activeVideoIdx];
-  if (v.id) VideoDB.updateAnnotations(v.id, v.annotations).catch(()=>{});
-  renderAnnotations(); renderVideoLibrary(); closeModal('annotationModal');
-  document.getElementById('annoNote').value = ''; showToast('Annotation added');
+  const sel = document.getElementById('annoElement');
+  const sk = findSkill(sel.value);
+  if (!sk) return showToast('Pick a skill');
+  const idxStr = document.getElementById('annoEditIdx').value;
+  const fields = { element: sk.id, elementName: sk.name, type: sk.type || 'other',
+    quality: parseInt(document.getElementById('annoQuality').value), note: document.getElementById('annoNote').value.trim() };
+  if (idxStr !== '') {
+    const a = v.annotations[parseInt(idxStr)];
+    uncountTag(a);
+    if (a.source === 'ai' && !a.aiSkillId) a.aiSkillId = a.element; // remember what the AI said (training label)
+    Object.assign(a, fields, { status: 'confirmed' });
+    countTag(a);
+    showToast('Tag updated');
+  } else {
+    const a = Object.assign({ time: videoPlayer.currentTime, source: 'manual', status: 'confirmed' }, fields);
+    v.annotations.push(a); countTag(a);
+    showToast(sk.name + ' tagged');
+  }
+  closeModal('annotationModal');
+  persistTags(v);
+}
+
+function confirmTag(i) {
+  const v = videoFiles[activeVideoIdx], a = v.annotations[i];
+  a.status = 'confirmed'; if (!a.aiSkillId) a.aiSkillId = a.element;
+  countTag(a); persistTags(v); showToast('Confirmed: ' + a.elementName);
+}
+function deleteTag(i) {
+  const v = videoFiles[activeVideoIdx], a = v.annotations[i];
+  uncountTag(a);
+  if (a.source === 'ai' && a.status === 'suggested') {
+    (v.aiRejections = v.aiRejections || []).push({ time: a.time, skillId: a.element, confidence: a.confidence }); // "AI was wrong" label
+  }
+  v.annotations.splice(i, 1);
+  persistTags(v);
+}
+
+function renderIntentPrompt() {
+  const box = document.getElementById('intentPrompt');
+  if (!box) return;
+  const v = activeVideoIdx >= 0 ? videoFiles[activeVideoIdx] : null;
+  const sk = v && v.intentSkill ? findSkill(v.intentSkill) : null;
+  if (!sk || v.annotations.some(a => a.element === sk.id && isConfirmedTag(a))) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="scan-progress" style="margin-top:10px">
+    <div style="font-size:0.82rem;font-weight:600">Practicing: ${escHtml(sk.name)}</div>
+    <div class="scan-progress-text">Pause on the moment you did it and tap <strong>+ Tag Skill</strong>. One tag per attempt, including falls.</div>
+  </div>`;
 }
 
 function renderAnnotations() {
   const list = document.getElementById('annotationList');
+  document.querySelectorAll('.timeline-marker').forEach(m => m.remove());
+  renderIntentPrompt();
   if (activeVideoIdx < 0) { list.innerHTML = ''; return; }
   const annos = videoFiles[activeVideoIdx].annotations;
-  document.querySelectorAll('.timeline-marker').forEach(m => m.remove());
-  if (!annos.length) { list.innerHTML = ''; return; }
-  list.innerHTML = '<div style="font-size:0.82rem;font-weight:600;margin:14px 0 8px">Annotations ('+annos.length+')</div>' +
-    annos.map((a,i) => {
-      let dots=''; for(let q=1;q<=5;q++){const c=q<=a.quality?(a.quality>=4?'filled':a.quality>=3?'warn':'bad'):'';dots+=`<span class="quality-dot ${c}"></span> `;}
-      return `<div class="annotation-item" onclick="videoPlayer.currentTime=${a.time}">
+  if (!annos.length) { list.innerHTML = '<div style="font-size:0.75rem;color:var(--text-dim);margin-top:12px">No tags yet. Tag skills yourself with <strong>+ Tag Skill</strong>, or let <strong>AI Scan</strong> suggest some.</div>'; return; }
+  const suggested = annos.filter(a => a.status === 'suggested').length;
+  list.innerHTML = `<div style="font-size:0.82rem;font-weight:600;margin:14px 0 8px">Tags (${annos.length})${suggested ? ` <span style="font-weight:400;color:var(--warning)">· ${suggested} AI suggestion${suggested>1?'s':''} to review</span>` : ''}</div>` +
+    annos.map((a, i) => {
+      let dots = ''; for (let q = 1; q <= 5; q++) { const c = q <= a.quality ? (a.quality >= 4 ? 'filled' : a.quality >= 3 ? 'warn' : 'bad') : ''; dots += `<span class="quality-dot ${c}"></span> `; }
+      const sug = a.status === 'suggested';
+      const badge = sug ? '<span class="annotation-tag" style="background:rgba(251,191,36,0.15);color:var(--warning)">AI?</span>'
+        : a.source === 'ai' ? '<span class="annotation-tag" style="background:rgba(52,211,153,0.15);color:var(--success)">AI ✓</span>'
+        : '<span class="annotation-tag tag-' + escHtml(a.type) + '">tag</span>';
+      const note = (a.note || '').replace(' [AI detected]', '');
+      return `<div class="annotation-item" onclick="videoPlayer.currentTime=${a.time}" style="${sug ? 'border:1px dashed var(--warning)' : ''}">
         <span class="annotation-time">${fmtTime(a.time)}</span>
-        <span class="annotation-tag tag-${a.type}">${a.type}</span>
-        <span class="annotation-text">${a.elementName}${a.note?' — '+a.note:''}</span>
-        <span>${dots}</span>
-        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();videoFiles[${activeVideoIdx}].annotations.splice(${i},1);if(videoFiles[${activeVideoIdx}].id)VideoDB.updateAnnotations(videoFiles[${activeVideoIdx}].id,videoFiles[${activeVideoIdx}].annotations).catch(()=>{});renderAnnotations();renderVideoLibrary();" style="padding:3px 7px">x</button>
+        ${badge}
+        <span class="annotation-text">${sug ? 'Was this a ' : ''}${escHtml(a.elementName)}${sug ? '?' : ''}${note ? ' — ' + escHtml(note) : ''}</span>
+        ${sug ? '' : `<span>${dots}</span>`}
+        ${sug ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();confirmTag(${i})" style="padding:3px 8px" title="Yes, correct">✓</button>` : ''}
+        <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openTagModal(${i})" style="padding:3px 7px" title="${sug ? 'No, it was something else' : 'Edit'}">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteTag(${i})" style="padding:3px 7px" title="${sug ? 'Nothing happened here' : 'Delete'}">✕</button>
       </div>`;
     }).join('');
   if (videoPlayer.duration) {
-    annos.forEach(a => { const m=document.createElement('div'); m.className='timeline-marker '+a.type; m.style.left=(a.time/videoPlayer.duration*100)+'%'; m.title=a.elementName; m.onclick=e=>{e.stopPropagation();videoPlayer.currentTime=a.time;}; timelineBar.appendChild(m); });
+    annos.forEach(a => { const m = document.createElement('div'); m.className = 'timeline-marker ' + a.type; m.style.left = (a.time / videoPlayer.duration * 100) + '%'; m.title = a.elementName; m.onclick = e => { e.stopPropagation(); videoPlayer.currentTime = a.time; }; timelineBar.appendChild(m); });
   }
 }
 
@@ -3306,7 +3221,7 @@ function showScanResults(results, videoEntry) {
   });
 
   html += `<div style="display:flex;gap:8px;margin-top:10px">
-    <button class="btn btn-primary btn-sm" onclick="acceptScanResults()" style="flex:1">Add All as Annotations</button>
+    <button class="btn btn-primary btn-sm" onclick="acceptScanResults()" style="flex:1">Add as Suggestions to Review</button>
     <button class="btn btn-secondary btn-sm" onclick="document.getElementById('scanProgress').style.display='none'" style="flex:1">Dismiss</button>
   </div></div>`;
 
@@ -3329,43 +3244,24 @@ function acceptScanResults() {
     const matched = allAvailable.find(s => s.id === r.skillId);
     const type = matched ? matched.type : 'other';
 
+    if (!matched) return;
     v.annotations.push({
       time: r.timestamp,
       type: type,
-      element: r.skillId || '',
-      elementName: r.skillName,
-      quality: Math.round(r.confidence * 5),
-      note: (r.note || '') + ' [AI detected]'
+      element: matched.id,
+      elementName: matched.name,
+      quality: 3,
+      confidence: r.confidence,
+      note: r.note || '',
+      source: 'ai',
+      status: 'suggested'
     });
   });
 
-  v.annotations.sort((a, b) => a.time - b.time);
-  if (v.id) VideoDB.updateAnnotations(v.id, v.annotations).catch(() => {});
-  renderAnnotations();
-  renderVideoLibrary();
+  persistTags(v);
   document.getElementById('scanProgress').style.display = 'none';
   window._pendingScanResults = null;
-  showToast(`${results.length} AI annotations added`);
-}
-
-function saveVideoSession() {
-  if (activeVideoIdx < 0) return;
-  const v = videoFiles[activeVideoIdx], annos = v.annotations;
-  const session = { id:Date.now(), title:document.getElementById('videoSessionTitle').value||'Video Session',
-    date:document.getElementById('videoSessionDate').value, duration:Math.round(v.duration/60),
-    type:APP.discipline==='hockey'?'Hockey Practice':APP.discipline==='foundations'?'Foundations Practice':'Freestyle',
-    focus:annos.map(a=>a.elementName).filter((v,i,s)=>s.indexOf(v)===i).join(', '),
-    rating:0, notes:`Video: ${v.name} | ${annos.length} annotations`, videoName:v.name };
-  annos.forEach(a => {
-    if (a.element) {
-      const d = getSkillData(a.element);
-      d.attempts++; if (a.quality >= 3) d.landed++;
-      APP.elementLogs.push({ id:Date.now()+Math.random(), elementId:a.element, elementName:a.elementName,
-        date:session.date, attempts:1, landed:a.quality>=3?1:0, quality:a.quality, notes:a.note });
-    }
-  });
-  APP.sessions.push(session); updateStreak(session.date); saveData(APP); renderAll();
-  showToast('Session saved with '+annos.length+' annotations');
+  showToast('AI suggestions added — confirm or correct each one');
 }
 
 // ═══════════════════════════════════════════
@@ -3585,14 +3481,27 @@ function renderTrainingPlan() {
 //  DASHBOARD & CHARTS
 // ═══════════════════════════════════════════
 function renderDashboard() {
-  document.getElementById('totalSessions').textContent = APP.sessions.length;
-  const totalMin = APP.sessions.reduce((s,x)=>s+(x.duration||0),0);
-  document.getElementById('totalIceTime').textContent = totalMin>=60?Math.round(totalMin/60)+'h':totalMin+'m';
+  renderPracticePicker();
+  document.getElementById('totalVideos').textContent = videoFiles.length;
+  document.getElementById('totalTags').textContent = videoFiles.reduce((n,v)=>n+v.annotations.filter(isConfirmedTag).length,0);
   const tracked = getSkills().filter(s=>getSkillData(s.id).attempts>0).length;
   document.getElementById('totalSkills').textContent = tracked;
   const wa = getSkills().filter(s=>getSkillData(s.id).attempts>0);
   if (wa.length) { const avg=wa.reduce((s,sk)=>{const d=getSkillData(sk.id);return s+(d.landed/d.attempts);},0)/wa.length; document.getElementById('avgSuccess').textContent=Math.round(avg*100)+'%'; }
-  renderRecentSessions(); renderNextSkills(); drawRadarChart(); renderProgressTimeline(); renderAchievements(); renderWeeklyChallenge();
+  renderRecentVideos(); renderNextSkills(); drawRadarChart(); renderProgressTimeline(); renderAchievements(); renderWeeklyChallenge();
+}
+
+function renderRecentVideos() {
+  const c = document.getElementById('recentVideos');
+  if (!c) return;
+  const recent = videoFiles.map((v,i)=>({v,i})).slice(-5).reverse();
+  if (!recent.length) { c.innerHTML = '<div class="empty-state"><p>No videos yet. Record or upload one in the <strong>Video</strong> tab.</p></div>'; return; }
+  c.innerHTML = recent.map(({v,i}) => {
+    const names = tagSkillNames(v);
+    return `<div class="session-item" style="cursor:pointer" onclick="switchTab('video');selectVideo(${i})">
+      <div class="session-info"><div class="session-title">${escHtml(v.name)}</div>
+      <div class="session-meta">${fmtDur(v.duration)}${names.length ? ' &bull; ' + names.map(escHtml).join(', ') : ' &bull; not tagged yet'}</div></div></div>`;
+  }).join('');
 }
 
 function renderRecentSessions() {
@@ -4157,7 +4066,7 @@ function renderUpgradeBanners() {
   if (dash && !dash.querySelector('.upgrade-banner')) {
     const banner = document.createElement('div');
     banner.className = 'upgrade-banner';
-    banner.innerHTML = `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos, auto-analysis, training plans, and more.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`;
+    banner.innerHTML = `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`;
     dash.insertBefore(banner, dash.firstChild);
   }
 }
