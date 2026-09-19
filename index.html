@@ -3102,7 +3102,7 @@ async function scanVideoWithAI() {
     prog.innerHTML = `<div class="scan-progress">
       <div style="font-size:0.82rem;font-weight:600;color:var(--danger)">Scan failed</div>
       <div class="scan-progress-text">${err.message || 'Unknown error'}</div>
-      <div class="scan-progress-text" style="margin-top:6px">Make sure ANTHROPIC_API_KEY is set on the server.</div>
+      ${/credit balance/i.test(err.message||'') ? '<div class="scan-progress-text" style="margin-top:6px">The Anthropic API account is out of credit — add credits in console.anthropic.com → Plans &amp; Billing.</div>' : /log in/i.test(err.message||'') ? '<div class="scan-progress-text" style="margin-top:6px">Log in again, then retry the scan.</div>' : ''}
     </div>`;
   } finally {
     btn.disabled = false;
