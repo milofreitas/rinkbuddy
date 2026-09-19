@@ -1129,7 +1129,7 @@
             <label class="btn btn-secondary btn-sm" style="cursor:pointer">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Upload
-              <input type="file" accept="video/*" id="coachVideoUpload" onchange="handleCoachVideoUpload(this)" style="display:none">
+              <input type="file" accept="video/*,.mov,.MOV,.mp4,.m4v,.webm,.mkv,.avi,.3gp,.mts,.m2ts" id="coachVideoUpload" onchange="handleCoachVideoUpload(this)" style="display:none">
             </label>
           </div>
           <div id="coachVideoPreview" style="margin-top:8px;display:none">
@@ -2636,27 +2636,72 @@ const VideoDB = {
   } catch(e) { console.warn('Could not restore videos:', e); }
 })();
 
+// ── Local storage, no account needed ──
+// Videos and tags live in this browser (IndexedDB). Ask the browser to keep them
+// instead of evicting them, and show how much room is left on the device.
+function videoLimitReached(pending) {
+  if (isProUser()) return false;
+  if (!CloudAccount.getSession()) return false; // signed out = local only, so no cap
+  return videoFiles.length + (pending || 0) >= 3;
+}
+async function requestDurableStorage() {
+  try {
+    if (navigator.storage && navigator.storage.persist && navigator.storage.persisted
+        && !(await navigator.storage.persisted())) {
+      await navigator.storage.persist();
+    }
+  } catch (e) { /* not supported, or refused */ }
+  renderStorageNote();
+}
+async function renderStorageNote() {
+  const el = document.getElementById('storageNote');
+  if (!el) return;
+  if (!navigator.storage || !navigator.storage.estimate) { el.textContent = ''; return; }
+  try {
+    const est = await navigator.storage.estimate();
+    if (!est || !est.quota) { el.textContent = ''; return; }
+    const durable = navigator.storage.persisted ? await navigator.storage.persisted() : false;
+    const iOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+    const warn = iOS
+      ? 'add RinkBuddy to your Home Screen so Safari keeps your videos'
+      : 'keep your originals — a browser can clear this to free up space';
+    el.innerHTML = `${fmtSize(est.usage || 0)} of ${fmtSize(est.quota)} used on this device` +
+      (durable ? '' : ` · <span style="color:var(--warning)">${warn}</span>`);
+  } catch (e) { el.textContent = ''; }
+}
+function reportSaveError(entry, e) {
+  console.warn('Video save error:', e);
+  entry.notSaved = true;
+  const outOfRoom = e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''));
+  showToast(outOfRoom
+    ? `No room left on this device for ${entry.name}. It plays now, but it won't survive a reload — delete older videos or free up space.`
+    : `${entry.name} couldn't be stored on this device. It plays now, but it won't survive a reload.`);
+  renderVideoLibrary(); renderStorageNote();
+}
+
 function renderUploadArea() {
   const area = document.getElementById('uploadArea');
   const hasVids = videoFiles.length > 0;
   // Free tier: show limit message
-  if (!isProUser() && videoFiles.length >= 3) {
+  if (videoLimitReached()) {
     area.innerHTML = `<div class="upgrade-banner" style="margin-top:10px"><div class="upgrade-banner-text"><strong>Video limit reached</strong> — Free plan allows 3 videos. Upgrade to Pro for unlimited uploads.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>`;
     return;
   }
   area.innerHTML = `<div class="upload-zone${hasVids?' compact':''}" id="uploadZone">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:${hasVids?'20px':'48px'};height:${hasVids?'20px':'48px'}"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     <p>${hasVids?'Drop more videos here or <span class="highlight">browse</span>':'Drag & drop skating videos or <span class="highlight">browse</span>'}</p>
-    ${hasVids?'':'<p style="font-size:0.7rem;margin-top:4px">MP4, MOV, WebM — then tag the skills you did</p>'}
+    ${hasVids?'':'<p style="font-size:0.7rem;margin-top:4px">MOV, MP4, WebM — straight from your phone, no converting — then tag the skills you did</p>'}
     <p style="font-size:0.7rem;margin-top:6px;color:var(--accent)">Best for jumps &amp; spins: film in the iPhone Camera app’s <strong>Slo-Mo</strong> mode (or 60 fps), then import it here. More frames = clearer takeoffs.</p>
-    <input type="file" id="videoInput" accept="video/*" multiple style="display:none">
-  </div>`;
+    <input type="file" id="videoInput" accept="video/*,.mov,.MOV,.mp4,.m4v,.webm,.mkv,.avi,.3gp,.mts,.m2ts" multiple style="display:none">
+  </div>
+  <div id="storageNote" style="font-size:0.68rem;color:var(--text-dim);margin-top:6px;text-align:center"></div>`;
   const zone = document.getElementById('uploadZone');
   zone.addEventListener('click', () => document.getElementById('videoInput').click());
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
   zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); addVideos(e.dataTransfer.files); });
   document.getElementById('videoInput').addEventListener('change', e => addVideos(e.target.files));
+  renderStorageNote();
 }
 
 // ═══════════════════════════════════════════
@@ -2754,25 +2799,39 @@ function processRecording() {
   const entry = { id, file: blob, url, name, size: blob.size, duration: (Date.now() - recStartTime) / 1000, annotations: [], intentSkill: currentPracticeSkill(), fps: st.frameRate ? Math.round(st.frameRate) : 0 };
 
   videoFiles.push(entry);
-  VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
+  VideoDB.save(entry).catch(e => reportSaveError(entry, e));
   renderVideoLibrary(); renderUploadArea();
 
   selectVideo(videoFiles.length - 1);
   recordedChunks = [];
 }
 
+// A file is a video if the browser says so, or if the extension says so. Phones
+// and file pickers often report no MIME type at all (Android .MOV, files from
+// Drive/OneDrive), and dropping those silently looked like "only MP4 works".
+const VIDEO_EXTS = ['mov','mp4','m4v','webm','avi','mkv','qt','3gp','3g2','mpg','mpeg','mts','m2ts','ts','ogv','flv','wmv','hevc'];
+function isVideoFile(f) {
+  if (!f) return false;
+  const type = (f.type || '').toLowerCase();
+  if (type.startsWith('video/')) return true;
+  if (type.startsWith('image/') || type.startsWith('audio/')) return false;
+  const ext = (f.name || '').toLowerCase().split('.').pop();
+  return VIDEO_EXTS.includes(ext);
+}
+
 function addVideos(fl) {
-  // Free tier: max 3 videos
-  if (!isProUser() && videoFiles.length >= 3) {
+  // Free tier (signed in): max 3 videos. Signed out, everything is local only, so there is no cap.
+  if (videoLimitReached()) {
     showToast('Free plan allows 3 videos. Upgrade to Pro for unlimited.');
     return;
   }
   const newEntries = [];
   let dupeCount = 0;
+  const skipped = [];
   Array.from(fl).forEach(f => {
-    if (!f.type.startsWith('video/')) return;
+    if (!isVideoFile(f)) { skipped.push(f.name || 'file'); return; }
     // Free tier: check per-file
-    if (!isProUser() && videoFiles.length + newEntries.length >= 3) {
+    if (videoLimitReached(newEntries.length)) {
       showToast('Free plan allows 3 videos. Upgrade to Pro for unlimited.');
       return;
     }
@@ -2787,13 +2846,19 @@ function addVideos(fl) {
     tmp.onloadedmetadata = () => {
       entry.duration = tmp.duration;
       renderVideoLibrary();
-      VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
+      VideoDB.save(entry).catch(e => reportSaveError(entry, e));
+    };
+    tmp.onerror = () => {
+      entry.unplayable = true;
+      renderVideoLibrary();
+      showToast(cleanName + ": this browser can't play this file. It's stored, but tagging needs a format it can play.");
     };
     videoFiles.push(entry);
     newEntries.push(entry);
-    VideoDB.save(entry).then(() => detectFps(entry, f)).catch(e => console.warn('Video save error:', e));
+    VideoDB.save(entry).then(() => detectFps(entry, f)).catch(e => reportSaveError(entry, e));
   });
   if (dupeCount > 0) showToast(dupeCount + ' duplicate video' + (dupeCount > 1 ? 's' : '') + ' skipped');
+  if (skipped.length) showToast('Not a video file: ' + skipped.slice(0, 3).join(', ') + (skipped.length > 3 ? ' and ' + (skipped.length - 3) + ' more' : ''));
   renderVideoLibrary(); renderUploadArea();
   if (newEntries.length > 0) selectVideo(videoFiles.indexOf(newEntries[newEntries.length - 1]));
   renderDashboard();
@@ -2815,6 +2880,8 @@ function renderVideoLibrary() {
     <button onclick="event.stopPropagation();deleteVideo(${i})" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.7);border:none;color:var(--danger);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;z-index:2" title="Delete video">&times;</button>
     <div class="video-thumb-name">${v.name}</div>
     <div class="video-thumb-meta">${fmtDur(v.duration)} &bull; ${fmtSize(v.size)}${v.fps ? ` &bull; <span style="color:${v.fps >= 50 ? 'var(--success)' : 'var(--text-dim)'}">${fpsLabel(v.fps)}</span>` : ''}</div>
+    ${v.notSaved ? '<div class="video-thumb-meta" style="color:var(--danger)">not stored on this device</div>' : ''}
+    ${v.unplayable ? '<div class="video-thumb-meta" style="color:var(--warning)">this browser can\'t play it</div>' : ''}
     ${tagSkillNames(v).length ? `<div class="video-thumb-meta" style="color:var(--accent)">${tagSkillNames(v).slice(0,3).map(escHtml).join(', ')}</div>` : ''}
   </div>`;
   }).join('');
@@ -2867,7 +2934,7 @@ function selectVideo(i) {
 function prevVideo() { if (activeVideoIdx > 0) selectVideo(activeVideoIdx - 1); }
 function nextVideo() { if (activeVideoIdx < videoFiles.length - 1) selectVideo(activeVideoIdx + 1); }
 function fmtDur(s) { if(!s) return '--:--'; return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
-function fmtSize(b) { return b >= 1e9 ? (b/1e9).toFixed(1)+' GB' : (b/1e6).toFixed(0)+' MB'; }
+function fmtSize(b) { return b >= 1e9 ? (b/1e9).toFixed(1)+' GB' : b >= 1e6 ? (b/1e6).toFixed(0)+' MB' : Math.max(1, Math.round(b/1e3))+' KB'; }
 function fmtTime(s) { return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
 
 videoPlayer.addEventListener('timeupdate', () => { if(videoPlayer.duration){timelineProgress.style.width=(videoPlayer.currentTime/videoPlayer.duration*100)+'%';timeDisplay.textContent=fmtTime(videoPlayer.currentTime)+' / '+fmtTime(videoPlayer.duration);} });
@@ -4422,6 +4489,8 @@ createProfile = function() {
 // Initialize view based on login state
 updateView();
 renderAll();
+// Videos and tags live in this browser, so ask it to keep them (no account needed)
+requestDurableStorage();
 // Check subscription status on page load (in case tier changed server-side)
 if (CloudAccount.isLoggedIn()) checkSubscriptionStatus();
 window.addEventListener('resize',()=>{drawRadarChart();drawCompChart();});
