@@ -1,6 +1,6 @@
 # RinkBuddy research — 2026-09-19
 
-Eight reports; read this page first.
+Nine reports; read this page first.
 
 | # | File | One-line takeaway |
 |---|---|---|
@@ -11,8 +11,8 @@ Eight reports; read this page first.
 | 04 | 04-reference-data.md | No commercially usable datasets; stock/YouTube legally out; film own footage (~$6–9k / 4,000 clips / 90 days); COPPA consent for minors |
 | 05 | 05-demand-market.md | Demand = cheap feedback between lessons; beachhead = adult learners via coaches; yr-1 realistic 300–800 subs |
 | 06 | 06-cross-domain-data-playbooks.md | Nobody starts with data: paid human "Coach Check" as gold labels + declare-then-verify tagging |
-| 08 | 08-video-teaching-platforms.md | Verified (3-vote) deep research: video self-modeling helps most ages ~9–17 but gains fade without repeated use; parents spend ~$1,016/child/yr; COPPA biometric rule; HLH hockey AI $79–99/mo |
 | 07 | 07-phone-capture.md | Phones do 120/240 fps but web capture caps ~60; ask for 60 fps now, native module later; 120 fps @ 1/120s best at US rinks; distance > fps |
+| 08 | 08-video-teaching-platforms.md | Verified (3-vote) deep research: video self-modeling helps most ages ~9–17 but gains fade without repeated use; parents spend ~$1,016/child/yr; COPPA biometric rule; HLH hockey AI $79–99/mo |
 
 ## Converging plan
 1. **Positioning:** progress journal + feedback between lessons for adult learners (figure + hockey), not "AI coach". Coaches as distribution.
