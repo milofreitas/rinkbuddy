@@ -21,6 +21,7 @@
   "author": "Murilo",
   "license": "MIT",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.127.0",
     "@capacitor/android": "^8.3.0",
     "@capacitor/camera": "^8.0.2",
     "@capacitor/cli": "^8.3.0",

@@ -58,6 +58,8 @@ function jsonRes(res, code, obj) {
 }
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const Anthropic = require('@anthropic-ai/sdk');
+const anthropic = ANTHROPIC_API_KEY ? new Anthropic({ apiKey: ANTHROPIC_API_KEY }) : null;
 
 // ═══════════════════════════════════════════════════════════════
 // VISUAL SKILL IDENTIFICATION GUIDES — fed to Claude Vision API
@@ -538,43 +540,28 @@ Return ONLY the JSON array.`
       });
 
       // Call Claude API
-      const apiBody = JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 8192,
-        messages: [{ role: 'user', content }]
-      });
+      let finalMessage;
+      try {
+        const stream = anthropic.beta.messages.stream({
+          model: 'claude-opus-5',
+          max_tokens: 32000,
+          betas: ['server-side-fallback-2026-07-01'],
+          fallbacks: 'default',
+          messages: [{ role: 'user', content }]
+        }, { timeout: 300000 });
+        finalMessage = await stream.finalMessage();
+      } catch (e) {
+        console.error('[analyze-video] Claude API error:', e.status || '', e.message);
+        return jsonRes(res, 502, { error: e.error?.error?.message || e.message || 'Claude API error' });
+      }
 
-      const apiRes = await new Promise((resolve, reject) => {
-        const apiReq = https.request({
-          hostname: 'api.anthropic.com',
-          path: '/v1/messages',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': ANTHROPIC_API_KEY,
-            'anthropic-version': '2023-06-01'
-          }
-        }, apiResponse => {
-          let data = '';
-          apiResponse.on('data', chunk => { data += chunk; });
-          apiResponse.on('end', () => {
-            try { resolve({ status: apiResponse.statusCode, body: JSON.parse(data) }); }
-            catch { reject(new Error('Invalid API response')); }
-          });
-        });
-        apiReq.on('error', reject);
-        apiReq.setTimeout(180000, () => { apiReq.destroy(); reject(new Error('API timeout')); });
-        apiReq.write(apiBody);
-        apiReq.end();
-      });
-
-      if (apiRes.status !== 200) {
-        const errMsg = apiRes.body?.error?.message || 'Claude API error';
-        return jsonRes(res, 502, { error: errMsg });
+      if (finalMessage.stop_reason === 'refusal') {
+        console.error('[analyze-video] refusal:', finalMessage.stop_details?.category);
+        return jsonRes(res, 200, { skills: [] });
       }
 
       // Extract JSON from Claude's response
-      const responseText = (apiRes.body.content || []).map(c => c.text || '').join('');
+      const responseText = (finalMessage.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
       let detectedSkills = [];
       try {
         // Try to parse the response as JSON (Claude might wrap it in markdown code blocks)
