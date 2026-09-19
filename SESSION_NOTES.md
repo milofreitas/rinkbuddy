@@ -1,3 +1,37 @@
+# RinkBuddy — START HERE (updated 2026-09-19)
+
+Read this, then `research/README.md` (8 research reports + converging plan).
+
+## Live state (verified 2026-09-19)
+- Site www.rinkbuddy.com (GitHub Pages, repo milofreitas/rinkbuddy, deploys from `main`)
+- Backend rinkbuddy-production.up.railway.app (Railway, `railway` CLI logged in + linked in this folder)
+- Accounts on Railway volume `/app/accounts` (survive redeploys). Stripe LIVE, $9.99/mo price + webhook OK. 0 subscribers.
+- Never push without Milo's OK.
+
+## App (as of commit 95f137d)
+- Nav reduced to **Home / Skills / Video**. Training, Sessions, Compete, Coach hidden (code kept).
+- Video hub: "What are you practicing?" pre-tag → record/upload → `+ Tag Skill` (manual) or AI Scan → suggestions "Was this a X?" ✓/✎/✕.
+  Tags = `video.annotations[]` {time, element, quality, source manual|ai, status confirmed|suggested, aiSkillId (AI's original label when corrected), logId}.
+  Confirmed tags count toward skill progress once (countTag/uncountTag). Rejected AI suggestions → `video.aiRejections`. These are future training labels.
+- Fake Math.random "auto-analysis" removed. Fabricated landing testimonials removed.
+- Capture: camera requests 60 fps; imported MP4/MOV true fps read from container (`readVideoFps`), Slo-mo clips play at 0.25x, frame-step uses real fps.
+- AI: `/api/analyze-video` requires login token; model `claude-opus-5` via @anthropic-ai/sdk. STILL samples 1 fps (known weakness — see research/03).
+
+## Next up (from research)
+1. Phone checks by Milo: camera shows 60 fps? Imported iPhone Slo-Mo shows "Slo-mo 240 fps" (if 30 → Photos picker is transcoding).
+2. AI v1: motion-peak bursts at 12–15 fps + skater crop + cached guide + "unsure" output (research/03 §v1). Cuts cost ~$0.75–1.30 → ~$0.25–0.45/min.
+3. Milo's own rink footage (2026-09-19 onward) → locked eval set + first labels (research/04 shot list).
+4. Demand tests: landing page repositioned "feedback between lessons" for adult learners; $59/yr founding pre-order (research/05).
+5. Native 120 fps capture module (research/07), later.
+
+## Known loose ends
+- Railway service `function-bun` looks unused.
+- APPSTORE_LISTING.md has an unverified "designed with input from…" claim — reword before submitting.
+- Custom timeline label can show previous video's time until playback starts (minor).
+
+---
+
+## Older notes (March 2026)
 # RinkBuddy Session Notes — March 28, 2026
 
 ## Architecture
