@@ -5,3 +5,7 @@ accounts/
 *.log
 Icon\r
 Icon?
+footage/
+work/
+_test*.mp4
+_test*.mov
