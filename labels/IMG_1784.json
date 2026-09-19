@@ -1,0 +1,38 @@
+{
+  "clip": "IMG_1784.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 119.94,
+    "resolution": "3840x2160",
+    "orientation": "landscape",
+    "handheld": true
+  },
+  "usable_windows": [
+    [
+      5,
+      13
+    ]
+  ],
+  "unusable": [
+    [
+      0,
+      4.5
+    ]
+  ],
+  "events": [
+    {
+      "t_start": 6.0,
+      "t_end": 12.0,
+      "skill_id": null,
+      "skill": "Standing / talking, then skating away",
+      "outcome": "n/a",
+      "quality": null,
+      "cues": "4K; subject ~55% of frame at 7-11s then recedes to <15%",
+      "confidence": "high",
+      "labeled_by": "claude"
+    }
+  ],
+  "verdict": "4K helps but subject leaves the usable zone after ~13s."
+}

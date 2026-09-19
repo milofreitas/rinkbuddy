@@ -1,0 +1,46 @@
+{
+  "clip": "IMG_1782.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 119.94,
+    "resolution": "1920x1080",
+    "orientation": "landscape",
+    "handheld": true
+  },
+  "usable_windows": [
+    [
+      7.5,
+      13.5
+    ],
+    [
+      20,
+      28
+    ]
+  ],
+  "unusable": [
+    [
+      0,
+      2
+    ],
+    [
+      6.5,
+      7.5
+    ]
+  ],
+  "events": [
+    {
+      "t_start": 8.0,
+      "t_end": 13.0,
+      "skill_id": null,
+      "skill": "Standing / talking to camera",
+      "outcome": "n/a",
+      "quality": null,
+      "cues": "subject ~70% of frame height \u2014 the best framing of the batch, but no skill performed",
+      "confidence": "high",
+      "labeled_by": "claude"
+    }
+  ],
+  "verdict": "Framing proves the setup can work. No skill attempt to label."
+}

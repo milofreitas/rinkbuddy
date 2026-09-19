@@ -1,0 +1,26 @@
+{
+  "clip": "IMG_1783.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {"fps": 119.94, "resolution": "1920x1080", "handheld": false,
+             "position": "on the boards, fixed, wide shot of most of the rink",
+             "distance_m_est": [8, 35]},
+  "usable_windows": [[44, 52], [70, 79], [96, 118]],
+  "unusable": [[0, 2], [7.5, 9], [37, 40], [75, 77], [113, 116]],
+  "events": [
+    {"t_start": 103.0, "t_end": 105.5, "skill_id": "f-fwd-stroking", "skill": "Forward stroking / basic skating",
+     "outcome": "clean", "quality": 3,
+     "cues": "left-to-right travel, alternating pushes, moderate knee bend, upright posture, arms low and close to the body rather than extended",
+     "labeled_by": "claude", "confidence": "medium",
+     "note": "readable at 15 fps; skater ~40% of frame height here — the closest pass in the clip"}
+  ],
+  "observations": [
+    "Whole-rink framing: for most of the 138 s the skater is 5-15% of frame height — too small for pose analysis.",
+    "People walk between camera and ice at 7.5s, 37s, 75s and 113s, fully blocking the view.",
+    "Several skaters share the ice; a tracker would need to lock onto the subject (white tee, cap, dark shorts).",
+    "No jumps or spins occur in this clip — nothing to detect beyond skating and gliding.",
+    "120 fps survived AirDrop intact; motion blur is low and frames are sharp even on the close passes."
+  ],
+  "verdict": "Good camera settings, wrong framing. Usable as a negative/landscape example, not as a skill example."
+}

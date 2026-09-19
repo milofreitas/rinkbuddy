@@ -1,0 +1,54 @@
+{
+  "clip": "IMG_1787.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 119.94,
+    "resolution": "1920x1080",
+    "orientation": "landscape",
+    "handheld": true
+  },
+  "usable_windows": [
+    [
+      4.5,
+      13
+    ],
+    [
+      16,
+      28
+    ]
+  ],
+  "unusable": [
+    [
+      0,
+      4
+    ]
+  ],
+  "events": [
+    {
+      "t_start": 10.4,
+      "t_end": 11.7,
+      "skill_id": "f-2ft-turn",
+      "skill": "Two-foot turn / pivot (forward to backward)",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "slow rotation while gliding, feet stay together, upright posture, no visible edge change; one hand holds the phone which hides the right arm",
+      "confidence": "low",
+      "note": "could be an intentional two-foot turn or just turning around to talk",
+      "labeled_by": "claude"
+    },
+    {
+      "t_start": 25.4,
+      "t_end": 26.2,
+      "skill_id": "f-2ft-turn",
+      "skill": "Transition backward-to-forward facing",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "travels away from camera with back turned, then rotates to face camera with knees bent; feet appear to stay on the ice throughout",
+      "confidence": "low",
+      "labeled_by": "claude"
+    }
+  ],
+  "verdict": "Best clip of the batch: landscape, subject 50-70% of frame. Two real transitions captured."
+}

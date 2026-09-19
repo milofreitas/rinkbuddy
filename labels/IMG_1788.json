@@ -1,0 +1,21 @@
+{
+  "clip": "IMG_1788.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 119.94,
+    "resolution": "1920x1080",
+    "orientation": "landscape",
+    "handheld": true
+  },
+  "usable_windows": [],
+  "unusable": [
+    [
+      0,
+      3.37
+    ]
+  ],
+  "events": [],
+  "verdict": "Unusable \u2014 camera against shirt/hand the whole time."
+}

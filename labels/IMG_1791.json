@@ -1,0 +1,124 @@
+{
+  "clip": "IMG_1791.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 119.95,
+    "resolution": "3840x2160",
+    "orientation": "landscape",
+    "handheld": true,
+    "note": "held by a second person; subject framed well between 20-30s, 100-110s and 120-125s"
+  },
+  "scan": {
+    "method": "1 fps sweep over all 127s, then 15 fps bursts on candidate moments",
+    "frames_reviewed": "127 overview + 114 burst frames of 15,276 total"
+  },
+  "usable_windows": [
+    [
+      20,
+      30
+    ],
+    [
+      41,
+      50
+    ],
+    [
+      62,
+      80
+    ],
+    [
+      100,
+      110
+    ],
+    [
+      120,
+      125
+    ]
+  ],
+  "unusable": [
+    [
+      0,
+      6
+    ],
+    [
+      7,
+      9
+    ],
+    [
+      30,
+      32
+    ],
+    [
+      50,
+      52
+    ],
+    [
+      82,
+      84
+    ],
+    [
+      90,
+      91
+    ],
+    [
+      125,
+      127.34
+    ]
+  ],
+  "events": [
+    {
+      "t_start": 25.6,
+      "t_end": 26.3,
+      "skill_id": "f-fwd-stroking",
+      "skill": "Forward skating toward camera",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "upright, small steps, arms low; no clear stroke extension",
+      "confidence": "medium",
+      "labeled_by": "claude"
+    },
+    {
+      "t_start": 26.3,
+      "t_end": 27.0,
+      "skill_id": "f-2ft-turn",
+      "skill": "Turn away from camera (two-foot)",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "rotates to the right, arms swing wide for balance, feet stay on the ice",
+      "confidence": "low",
+      "labeled_by": "claude"
+    },
+    {
+      "t_start": 102.6,
+      "t_end": 104.0,
+      "skill_id": "f-fwd-swizzle",
+      "skill": "Forward swizzles (lemons)",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "faces camera, travels forward; feet open to a wide V then draw back together, repeated; arms come out wide at 103.3-103.5 for balance; knees only lightly bent",
+      "confidence": "medium",
+      "labeled_by": "claude",
+      "coaching": "deeper knee bend and heels pressing out would make the lemons rounder; arms should stay steady at waist height rather than flying out"
+    },
+    {
+      "t_start": 122.2,
+      "t_end": 123.5,
+      "skill_id": "f-fwd-swizzle",
+      "skill": "Forward swizzles (lemons)",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "clearest example in the clip: 3-4 open/close cycles traveling toward the camera, feet symmetric, upper body quiet, hands held in front",
+      "confidence": "high",
+      "labeled_by": "claude",
+      "coaching": "good symmetry; push out through the heels and bend the knees more to widen each lemon"
+    }
+  ],
+  "observations": [
+    "Best clip so far: 4K, and the subject reaches 40-60% of frame height in three windows.",
+    "Camera is held by another person and often points at the operator's shirt or at other skaters; roughly 25% of the clip is blocked or off-subject.",
+    "Busy public session: 10+ skaters, several children with training aids, which is the hardest case for automatic tracking.",
+    "Two clean swizzle sequences are the first genuinely labelable skill attempts in the whole batch."
+  ],
+  "verdict": "Two usable swizzle examples. Framing works when the camera stays on the skater; the loss is from pointing away, not from settings."
+}
