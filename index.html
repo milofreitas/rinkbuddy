@@ -913,6 +913,7 @@
       <div id="webcamArea">
         <div id="webcamPreviewWrap" style="display:none;position:relative">
           <video id="webcamPreview" autoplay playsinline muted style="width:100%;border-radius:8px;background:#000;max-height:360px;object-fit:cover"></video>
+          <div id="camInfo" style="font-size:0.72rem;color:var(--text-dim);text-align:center;margin-top:6px"></div>
           <div style="display:flex;gap:8px;margin-top:10px;justify-content:center;align-items:center;flex-wrap:wrap" id="recControls">
             <button class="btn btn-secondary btn-sm" id="camSwitchBtn" onclick="switchCamera()" style="display:none;gap:6px">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -2453,6 +2454,83 @@ const timeDisplay = document.getElementById('timeDisplay');
 let videoFiles = [], activeVideoIdx = -1;
 let speeds = [0.25, 0.5, 0.75, 1, 1.5, 2], speedIdx = 3;
 
+// Read the true frame rate of an MP4/MOV (iPhone slo-mo keeps every frame; the
+// slow-motion effect is only playback metadata). Reads box headers + the moov box
+// via Blob.slice, so a 1 GB file costs a few hundred KB of reads. Returns null for
+// anything it can't parse (e.g. WebM from MediaRecorder).
+async function readVideoFps(blob) {
+  try {
+    const u32 = (dv, o) => dv.getUint32(o);
+    const u64 = (dv, o) => dv.getUint32(o) * 2 ** 32 + dv.getUint32(o + 4);
+    const type = (dv, o) => String.fromCharCode(dv.getUint8(o), dv.getUint8(o + 1), dv.getUint8(o + 2), dv.getUint8(o + 3));
+    // 1. find the top-level moov box
+    let off = 0, moov = null;
+    while (off + 8 <= blob.size) {
+      const hv = new DataView(await blob.slice(off, off + 16).arrayBuffer());
+      let size = u32(hv, 0); const t = type(hv, 4); let hdr = 8;
+      if (size === 1) { size = u64(hv, 8); hdr = 16; }
+      else if (size === 0) size = blob.size - off;
+      if (size < hdr) return null;
+      if (t === 'moov') {
+        if (size > 64e6) return null;
+        moov = new DataView(await blob.slice(off + hdr, off + size).arrayBuffer());
+        break;
+      }
+      off += size;
+    }
+    if (!moov) return null;
+    // 2. walk child boxes
+    const children = (dv, start, end) => {
+      const out = [];
+      let o = start;
+      while (o + 8 <= end) {
+        let size = u32(dv, o); const t = type(dv, o + 4); let hdr = 8;
+        if (size === 1) { size = u64(dv, o + 8); hdr = 16; } else if (size === 0) size = end - o;
+        if (size < hdr || o + size > end) break;
+        out.push({ t, start: o + hdr, end: o + size });
+        o += size;
+      }
+      return out;
+    };
+    const find = (list, t) => list.find(b => b.t === t);
+    for (const trak of children(moov, 0, moov.byteLength).filter(b => b.t === 'trak')) {
+      const mdia = find(children(moov, trak.start, trak.end), 'mdia'); if (!mdia) continue;
+      const mk = children(moov, mdia.start, mdia.end);
+      const hdlr = find(mk, 'hdlr'); if (!hdlr || type(moov, hdlr.start + 8) !== 'vide') continue;
+      const mdhd = find(mk, 'mdhd'); if (!mdhd) continue;
+      const timescale = u32(moov, mdhd.start + (moov.getUint8(mdhd.start) === 1 ? 20 : 12));
+      const minf = find(mk, 'minf'); if (!minf) continue;
+      const stbl = find(children(moov, minf.start, minf.end), 'stbl'); if (!stbl) continue;
+      const stts = find(children(moov, stbl.start, stbl.end), 'stts'); if (!stts) continue;
+      const n = u32(moov, stts.start + 4);
+      let frames = 0, ticks = 0;
+      for (let i = 0; i < n; i++) {
+        const c = u32(moov, stts.start + 8 + i * 8), d = u32(moov, stts.start + 12 + i * 8);
+        frames += c; ticks += c * d;
+      }
+      if (!frames || !ticks || !timescale) continue;
+      const seconds = ticks / timescale;
+      return { fps: Math.round((frames / seconds) * 10) / 10, frames, seconds };
+    }
+    return null;
+  } catch (e) { return null; }
+}
+
+function fpsLabel(fps) { return fps ? (fps >= 100 ? 'Slo-mo ' + Math.round(fps) + ' fps' : Math.round(fps) + ' fps') : ''; }
+function detectFps(entry, blob) {
+  readVideoFps(blob).then(r => {
+    if (!r) return;
+    entry.fps = r.fps;
+    VideoDB.updateFields(entry.id, { fps: r.fps }).catch(() => {});
+    renderVideoLibrary();
+    if (videoFiles[activeVideoIdx] === entry) applyPlaybackForFps(entry);
+  });
+}
+function applyPlaybackForFps(v) {
+  // High-frame-rate clips play in real time by default; slow them so the extra frames show.
+  if (v.fps >= 100) { speedIdx = 0; videoPlayer.playbackRate = speeds[0]; document.getElementById('speedBtn').textContent = speeds[0] + 'x'; }
+}
+
 // ═══════════════════════════════════════════
 //  IndexedDB Video Persistence
 // ═══════════════════════════════════════════
@@ -2481,7 +2559,8 @@ const VideoDB = {
         size: videoEntry.size,
         duration: videoEntry.duration,
         annotations: videoEntry.annotations || [],
-        intentSkill: videoEntry.intentSkill || ''
+        intentSkill: videoEntry.intentSkill || '',
+        fps: videoEntry.fps || 0
       });
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
@@ -2503,6 +2582,16 @@ const VideoDB = {
       tx.objectStore(this._storeName).delete(id);
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
+    });
+  },
+  async updateFields(id, fields) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const store = db.transaction(this._storeName, 'readwrite').objectStore(this._storeName);
+      const req = store.get(id);
+      req.onsuccess = () => { if (req.result) store.put(Object.assign(req.result, fields)); };
+      store.transaction.oncomplete = () => resolve();
+      store.transaction.onerror = () => reject();
     });
   },
   async updateAnnotations(id, annotations) {
@@ -2532,6 +2621,7 @@ const VideoDB = {
         id: rec.id, _blob: rec.blob, name: rec.name,
         size: rec.size, duration: rec.duration, annotations: rec.annotations || [],
         intentSkill: rec.intentSkill || '',
+        fps: rec.fps || 0,
         get url() {
           if (!url) url = URL.createObjectURL(this._blob);
           return url;
@@ -2539,6 +2629,7 @@ const VideoDB = {
         get file() { return this._blob; }
       };
       videoFiles.push(entry);
+      if (!entry.fps) detectFps(entry, rec.blob);
     });
     renderVideoLibrary(); renderUploadArea();
     if (typeof renderDashboard === 'function') { renderDashboard(); renderSkillTree(); }
@@ -2557,6 +2648,7 @@ function renderUploadArea() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:${hasVids?'20px':'48px'};height:${hasVids?'20px':'48px'}"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     <p>${hasVids?'Drop more videos here or <span class="highlight">browse</span>':'Drag & drop skating videos or <span class="highlight">browse</span>'}</p>
     ${hasVids?'':'<p style="font-size:0.7rem;margin-top:4px">MP4, MOV, WebM — then tag the skills you did</p>'}
+    <p style="font-size:0.7rem;margin-top:6px;color:var(--accent)">Best for jumps &amp; spins: film in the iPhone Camera app’s <strong>Slo-Mo</strong> mode (or 60 fps), then import it here. More frames = clearer takeoffs.</p>
     <input type="file" id="videoInput" accept="video/*" multiple style="display:none">
   </div>`;
   const zone = document.getElementById('uploadZone');
@@ -2577,7 +2669,7 @@ async function openWebcam() {
   try {
     if (webcamStream) { webcamStream.getTracks().forEach(t => t.stop()); }
     webcamStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 60 } },
       audio: false
     });
     const preview = document.getElementById('webcamPreview');
@@ -2589,6 +2681,9 @@ async function openWebcam() {
     document.getElementById('camSwitchBtn').style.display = '';
     document.getElementById('camCloseBtn').style.display = '';
     document.getElementById('camLabel').textContent = currentFacingMode === 'user' ? 'Front Camera' : 'Rear Camera';
+    const st = webcamStream.getVideoTracks()[0].getSettings();
+    document.getElementById('camInfo').textContent = (st.height ? st.height + 'p · ' : '') + (st.frameRate ? Math.round(st.frameRate) + ' fps' : '')
+      + (st.frameRate && st.frameRate < 50 ? ' — for smoother jumps, film in your Camera app (Slo-Mo or 60 fps) and import below' : '');
   } catch(e) {
     showToast('Camera access denied or unavailable');
     console.warn('Webcam error:', e);
@@ -2615,7 +2710,7 @@ function startRecording() {
   recordedChunks = [];
   const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
     : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
-  mediaRecorder = new MediaRecorder(webcamStream, { mimeType });
+  mediaRecorder = new MediaRecorder(webcamStream, { mimeType, videoBitsPerSecond: 8000000 });
   mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
   mediaRecorder.onstop = () => processRecording();
   mediaRecorder.start(1000); // chunk every second
@@ -2655,7 +2750,8 @@ function processRecording() {
   const now = new Date();
   const name = 'Recording_' + now.toISOString().slice(0,16).replace(/[T:]/g, '-');
   const id = 'vid_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-  const entry = { id, file: blob, url, name, size: blob.size, duration: (Date.now() - recStartTime) / 1000, annotations: [], intentSkill: currentPracticeSkill() };
+  const st = webcamStream ? webcamStream.getVideoTracks()[0].getSettings() : {};
+  const entry = { id, file: blob, url, name, size: blob.size, duration: (Date.now() - recStartTime) / 1000, annotations: [], intentSkill: currentPracticeSkill(), fps: st.frameRate ? Math.round(st.frameRate) : 0 };
 
   videoFiles.push(entry);
   VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
@@ -2695,7 +2791,7 @@ function addVideos(fl) {
     };
     videoFiles.push(entry);
     newEntries.push(entry);
-    VideoDB.save(entry).catch(e => console.warn('Video save error:', e));
+    VideoDB.save(entry).then(() => detectFps(entry, f)).catch(e => console.warn('Video save error:', e));
   });
   if (dupeCount > 0) showToast(dupeCount + ' duplicate video' + (dupeCount > 1 ? 's' : '') + ' skipped');
   renderVideoLibrary(); renderUploadArea();
@@ -2718,7 +2814,7 @@ function renderVideoLibrary() {
     ${v.annotations.length?`<div class="video-thumb-badge">${v.annotations.length} tag${v.annotations.length>1?'s':''}</div>`:''}
     <button onclick="event.stopPropagation();deleteVideo(${i})" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.7);border:none;color:var(--danger);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;z-index:2" title="Delete video">&times;</button>
     <div class="video-thumb-name">${v.name}</div>
-    <div class="video-thumb-meta">${fmtDur(v.duration)} &bull; ${fmtSize(v.size)}</div>
+    <div class="video-thumb-meta">${fmtDur(v.duration)} &bull; ${fmtSize(v.size)}${v.fps ? ` &bull; <span style="color:${v.fps >= 50 ? 'var(--success)' : 'var(--text-dim)'}">${fpsLabel(v.fps)}</span>` : ''}</div>
     ${tagSkillNames(v).length ? `<div class="video-thumb-meta" style="color:var(--accent)">${tagSkillNames(v).slice(0,3).map(escHtml).join(', ')}</div>` : ''}
   </div>`;
   }).join('');
@@ -2764,6 +2860,7 @@ function selectVideo(i) {
   playerArea.style.display = 'block';
   document.getElementById('activeVideoTitle').textContent = v.name;
   speedIdx = 3; document.getElementById('speedBtn').textContent = '1x'; videoPlayer.playbackRate = 1;
+  videoPlayer.onloadedmetadata = () => applyPlaybackForFps(v);
   renderAnnotations(); renderVideoLibrary();
   setTimeout(() => playerArea.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
@@ -2782,8 +2879,8 @@ function stepFrame(dir) {
   const vp = document.getElementById('videoPlayer');
   if (!vp || !vp.duration) return;
   vp.pause();
-  // Assume ~30fps if we can't determine exact framerate
-  const frameTime = 1 / 30;
+  const v = videoFiles[activeVideoIdx];
+  const frameTime = 1 / ((v && v.fps) || 30);
   vp.currentTime = Math.max(0, Math.min(vp.duration, vp.currentTime + dir * frameTime));
 }
 
