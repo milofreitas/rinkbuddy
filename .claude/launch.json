@@ -5,7 +5,8 @@
       "name": "rinkbuddy",
       "runtimeExecutable": "/opt/homebrew/bin/node",
       "runtimeArgs": ["serve.js"],
-      "port": 3000
+      "port": 8080,
+      "autoPort": true
     }
   ]
 }
