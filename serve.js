@@ -451,7 +451,8 @@ async function handleAPI(req, res) {
     if (route === '/api/analyze-video' && req.method === 'POST') {
       if (!ANTHROPIC_API_KEY) return jsonRes(res, 400, { error: 'ANTHROPIC_API_KEY not configured on server' });
 
-      const { frames, skills, discipline, batchContext } = await readBody(req);
+      const { token, frames, skills, discipline, batchContext } = await readBody(req);
+      if (!findByToken(token)) return jsonRes(res, 401, { error: 'Please log in to use AI Scan' });
       if (!frames || !frames.length) return jsonRes(res, 400, { error: 'No frames provided' });
 
       const skillList = (skills || []).map(s => `- ${s.name} (${s.type}, id:${s.id})`).join('\n');

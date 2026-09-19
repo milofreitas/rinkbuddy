@@ -725,35 +725,6 @@
     </div>
   </section>
 
-  <!-- Testimonials -->
-  <section class="lp-section">
-    <div class="lp-section-title">Loved by Skaters</div>
-    <div class="lp-section-sub">Join thousands of figure skaters and hockey players improving their game.</div>
-    <div class="lp-testimonials">
-      <div class="lp-testimonial">
-        <div class="lp-testimonial-text">"RinkBuddy completely changed how I practice. Seeing my success rates climb from 40% to 85% on my axel was incredibly motivating."</div>
-        <div class="lp-testimonial-author">
-          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" loading="lazy" style="width:40px;height:40px;border-radius:50%;object-fit:cover" alt="Sarah K.">
-          <div><div class="lp-testimonial-name">Sarah K.</div><div class="lp-testimonial-role">Figure Skater, Intermediate</div></div>
-        </div>
-      </div>
-      <div class="lp-testimonial">
-        <div class="lp-testimonial-text">"The video analysis is a game changer. I can annotate exactly where my edge goes wrong on three turns and track improvement over weeks."</div>
-        <div class="lp-testimonial-author">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" loading="lazy" style="width:40px;height:40px;border-radius:50%;object-fit:cover" alt="Mike R.">
-          <div><div class="lp-testimonial-name">Mike R.</div><div class="lp-testimonial-role">Hockey Player, Advanced</div></div>
-        </div>
-      </div>
-      <div class="lp-testimonial">
-        <div class="lp-testimonial-text">"My coach and I both use RinkBuddy. She reviews my videos and adds annotations, and the training plans keep me focused between lessons."</div>
-        <div class="lp-testimonial-author">
-          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" loading="lazy" style="width:40px;height:40px;border-radius:50%;object-fit:cover" alt="Emma T.">
-          <div><div class="lp-testimonial-name">Emma T.</div><div class="lp-testimonial-role">Figure Skater, Pre-Juvenile</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
 <section class="lp-section" id="feedback" style="text-align:center">
   <h2 class="lp-section-title">Share Your Feedback</h2>
   <p class="lp-section-subtitle">Help us improve RinkBuddy. We read every message.</p>
@@ -3158,6 +3129,7 @@ async function analyzeFramesWithAI(frames, skillNames, onProgress) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        token: (CloudAccount.getSession() || {}).token,
         frames: batch.map(f => ({ timestamp: f.timestamp, timeLabel: f.timeLabel, data: f.data })),
         skills: skillNames,
         discipline: APP.discipline || 'foundations',
@@ -4901,6 +4873,7 @@ async function analyzeCoachVideo() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          token: (CloudAccount.getSession() || {}).token,
           frames: batch.map(f => ({ timestamp: f.timestamp, timeLabel: f.timeLabel, data: f.data })),
           skills: skillNames,
           discipline: disc
