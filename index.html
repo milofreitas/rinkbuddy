@@ -23,6 +23,7 @@
           ? choice
           : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.dataset.theme = next;
+        if (typeof drawRadarChart === 'function') requestAnimationFrame(drawRadarChart);
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', next === 'dark' ? '#0B1826' : '#F5F8FA');
       };
@@ -881,7 +882,7 @@
 
 <header class="header">
   <div class="logo">
-    <svg viewBox="0 0 32 28" fill="none"><defs><linearGradient id="g1" x1="0" y1="0" x2="32" y2="28"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><path d="M28 8c-1.5-3-4.5-5.5-7.5-6.5C18.5.5 16.5.5 14.5 1c-1.5.4-3 1.2-4 2.5C9.2 5.2 8.5 7 8.5 9v4.5c0 1.5-.6 2.8-1.6 3.8L5.5 18.7c-1 1-2.2 1.5-3.5 1.5-.8 0-1.5.7-1.5 1.5V23c0 .8.7 1.5 1.5 1.5H5l1.5.8c.6.3 1 .9 1 1.6 0 .6.5 1.1 1.1 1.1h19.3c.6 0 1.1-.5 1.1-1.1 0-1.5.5-2.8 1.4-3.8l.8-.8c1.4-1.4 2.2-3.3 2.2-5.3V11c0-1.2-.4-2.3-1-3.2L28 8z" fill="url(#g1)"/><path d="M1 26.5h30" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/></svg>
+    <svg viewBox="0 0 32 28" fill="none"><path d="M28 8c-1.5-3-4.5-5.5-7.5-6.5C18.5.5 16.5.5 14.5 1c-1.5.4-3 1.2-4 2.5C9.2 5.2 8.5 7 8.5 9v4.5c0 1.5-.6 2.8-1.6 3.8L5.5 18.7c-1 1-2.2 1.5-3.5 1.5-.8 0-1.5.7-1.5 1.5V23c0 .8.7 1.5 1.5 1.5H5l1.5.8c.6.3 1 .9 1 1.6 0 .6.5 1.1 1.1 1.1h19.3c.6 0 1.1-.5 1.1-1.1 0-1.5.5-2.8 1.4-3.8l.8-.8c1.4-1.4 2.2-3.3 2.2-5.3V11c0-1.2-.4-2.3-1-3.2L28 8z" fill="var(--accent)"/><path d="M1 26.5h30" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/></svg>
     RinkBuddy
   </div>
   <div class="header-right">
@@ -1164,7 +1165,7 @@
           <label class="form-label">📹 Lesson Video</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-secondary btn-sm" onclick="recordCoachVideo()" id="coachRecordBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="red" stroke="none"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="var(--danger)" stroke="none"/></svg>
               Record
             </button>
             <label class="btn btn-secondary btn-sm" style="cursor:pointer">
@@ -1193,7 +1194,7 @@
                 <span style="font-size:0.82rem;font-weight:600" id="coachAIStatus">Analyzing video...</span>
               </div>
               <div style="height:4px;background:var(--bg);border-radius:2px;overflow:hidden">
-                <div id="coachAIFill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#6366f1);border-radius:2px;transition:width 0.3s"></div>
+                <div id="coachAIFill" style="height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width 0.3s"></div>
               </div>
             </div>
             <div id="coachAIResults" style="display:none;margin-top:8px"></div>
@@ -1245,24 +1246,24 @@
         </div>
         <div id="progressReportArea" style="display:none">
           <!-- Report Header Card -->
-          <div id="reportHeaderCard" style="background:linear-gradient(135deg,var(--accent),#6366f1);border-radius:12px;padding:18px;margin-bottom:14px;color:white">
+          <div id="reportHeaderCard" style="background:var(--accent);border-radius:12px;padding:18px;margin-bottom:14px;color:var(--on-accent)">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-              <div id="reportAvatar" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700"></div>
+              <div id="reportAvatar" style="width:44px;height:44px;border-radius:50%;background:color-mix(in srgb, var(--on-accent) 20%, transparent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700"></div>
               <div>
                 <div id="reportStudentName" style="font-size:1rem;font-weight:700"></div>
                 <div id="reportStudentMeta" style="font-size:0.72rem;opacity:0.85"></div>
               </div>
             </div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center">
+              <div style="background:color-mix(in srgb, var(--on-accent) 15%, transparent);border-radius:8px;padding:10px;text-align:center">
                 <div id="reportTotalLessons" style="font-size:1.3rem;font-weight:700">0</div>
                 <div style="font-size:0.65rem;opacity:0.8">Lessons</div>
               </div>
-              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center">
+              <div style="background:color-mix(in srgb, var(--on-accent) 15%, transparent);border-radius:8px;padding:10px;text-align:center">
                 <div id="reportTotalTime" style="font-size:1.3rem;font-weight:700">0m</div>
                 <div style="font-size:0.65rem;opacity:0.8">Total Time</div>
               </div>
-              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center">
+              <div style="background:color-mix(in srgb, var(--on-accent) 15%, transparent);border-radius:8px;padding:10px;text-align:center">
                 <div id="reportAvgRating" style="font-size:1.3rem;font-weight:700">--</div>
                 <div style="font-size:0.65rem;opacity:0.8">Avg Rating</div>
               </div>
@@ -1418,7 +1419,7 @@
       </div>
       <button class="btn btn-secondary btn-sm" style="width:100%;margin-bottom:8px;margin-top:10px" onclick="openFeedbackModal()">Send Feedback</button>
       <button class="btn btn-danger btn-sm" style="width:100%;margin-top:0;margin-bottom:8px" onclick="doLogout()">Log Out</button>
-      <button class="btn btn-sm" style="width:100%;margin-top:0;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3)" onclick="resetAllProgress()">⚠️ Reset All Progress</button>
+      <button class="btn btn-sm btn-danger" style="width:100%;margin-top:0" onclick="resetAllProgress()">⚠️ Reset All Progress</button>
     </div>
   </div>
   <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('accountModal')">Close</button></div>
@@ -2036,8 +2037,8 @@ function renderProfileList() {
   const c = document.getElementById('profileList');
   c.innerHTML = profiles.map(p => {
     const isActive = p.id === activeId;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isActive?'rgba(56,189,248,0.1)':'var(--surface2)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="switchProfile('${p.id}')">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white">${p.name.charAt(0).toUpperCase()}</div>
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isActive?'color-mix(in srgb, var(--accent) 10%, transparent)':'var(--surface2)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="switchProfile('${p.id}')">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--on-accent)">${p.name.charAt(0).toUpperCase()}</div>
       <div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${p.name}</div><div style="font-size:0.7rem;color:var(--text-dim)">${isActive ? 'Active' : 'Tap to switch'}</div></div>
       <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();renameProfile('${p.id}')" style="padding:4px 8px" title="Rename">✏️</button>
       ${profiles.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProfile('${p.id}')" style="padding:4px 8px">x</button>` : ''}
@@ -2283,7 +2284,7 @@ function showSkillDetail(id) {
       <div style="font-size:0.82rem;margin-bottom:8px">${guide.visual}</div>
       <div style="font-size:0.75rem;font-weight:600;color:var(--accent);margin-bottom:4px">Key focus points:</div>
       <ul style="font-size:0.78rem;color:var(--text-dim);padding-left:16px;margin-bottom:8px">${guide.focus.map(f => '<li>' + f + '</li>').join('')}</ul>
-      ${guide.balance ? `<div style="font-size:0.75rem;padding:8px;background:rgba(251,191,36,0.1);border-radius:6px;border-left:3px solid var(--warning)"><strong style="color:var(--warning)">Balance:</strong> <span style="color:var(--text-dim)">${guide.balance}</span></div>` : ''}
+      ${guide.balance ? `<div style="font-size:0.75rem;padding:8px;background:color-mix(in srgb, var(--warning) 10%, transparent);border-radius:6px;border-left:3px solid var(--warning)"><strong style="color:var(--warning)">Balance:</strong> <span style="color:var(--text-dim)">${guide.balance}</span></div>` : ''}
     </div>`;
     if (guide.yt) html += `<details style="margin-bottom:12px;background:var(--surface2);border-radius:8px" ontoggle="mountTutorial(this,'${guide.yt}')">
       <summary style="cursor:pointer;padding:10px 12px;font-size:0.78rem;font-weight:600;color:var(--accent)">▸ Watch the tutorial</summary>
@@ -2666,7 +2667,7 @@ function renderUploadArea() {
   const hasVids = videoFiles.length > 0;
   // Free tier: show limit message
   if (videoLimitReached()) {
-    area.innerHTML = `<div class="upgrade-banner" style="margin-top:10px"><div class="upgrade-banner-text"><strong>Video limit reached</strong> — Free plan allows 3 videos. Upgrade to Pro for unlimited uploads.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>`;
+    area.innerHTML = `<div class="upgrade-banner" style="margin-top:10px"><div class="upgrade-banner-text"><strong>Video limit reached</strong> — Free plan allows 3 videos. Upgrade to Pro for unlimited uploads.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>`;
     return;
   }
   area.innerHTML = `<div class="upload-zone${hasVids?' compact':''}" id="uploadZone">
@@ -3264,8 +3265,8 @@ function renderAnnotations() {
     annos.map((a, i) => {
       let dots = ''; for (let q = 1; q <= 5; q++) { const c = q <= a.quality ? (a.quality >= 4 ? 'filled' : a.quality >= 3 ? 'warn' : 'bad') : ''; dots += `<span class="quality-dot ${c}"></span> `; }
       const sug = a.status === 'suggested';
-      const badge = sug ? '<span class="annotation-tag" style="background:rgba(251,191,36,0.15);color:var(--warning)">AI?</span>'
-        : a.source === 'ai' ? '<span class="annotation-tag" style="background:rgba(52,211,153,0.15);color:var(--success)">AI ✓</span>'
+      const badge = sug ? '<span class="annotation-tag" style="background:color-mix(in srgb, var(--warning) 15%, transparent);color:var(--warning)">AI?</span>'
+        : a.source === 'ai' ? '<span class="annotation-tag" style="background:color-mix(in srgb, var(--success) 15%, transparent);color:var(--success)">AI ✓</span>'
         : '<span class="annotation-tag tag-' + escHtml(a.type) + '">tag</span>';
       const note = (a.note || '').replace(' [AI detected]', '');
       return `<div class="annotation-item" onclick="videoPlayer.currentTime=${a.time}" style="${sug ? 'border:1px dashed var(--warning)' : ''}">
@@ -3763,7 +3764,7 @@ function getSkillClipHTML(skillId) {
 function renderSuggestions() {
   const c = document.getElementById('trainingSuggestions');
   if (!isProUser()) {
-    c.innerHTML = '<div class="upgrade-banner"><div class="upgrade-banner-text"><strong>Pro Feature</strong> — Personalized training suggestions and AI-generated weekly plans require a Pro subscription.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>';
+    c.innerHTML = '<div class="upgrade-banner"><div class="upgrade-banner-text"><strong>Pro Feature</strong> — Personalized training suggestions and AI-generated weekly plans require a Pro subscription.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>';
     return;
   }
   const skills = getSkills(); let html = '';
@@ -3810,7 +3811,7 @@ function renderTrainingPlan() {
     <span style="font-weight:600">Week of ${p.weekOf}</span><span style="color:var(--text-dim)">${p.days.filter(d=>d.done).length}/7 done</span></div>` +
     p.days.map((d,i) => `<div class="plan-day"><span class="plan-day-name">${d.day}</span><span class="plan-tasks">${d.tasks}</span>
       <div class="plan-check ${d.done?'done':''}" onclick="APP.trainingPlans[0].days[${i}].done=!APP.trainingPlans[0].days[${i}].done;saveData(APP);renderTrainingPlan();">
-      ${d.done?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div></div>`).join('');
+      ${d.done?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--on-accent)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div></div>`).join('');
 }
 
 // ═══════════════════════════════════════════
@@ -3911,7 +3912,7 @@ function renderAchievements() {
   if (!earned.length && !locked.length) { el.innerHTML = '<div class="empty-state"><p>Start skating to earn badges!</p></div>'; return; }
 
   el.innerHTML = (earned.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:${locked.length?10:0}px">` +
-    earned.map(a => `<div style="background:rgba(52,211,153,0.1);border:1px solid var(--success);border-radius:8px;padding:6px 10px;text-align:center;min-width:70px" title="${a.desc}">
+    earned.map(a => `<div style="background:color-mix(in srgb, var(--success) 10%, transparent);border:1px solid var(--success);border-radius:8px;padding:6px 10px;text-align:center;min-width:70px" title="${a.desc}">
       <div style="font-size:1.2rem">${a.icon}</div>
       <div style="font-size:0.6rem;font-weight:600;color:var(--success)">${a.name}</div>
     </div>`).join('') + '</div>' : '') +
@@ -3974,6 +3975,18 @@ function renderWeeklyChallenge() {
   ${attemptProgress >= 100 && currentRate >= goalRate ? '<div style="text-align:center;margin-top:8px;font-size:0.82rem;color:var(--success);font-weight:600">🎉 Challenge Complete!</div>' : ''}`;
 }
 
+// Live token readers for canvas: fillStyle/strokeStyle can't resolve var(), so these
+// read the *current* theme's resolved custom-property value from the root element.
+function token(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function tokenAlpha(name, alpha) {
+  const hex = token(name).replace('#', '');
+  const full = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+  const a = Math.round(alpha * 255).toString(16).padStart(2, '0');
+  return '#' + full + a;
+}
+
 function drawRadarChart() {
   const canvas=document.getElementById('radarChart'),ctx=canvas.getContext('2d');
   const container=canvas.parentElement;
@@ -3988,11 +4001,11 @@ function drawRadarChart() {
   const values=types.map(t=>{const ss=skills.filter(s=>s.type===t);const tot=ss.reduce((a,s)=>a+getSkillData(s.id).attempts,0);return tot?ss.reduce((a,s)=>a+getSkillData(s.id).landed,0)/tot:0;});
   const n=cats.length; ctx.clearRect(0,0,size,size);
   const labelFont=Math.max(9,Math.round(size*0.042));
-  for(let ring=1;ring<=4;ring++){const r=(ring/4)*R;ctx.beginPath();for(let i=0;i<=n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.stroke();}
-  for(let i=0;i<n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.stroke();
-    ctx.fillStyle='#94a3b8';ctx.font=labelFont+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(cats[i],cx+(R+size*0.06)*Math.cos(a),cy+(R+size*0.06)*Math.sin(a));}
-  ctx.beginPath();values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a)):ctx.lineTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a));});ctx.closePath();ctx.fillStyle='rgba(56,189,248,0.15)';ctx.fill();ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.stroke();
-  values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.arc(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a),4,0,Math.PI*2);ctx.fillStyle='#38bdf8';ctx.fill();});
+  for(let ring=1;ring<=4;ring++){const r=(ring/4)*R;ctx.beginPath();for(let i=0;i<=n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}ctx.closePath();ctx.strokeStyle=tokenAlpha('--text',0.08);ctx.stroke();}
+  for(let i=0;i<n;i++){const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.strokeStyle=tokenAlpha('--text',0.1);ctx.stroke();
+    ctx.fillStyle=token('--text-dim');ctx.font=labelFont+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(cats[i],cx+(R+size*0.06)*Math.cos(a),cy+(R+size*0.06)*Math.sin(a));}
+  ctx.beginPath();values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;i===0?ctx.moveTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a)):ctx.lineTo(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a));});ctx.closePath();ctx.fillStyle=tokenAlpha('--accent',0.15);ctx.fill();ctx.strokeStyle=token('--accent');ctx.lineWidth=2;ctx.stroke();
+  values.forEach((v,i)=>{const a=(Math.PI*2*i)/n-Math.PI/2;ctx.beginPath();ctx.arc(cx+v*R*Math.cos(a),cy+v*R*Math.sin(a),4,0,Math.PI*2);ctx.fillStyle=token('--accent');ctx.fill();});
 }
 
 function drawCompChart() {
@@ -4001,9 +4014,9 @@ function drawCompChart() {
   canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;ctx.scale(dpr,dpr);canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
   const W=rect.width,H=rect.height,pad={top:20,right:20,bottom:30,left:40};ctx.clearRect(0,0,W,H);
   const comps=[...APP.competitions].sort((a,b)=>a.date.localeCompare(b.date));
-  if(comps.length<2){ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Add 2+ results to see chart',W/2,H/2);return;}
+  if(comps.length<2){ctx.fillStyle=token('--text-dim');ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Add 2+ results to see chart',W/2,H/2);return;}
   const mx=Math.max(...comps.map(c=>c.total))*1.1;
-  [{key:'tes',color:'#38bdf8'},{key:'pcs',color:'#818cf8'},{key:'total',color:'#f472b6'}].forEach(s=>{
+  [{key:'tes',color:token('--accent')},{key:'pcs',color:token('--accent')},{key:'total',color:token('--text')}].forEach(s=>{
     ctx.strokeStyle=s.color;ctx.lineWidth=2;ctx.beginPath();
     comps.forEach((c,i)=>{const x=pad.left+(i/(comps.length-1))*(W-pad.left-pad.right),y=pad.top+((mx-c[s.key])/mx)*(H-pad.top-pad.bottom);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
     comps.forEach((c,i)=>{const x=pad.left+(i/(comps.length-1))*(W-pad.left-pad.right),y=pad.top+((mx-c[s.key])/mx)*(H-pad.top-pad.bottom);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle=s.color;ctx.fill();});
@@ -4429,8 +4442,8 @@ function renderUpgradeBanners() {
     const banner = document.createElement('div');
     banner.className = 'upgrade-banner';
     banner.innerHTML = CloudAccount.isLoggedIn()
-      ? `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`
-      : `<div class="upgrade-banner-text"><strong>Saved on this device</strong> — your videos, tags and progress stay in this browser. Create a free account to sync to your other devices and use AI Scan.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="goToSignup()">Create account</button>`;
+      ? `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`
+      : `<div class="upgrade-banner-text"><strong>Saved on this device</strong> — your videos, tags and progress stay in this browser. Create a free account to sync to your other devices and use AI Scan.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="goToSignup()">Create account</button>`;
     dash.insertBefore(banner, dash.firstChild);
   }
 }
@@ -4770,11 +4783,11 @@ function generateIcon(size) {
   const ctx = c.getContext('2d');
   // Background
   const g = ctx.createLinearGradient(0, 0, size, size);
-  g.addColorStop(0, '#0f172a'); g.addColorStop(0.5, '#1e1b4b'); g.addColorStop(1, '#0f172a');
+  g.addColorStop(0, token('--bg')); g.addColorStop(0.5, token('--surface2')); g.addColorStop(1, token('--bg'));
   ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
   // Skate blade shape
   const s = size / 32;
-  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = s * 2; ctx.lineCap = 'round';
+  ctx.strokeStyle = token('--accent'); ctx.lineWidth = s * 2; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(s*10, s*22); ctx.quadraticCurveTo(s*16, s*6, s*22, s*22); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(s*8, s*22); ctx.lineTo(s*24, s*22); ctx.stroke();
   return c.toDataURL('image/png');
@@ -5118,15 +5131,15 @@ function renderLessonLog() {
     return `<div class="session-item" style="flex-wrap:wrap;cursor:default">
       <div class="session-date"><div class="session-day">${d.getDate()}</div><div class="session-month">${d.toLocaleDateString('en-US',{month:'short'})}</div></div>
       <div class="session-info" style="min-width:120px">
-        <div class="session-title">${studentName}${hasAI ? ' <span style="font-size:0.6rem;background:rgba(139,92,246,0.15);color:#a78bfa;padding:1px 5px;border-radius:3px;vertical-align:middle">🤖 AI</span>' : ''}</div>
+        <div class="session-title">${studentName}${hasAI ? ' <span style="font-size:0.6rem;background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);padding:1px 5px;border-radius:3px;vertical-align:middle">🤖 AI</span>' : ''}</div>
         <div class="session-meta">${l.duration}min &middot; <span style="color:var(--warning)">${ratingStars}</span></div>
       </div>
       <div style="width:100%;padding-left:56px;margin-top:4px">
-        ${skillNames.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${skillNames.map(n => `<span style="font-size:0.65rem;padding:2px 6px;background:rgba(56,189,248,0.1);border-radius:4px;color:var(--accent)">${n}</span>`).join('')}</div>` : ''}
+        ${skillNames.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${skillNames.map(n => `<span style="font-size:0.65rem;padding:2px 6px;background:color-mix(in srgb, var(--accent) 10%, transparent);border-radius:4px;color:var(--accent)">${n}</span>`).join('')}</div>` : ''}
         ${userNotes ? `<div style="font-size:0.78rem;color:var(--text-dim)">${userNotes}</div>` : ''}
         ${hasAI ? `<details style="margin-top:6px">
-          <summary style="font-size:0.72rem;color:#a78bfa;cursor:pointer;font-weight:500">🤖 AI detected ${l.aiAnalysis.length} skill${l.aiAnalysis.length!==1?'s':''} — tap to expand</summary>
-          <div style="margin-top:6px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:6px;padding:8px">
+          <summary style="font-size:0.72rem;color:var(--accent);cursor:pointer;font-weight:500">🤖 AI detected ${l.aiAnalysis.length} skill${l.aiAnalysis.length!==1?'s':''} — tap to expand</summary>
+          <div style="margin-top:6px;background:color-mix(in srgb, var(--accent) 5%, transparent);border:1px solid color-mix(in srgb, var(--accent) 15%, transparent);border-radius:6px;padding:8px">
             ${l.aiAnalysis.map(a => `<div style="display:flex;gap:6px;padding:3px 0;font-size:0.72rem">
               <span style="color:var(--text-dim);font-family:monospace;min-width:32px">${fmtTime(a.timestamp)}</span>
               <span style="font-weight:500">${a.skillName}</span>
@@ -5315,10 +5328,10 @@ async function analyzeCoachVideo() {
 
       // Show detected skills summary
       results.style.display = 'block';
-      results.innerHTML = `<div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-radius:8px;padding:12px;margin-top:4px">
+      results.innerHTML = `<div style="background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 20%, transparent);border-radius:8px;padding:12px;margin-top:4px">
         <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px;color:var(--accent)">🤖 AI Detected ${deduped.length} Skill${deduped.length !== 1 ? 's' : ''}</div>
         ${deduped.map(r => {
-          const confColor = r.confidence >= 0.8 ? '#22c55e' : r.confidence >= 0.5 ? '#f59e0b' : '#ef4444';
+          const confColor = r.confidence >= 0.8 ? 'var(--success)' : r.confidence >= 0.5 ? 'var(--warning)' : 'var(--danger)';
           return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.78rem">
             <span style="color:var(--text-dim);min-width:36px;font-family:monospace;font-size:0.7rem">${fmtTime(r.timestamp)}</span>
             <span style="flex:1;font-weight:500">${r.skillName}</span>
@@ -5473,7 +5486,7 @@ function generateProgressReport() {
     const d = new Date(l.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
     const stars = '★'.repeat(l.rating) + '☆'.repeat(5-l.rating);
     const skillNames = (l.skillsFocused||[]).slice(0,3).map(sid => skillNameMap[sid]||sid);
-    return `<div style="display:flex;gap:12px;padding:10px 0;${i < recentLessons.length-1 ? 'border-bottom:1px solid rgba(255,255,255,0.05)':''}">
+    return `<div style="display:flex;gap:12px;padding:10px 0;${i < recentLessons.length-1 ? 'border-bottom:1px solid color-mix(in srgb, var(--text) 5%, transparent)':''}">
       <div style="min-width:50px;text-align:center">
         <div style="font-size:0.78rem;font-weight:600;color:var(--accent)">${d.split(' ')[0]}</div>
         <div style="font-size:1.1rem;font-weight:700;color:var(--text)">${d.split(' ')[1]}</div>
@@ -5510,7 +5523,7 @@ function generateProgressReport() {
           <span style="color:var(--text-dim)">${count}x</span>
         </div>
         <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
-          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),#6366f1);border-radius:3px;transition:width 0.3s"></div>
+          <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:3px;transition:width 0.3s"></div>
         </div>
       </div>`;
     }).join('');
@@ -5540,13 +5553,15 @@ function generateProgressReport() {
         <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px">${aiLessons.length} lesson${aiLessons.length!==1?'s':''} analyzed by AI</div>
         ${aiSkillsSorted.map(([name, data]) => {
           const avgConf = Math.round((data.totalConf / data.count) * 100);
-          const confColor = avgConf >= 75 ? '#22c55e' : avgConf >= 50 ? '#f59e0b' : '#ef4444';
-          return `<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          const confTier = avgConf >= 75 ? 'success' : avgConf >= 50 ? 'warning' : 'danger';
+          const confColor = `var(--${confTier})`;
+          const confBg = `color-mix(in srgb, var(--${confTier}) 15%, transparent)`;
+          return `<div style="padding:6px 0;border-bottom:1px solid color-mix(in srgb, var(--text) 5%, transparent)">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <span style="font-size:0.78rem;font-weight:500">${name}</span>
               <div style="display:flex;align-items:center;gap:6px">
                 <span style="font-size:0.68rem;color:var(--text-dim)">${data.count}x detected</span>
-                <span style="font-size:0.65rem;padding:1px 5px;border-radius:3px;background:${confColor}20;color:${confColor}">${avgConf}%</span>
+                <span style="font-size:0.65rem;padding:1px 5px;border-radius:3px;background:${confBg};color:${confColor}">${avgConf}%</span>
               </div>
             </div>
             ${data.notes.length > 0 ? `<div style="font-size:0.68rem;color:var(--text-dim);margin-top:2px;font-style:italic">${data.notes[0]}</div>` : ''}
@@ -5562,7 +5577,7 @@ function generateProgressReport() {
   if (nextItems.length === 0) {
     focusEl.innerHTML = '<div style="font-size:0.78rem;color:var(--text-dim);padding:10px 0">No focus areas noted. Add them when logging lessons.</div>';
   } else {
-    focusEl.innerHTML = nextItems.map(n => `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+    focusEl.innerHTML = nextItems.map(n => `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--text) 5%, transparent)">
       <span style="color:var(--accent);font-size:0.85rem">→</span>
       <span style="font-size:0.82rem">${n}</span>
     </div>`).join('');
@@ -5611,10 +5626,10 @@ function renderAssessment() {
 
   area.innerHTML = cats.map(cat => {
     const val = assessments[cat] || 0;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--text) 5%, transparent)">
       <span style="font-size:0.82rem;min-width:120px;font-weight:500">${cat}</span>
       <div style="display:flex;gap:4px" data-assess-cat="${cat}">
-        ${[1,2,3,4,5].map(n => `<button class="btn btn-sm" style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;${n <= val ? 'background:var(--accent);color:white;border:none' : 'background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)'}" onclick="setAssessRating('${cat}',${n},'${studentId}')">${n}</button>`).join('')}
+        ${[1,2,3,4,5].map(n => `<button class="btn btn-sm" style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;${n <= val ? 'background:var(--accent);color:var(--on-accent);border:none' : 'background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)'}" onclick="setAssessRating('${cat}',${n},'${studentId}')">${n}</button>`).join('')}
       </div>
       <span style="font-size:0.72rem;color:var(--text-dim);min-width:30px">${val}/5</span>
     </div>`;

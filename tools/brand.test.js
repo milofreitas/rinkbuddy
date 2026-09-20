@@ -148,10 +148,30 @@ const remainingLiterals = () =>
   colourLiterals(INDEX, ALLOWED_LITERALS).filter(v => !BLACK_ALPHA.test(v));
 
 // Ratchet: this number only ever goes down. Task 4 → 119, Task 5 → 49, Task 6 → 0.
-const MAX_LITERALS = 49;
+const MAX_LITERALS = 0;
 
 test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
   const found = remainingLiterals();
   assert.ok(found.length <= MAX_LITERALS,
     `${found.length} literals left, budget is ${MAX_LITERALS}. First ten: ${found.slice(0, 10).join(', ')}`);
+});
+
+test('no brand-coloured gradients remain', () => {
+  const found = colourGradients(INDEX);
+  assert.deepStrictEqual(found, [], `gradients left: ${found.slice(0, 5).join(' | ')}`);
+});
+
+test('no gradient text remains', () => {
+  assert.doesNotMatch(INDEX, /background-clip:\s*text/);
+});
+
+// The hex/rgba lint cannot see CSS named colours. `stroke="white"` on an icon is
+// invisible on a light surface just as surely as #fff is, and measured 2.0-2.3:1 in
+// dark theme where Task 5 found them.
+const NAMED_COLOUR = /(stroke|fill|color|background(?:-color)?)\s*[:=]\s*["']?\s*(white|black|red|blue|green|yellow|orange|purple|pink|gray|grey|silver|gold|navy|teal|cyan|magenta|lime|maroon|olive|aqua|fuchsia)\b/gi;
+
+test('no CSS named colours are used for colour-bearing properties', () => {
+  const found = [...INDEX.matchAll(NAMED_COLOUR)].map(m => `${m[1]}=${m[2]}`);
+  assert.deepStrictEqual(found, [],
+    `named colours left: ${found.slice(0, 10).join(', ')}`);
 });
