@@ -1427,13 +1427,13 @@
 // ═══════════════════════════════════════════
 const SKILLS = {
   foundations: [
-    {id:'f-fall-getup',name:'Falling & Getting Up',type:'balance',level:'beginner',prereqs:[],bv:0,
+    {id:'f-fall-getup',name:'Sit on Ice and Stand Up',type:'balance',level:'beginner',prereqs:[],bv:0,
      tip:'Bend knees and fall to the side onto your hip. To get up: hands and knees, one foot up, push to stand.'},
-    {id:'f-march',name:'Marching on Ice',type:'locomotion',level:'beginner',prereqs:['f-fall-getup'],bv:0,
+    {id:'f-march',name:'March Forward Across the Ice',type:'locomotion',level:'beginner',prereqs:['f-fall-getup'],bv:0,
      tip:'Lift feet up and down in place, then march forward. Small steps, knees high. Arms out for balance.'},
     {id:'f-2ft-glide',name:'Two-Foot Glide',type:'balance',level:'beginner',prereqs:['f-march'],bv:0,
      tip:'Keep knees soft, arms out for balance. Core engaged. Practice shifting weight side to side.'},
-    {id:'f-1ft-glide',name:'One-Foot Glide',type:'balance',level:'beginner',prereqs:['f-2ft-glide'],bv:0,
+    {id:'f-1ft-glide',name:'Forward One-Foot Glide',type:'balance',level:'beginner',prereqs:['f-2ft-glide'],bv:0,
      tip:'Glide on two feet, then lift one skate just off the ice and hold. Knee soft over the toe, arms out, eyes up. Both feet.'},
     {id:'f-dip',name:'Dip',type:'balance',level:'beginner',prereqs:['f-2ft-glide'],bv:0,
      tip:'Deep knee bend while gliding on two feet. Arms forward for balance. Builds leg strength and balance.'},
@@ -1441,17 +1441,19 @@ const SKILLS = {
      tip:'Toes out, push apart, then toes in to bring feet together. Make a lemon shape on the ice. 6-8 in a row.'},
     {id:'f-bwd-swizzle',name:'Backward Swizzles',type:'locomotion',level:'beginner',prereqs:['f-bwd-wiggle'],bv:0,
      tip:'Heels out, push apart, then heels in to bring feet together. Reverse lemon shape. Keep weight on balls of feet.'},
-    {id:'f-fwd-stroke',name:'Forward Stroking/Skating',type:'locomotion',level:'intermediate',prereqs:['f-fwd-swizzle'],bv:0,
+    {id:'f-fwd-stroke',name:'Beginning Forward Stroking',type:'locomotion',level:'intermediate',prereqs:['f-fwd-swizzle'],bv:0,
      tip:'Focus on full extension of the pushing leg and smooth weight transfer. Knees bent, push to the side.'},
-    {id:'f-snowplow',name:'Snowplow Stop',type:'stop',level:'beginner',prereqs:['f-march','f-2ft-glide'],bv:0,
+    {id:'f-snowplow',name:'Beginning Snowplow Stop',type:'stop',level:'beginner',prereqs:['f-march','f-2ft-glide'],bv:0,
      tip:'Angle both feet inward. Bend knees and press gently. Equal pressure both feet.'},
+    {id:'f-snowplow-moving',name:'Moving Snowplow Stop',type:'stop',level:'beginner',prereqs:['f-snowplow'],bv:0,
+     tip:'Basic 2 G. Glide forward with speed, then press both feet out into a wedge and scrape to a stop.'},
     {id:'f-bwd-2ft-glide',name:'Backward Two-Foot Glide',type:'balance',level:'beginner',prereqs:['f-bwd-swizzle'],bv:0,
      tip:'Glide backward on two feet. Keep weight on balls of feet, knees bent. Look over shoulder.'},
-    {id:'f-2ft-hop',name:'Two-Foot Hop',type:'balance',level:'beginner',prereqs:['f-dip'],bv:0,
+    {id:'f-2ft-hop',name:'Two-Foot Hop in Place',type:'balance',level:'beginner',prereqs:['f-dip'],bv:0,
      tip:'Bend knees, jump straight up and land on two feet. Arms help with lift. Soft knees on landing.'},
     {id:'f-rocking-horse',name:'Rocking Horse',type:'locomotion',level:'beginner',prereqs:['f-fwd-swizzle','f-bwd-swizzle'],bv:0,
      tip:'One forward swizzle then one backward swizzle, rocking back and forth. Builds rhythm and comfort.'},
-    {id:'f-bwd-stroke',name:'Backward Stroking/Skating',type:'locomotion',level:'advanced',prereqs:['f-bwd-crossover'],bv:0,
+    {id:'f-bwd-stroke',name:'Backward Stroking',type:'locomotion',level:'advanced',prereqs:['f-bwd-crossover'],bv:0,
      tip:'Keep weight on the ball of the foot. C-cut pushes with each foot. Look over shoulder periodically.'},
     {id:'f-fwd-crossover',name:'Forward Crossover',type:'locomotion',level:'intermediate',prereqs:['f-fwd-outside-edge','f-fwd-inside-edge'],bv:0,
      tip:'Lean into the circle. Cross over fully with the outside foot. Push hard with under-foot.'},
@@ -1459,35 +1461,31 @@ const SKILLS = {
      tip:'Push with the inside edge. Keep arms steady for balance. The cross-under push is where the power comes from.'},
     {id:'f-t-stop',name:'T-Stop',type:'stop',level:'advanced',prereqs:['f-fwd-outside-edge','f-hockey-stop'],bv:0,
      tip:'Drag the back foot perpendicular. Keep most weight on the front foot.'},
-    {id:'f-fwd-outside-edge',name:'Forward Outside Edge',type:'edge',level:'intermediate',prereqs:['f-fwd-stroke','f-fwd-halfswizzle-pumps'],bv:0,
+    {id:'f-fwd-outside-edge',name:'Forward Outside Edge on a Circle',type:'edge',level:'intermediate',prereqs:['f-fwd-stroke','f-fwd-halfswizzle-pumps'],bv:0,
      tip:'Glide on one foot on the outside edge tracing a curve. Lean slightly out. Practice both feet.'},
-    {id:'f-fwd-inside-edge',name:'Forward Inside Edge',type:'edge',level:'intermediate',prereqs:['f-fwd-stroke','f-fwd-halfswizzle-pumps'],bv:0,
+    {id:'f-fwd-inside-edge',name:'Forward Inside Edge on a Circle',type:'edge',level:'intermediate',prereqs:['f-fwd-stroke','f-fwd-halfswizzle-pumps'],bv:0,
      tip:'Glide on one foot on the inside edge tracing a curve. Lean slightly in. Practice both feet.'},
-    {id:'f-bwd-outside-edge',name:'Backward Outside Edge',type:'edge',level:'advanced',prereqs:['f-bwd-1ft-glide','f-bwd-halfswizzle-pumps'],bv:0,
+    {id:'f-bwd-outside-edge',name:'Backward Outside Edge on a Circle',type:'edge',level:'advanced',prereqs:['f-bwd-1ft-glide','f-bwd-halfswizzle-pumps'],bv:0,
      tip:'Glide backward on one foot, outside edge. Control the curve with hip and shoulder position.'},
-    {id:'f-bwd-inside-edge',name:'Backward Inside Edge',type:'edge',level:'advanced',prereqs:['f-bwd-1ft-glide','f-bwd-halfswizzle-pumps'],bv:0,
+    {id:'f-bwd-inside-edge',name:'Backward Inside Edge on a Circle',type:'edge',level:'advanced',prereqs:['f-bwd-1ft-glide','f-bwd-halfswizzle-pumps'],bv:0,
      tip:'Glide backward on one foot, inside edge. Keep free leg extended. Control the curve.'},
-    {id:'f-edge-control',name:'Edge Control',type:'edge',level:'intermediate',prereqs:['f-fwd-outside-edge','f-fwd-inside-edge'],bv:0,
-     tip:'Practice inside and outside edges on both feet. Feel the blade grip and release on each edge.'},
     {id:'f-fwd-slalom',name:'Forward Slalom',type:'locomotion',level:'intermediate',prereqs:['f-fwd-stroke'],bv:0,
      tip:'Weave side to side on two feet using edge pressure. Knees drive the direction changes.'},
     {id:'f-2ft-spin',name:'Beginning Two-Foot Spin',type:'spin',level:'intermediate',prereqs:['f-fwd-pivot','f-fwd-crossover'],bv:0,
      tip:'Enter from a small circle. Pull arms in to spin. Aim for 2-4 revolutions. Spot with eyes.'},
     {id:'f-hockey-stop',name:'Hockey Stop',type:'stop',level:'advanced',prereqs:['f-snowplow','f-fwd-crossover'],bv:0,
      tip:'Turn both feet 90 degrees and shave the ice. Lean away from travel direction. Practice both sides.'},
-    {id:'f-transition',name:'Forward to Backward Transition',type:'turn',level:'intermediate',prereqs:['f-fwd-stroke','f-bwd-2ft-glide'],bv:0,
+    {id:'f-transition',name:'Moving Forward to Backward Two-Foot Turn',type:'turn',level:'intermediate',prereqs:['f-fwd-stroke','f-bwd-2ft-glide'],bv:0,
      tip:'Open hips and pivot on both feet. Keep speed through the transition.'},
     {id:'f-fwd-outside-3turn',name:'Forward Outside Three-Turn',type:'turn',level:'advanced',prereqs:['f-fwd-outside-edge'],bv:0,
      tip:'Rotate shoulders into the turn on the outside edge. Check with opposite arm after the turn. R and L.'},
     {id:'f-fwd-inside-3turn',name:'Forward Inside Three-Turn',type:'turn',level:'advanced',prereqs:['f-fwd-inside-edge'],bv:0,
      tip:'Enter on inside edge, rotate shoulders, turn to backward outside edge. Check firmly after turn.'},
-    {id:'f-fwd-spiral',name:'Forward Spiral',type:'balance',level:'beginner',prereqs:['f-fwd-outside-edge'],bv:0,
+    {id:'f-fwd-spiral',name:'Forward Spiral on a Straight Line',type:'balance',level:'beginner',prereqs:['f-fwd-outside-edge'],bv:0,
      tip:'Glide on one foot, free leg extended behind at hip height or above. Back arched, arms out. Hold 3+ seconds.'},
-    {id:'f-bwd-stroking-adv',name:'Backward Stroking (Advanced)',type:'locomotion',level:'advanced',prereqs:['f-bwd-outside-edge','f-bwd-inside-edge'],bv:0,
-     tip:'Powerful backward stroking with full extension and smooth crossovers. Control edges through turns.'},
-    {id:'f-1ft-spin',name:'One-Foot Spin',type:'spin',level:'advanced',prereqs:['f-2ft-spin'],bv:0,
+    {id:'f-1ft-spin',name:'Beginning One-Foot Spin',type:'spin',level:'advanced',prereqs:['f-2ft-spin'],bv:0,
      tip:'Enter from back crossover. Snap free foot to ankle. Arms in tight. Aim for 4+ revolutions centered.'},
-    {id:'f-lunge',name:'Lunge',type:'balance',level:'intermediate',prereqs:['f-fwd-stroke','f-dip'],bv:0,
+    {id:'f-lunge',name:'Forward Lunges',type:'balance',level:'intermediate',prereqs:['f-fwd-stroke','f-dip'],bv:0,
      tip:'Deep forward lunge while gliding. Back knee nearly touches ice. Arms out for balance. Both legs.'},
     {id:'f-shoot-the-duck',name:'Shoot the Duck',type:'balance',level:'advanced',prereqs:['f-dip','f-fwd-outside-edge'],bv:0,
      tip:'Glide on one foot in a deep squat, free leg extended forward. Arms forward for balance. Hold 3+ seconds.'},
@@ -1521,13 +1519,9 @@ const SKILLS = {
      tip:"Basic 6 G"}
   ],
   figure: [
-    {id:'2ft-spin',name:'Two-Foot Spin',type:'spin',level:'beginner',prereqs:['f-fwd-crossover'],bv:0.5,
-     tip:'Start from a small circle. Pull arms in tight to increase speed.'},
-    {id:'3turn',name:'Three Turn',type:'step',level:'beginner',prereqs:['f-fwd-crossover'],bv:0,
-     tip:'Rotate shoulders first, hips follow. Check the turn with opposite arm.'},
     {id:'mohawk',name:'Mohawk',type:'step',level:'beginner',prereqs:['f-fwd-crossover','f-bwd-crossover'],bv:0,
      tip:'Open the hip of the free foot. Keep shoulders square to the circle.'},
-    {id:'waltz',name:'Waltz Jump',type:'jump',level:'beginner',prereqs:['bunny-hop','mazurka','3turn'],bv:0.3,
+    {id:'waltz',name:'Waltz Jump',type:'jump',level:'beginner',prereqs:['bunny-hop','mazurka','f-fwd-outside-3turn'],bv:0.3,
      tip:'Step onto left forward outside edge. Swing right leg up, half rotation.'},
     {id:'toe',name:'Toe Loop',type:'jump',level:'beginner',prereqs:['waltz','half-flip','f-bwd-outside-edge'],bv:0.4,
      tip:'Pick with the toe. Rotate from the back outside edge. Arms tight on landing.'},
@@ -1535,13 +1529,13 @@ const SKILLS = {
      tip:'Enter from a back inside edge. Scoop the free leg through.'},
     {id:'loop',name:'Loop',type:'jump',level:'intermediate',prereqs:['toe','sal'],bv:0.5,
      tip:'Load the right back outside edge. Cross ankles and spring up.'},
-    {id:'uspin',name:'Upright Spin',type:'spin',level:'beginner',prereqs:['2ft-spin'],bv:1.2,
+    {id:'uspin',name:'Upright Spin',type:'spin',level:'beginner',prereqs:['f-2ft-spin'],bv:1.2,
      tip:'Enter from a back crossover. Snap free foot to spinning foot quickly.'},
     {id:'sspin',name:'Sit Spin',type:'spin',level:'intermediate',prereqs:['uspin'],bv:1.3,
      tip:'Push the free leg forward. Get low — thigh should be parallel to ice.'},
-    {id:'bracket',name:'Forward Bracket',type:'step',level:'expert',prereqs:['3turn','f-bwd-outside-edge','f-bwd-inside-edge'],bv:0,
+    {id:'bracket',name:'Bracket Turn (Brackets in the Field)',type:'step',level:'expert',prereqs:['f-fwd-outside-3turn','f-bwd-outside-edge','f-bwd-inside-edge'],bv:0,
      tip:'Like a three turn but against the curve. Rotate counter to the edge direction. Check firmly.'},
-    {id:'flip',name:'Flip',type:'jump',level:'intermediate',prereqs:['toe','3turn'],bv:0.5,
+    {id:'flip',name:'Flip',type:'jump',level:'intermediate',prereqs:['toe','f-fwd-outside-3turn'],bv:0.5,
      tip:'Enter from back inside edge with toe pick assist. Clean takeoff edge.'},
     {id:'lutz',name:'Lutz',type:'jump',level:'intermediate',prereqs:['flip'],bv:0.6,
      tip:'Long back outside edge entry. Counter-rotate into the jump.'},
@@ -1551,11 +1545,11 @@ const SKILLS = {
      tip:'Free leg hip-height behind. Hold back and head up.'},
     {id:'combospin',name:'Combination Spin',type:'spin',level:'intermediate',prereqs:['uspin','sspin','cspin','cf-spin'],bv:2.0,
      tip:'Smooth transitions between positions. Minimize travel.'},
-    {id:'stseq',name:'Step Sequence',type:'step',level:'advanced',prereqs:['3turn','mohawk'],bv:3.9,
+    {id:'stseq',name:'Step Sequence',type:'step',level:'advanced',prereqs:['f-fwd-outside-3turn','mohawk'],bv:3.9,
      tip:'Variety of turns, steps, and edges. Cover the full ice surface.'},
     {id:'layback',name:'Layback Spin',type:'spin',level:'intermediate',prereqs:['uspin'],bv:2.4,
      tip:'Arch the back gradually. Free leg behind. Arms frame the face.'},
-    {id:'spread-eagle',name:'Spread Eagle',type:'move',level:'intermediate',prereqs:['3turn','mohawk'],bv:0,
+    {id:'spread-eagle',name:'Spread Eagle',type:'move',level:'intermediate',prereqs:['f-fwd-outside-3turn','mohawk'],bv:0,
      tip:'Both feet on ice, toes turned out, gliding on a curve. Requires hip flexibility. Keep arms wide.'},
     {id:'ina-bauer',name:'Ina Bauer',type:'move',level:'intermediate',prereqs:['spread-eagle'],bv:0,
      tip:'One foot forward, one back, knees bent, gliding on a curve. Often with a back arch for drama.'},
@@ -1571,7 +1565,7 @@ const SKILLS = {
      tip:'Hold the outside edge on entry — no flutz. Counter-rotate strongly into the jump.'},
     {id:'2axel',name:'Double Axel',type:'jump',level:'expert',prereqs:['axel','2lutz'],bv:3.3,
      tip:'2.5 rotations from forward takeoff. Requires explosive jump height and fast rotation.'},
-    {id:'fspin',name:'Flying Spin',type:'spin',level:'expert',prereqs:['sspin','back-spin','fcamel'],bv:2.6,
+    {id:'fspin',name:'Flying Sit Spin (FSSp)',type:'spin',level:'expert',prereqs:['sspin','back-spin','fcamel'],bv:2.6,
      tip:'Enter with a jump into a spin position in the air. Land in spin. Death drop or flying camel.'},
     {id:'fcamel',name:'Flying Camel',type:'spin',level:'expert',prereqs:['cspin','back-spin'],bv:2.6,
      tip:'Jump into camel position in air, land spinning in camel. Maintain height of free leg throughout.'},
@@ -1609,7 +1603,7 @@ const SKILLS = {
      tip:"LTS FS3 'Waltz jump-toe loop or Salchow-toe loop combination'; every USFS singles test from Preliminary requires a two-jump combination"},
     {id:'spiral-seq',name:"Spiral Sequence",type:'sequence',level:'expert',prereqs:['f-fwd-spiral','mohawk'],bv:0,
      tip:"Spiral currently exists only in foundations"},
-    {id:'twizzle-f',name:"Forward Twizzles",type:'turn',level:'expert',prereqs:['3turn','bracket'],bv:0,
+    {id:'twizzle-f',name:"Forward Twizzles",type:'turn',level:'expert',prereqs:['f-fwd-outside-3turn','bracket'],bv:0,
      tip:"Pre-Silver Skating Skills test element 4, alongside brackets"},
     {id:'counter',name:"Counter Turn",type:'turn',level:'expert',prereqs:['bracket'],bv:0,
      tip:"Forward & Backward Outside/Inside Counters are Silver Skating Skills elements 2 and 3 \u2014 above brackets, below rockers"},
@@ -1629,7 +1623,7 @@ const SKILLS = {
      tip:'Turn both feet 90 degrees. Lean away from the direction of travel. Shave the ice.'},
     {id:'h-bwd-cross',name:'Backward Crossover',type:'skating',level:'intermediate',prereqs:['f-bwd-crossover'],bv:0,
      tip:'Lean into the circle. The cross-under push is where the power comes from.'},
-    {id:'h-tight-turn',name:'Tight Turns',type:'skating',level:'beginner',prereqs:['h-edge-work'],bv:0,
+    {id:'h-tight-turn',name:'Controlled Turn',type:'skating',level:'beginner',prereqs:['h-edge-work'],bv:0,
      tip:'Deep knee bend. Edge work controls the radius.'},
     {id:'h-1ft-stop',name:'One-Foot Stop',type:'stop',level:'intermediate',prereqs:['h-hockey-stop'],bv:0,
      tip:'All weight on the stopping foot. Angle the blade and press down.'},
@@ -1645,15 +1639,13 @@ const SKILLS = {
      tip:'Open hips from backward to forward. Explode into forward stride immediately after pivot.'},
     {id:'h-mohawk',name:'Mohawk Turn',type:'skating',level:'intermediate',prereqs:['f-transition'],bv:0,
      tip:'Heel-to-heel pivot. Keep low through the transition for speed.'},
-    {id:'h-power-stop',name:'Power Slide Stop',type:'stop',level:'advanced',prereqs:['h-hockey-stop'],bv:0,
-     tip:'Turn the body and slide both feet. Create maximum ice spray.'},
-    {id:'h-edge-work',name:'Inside/Outside Edges',type:'skating',level:'beginner',prereqs:['h-ready-stance'],bv:0,
+    {id:'h-edge-work',name:'Edge Control',type:'skating',level:'beginner',prereqs:['h-ready-stance'],bv:0,
      tip:'Practice slalom patterns. Feel the edges grip and release.'},
     {id:'h-lateral',name:'Lateral Movement',type:'skating',level:'advanced',prereqs:['f-fwd-crossover','h-bwd-cross'],bv:0,
      tip:'Defensive shuffles. Stay low, push sideways with inside edges.'},
-    {id:'h-quick-feet',name:'Quick Feet Agility',type:'skating',level:'intermediate',prereqs:['h-ready-stance'],bv:0,
+    {id:'h-quick-feet',name:'ABCs of Skating (Agility, Balance, Coordination, Speed)',type:'skating',level:'intermediate',prereqs:['h-ready-stance'],bv:0,
      tip:'Rapid short strides. Practice with cones. React and change direction.'},
-    {id:'h-spin-move',name:'Spin-o-rama',type:'skating',level:'expert',prereqs:['h-mohawk','f-transition'],bv:0,
+    {id:'h-spin-move',name:'Spin Around',type:'skating',level:'expert',prereqs:['h-mohawk','f-transition'],bv:0,
      tip:'Full 360 pivot while maintaining puck control. Protect the puck.'},
     {id:'h-gap-control',name:'Gap Control',type:'defensive',level:'intermediate',prereqs:['h-bwd-cross','h-lateral'],bv:0,
      tip:'Maintain optimal distance from the attacker while skating backward. Not too close, not too far.'},
@@ -1665,11 +1657,11 @@ const SKILLS = {
      tip:'Match forward skating speed going backward. Essential for defense.'},
     {id:'h-1ft-edges',name:'One-Foot Edge Work',type:'skating',level:'intermediate',prereqs:['h-edge-work'],bv:0,
      tip:'Full patterns on one foot. Inside and outside edges. Ultimate balance.'},
-    {id:'h-euro-step',name:'Euro Step',type:'skating',level:'advanced',prereqs:['h-mohawk','h-quick-feet'],bv:0,
+    {id:'h-euro-step',name:'Change of Direction with the Puck',type:'skating',level:'advanced',prereqs:['h-mohawk','h-quick-feet'],bv:0,
      tip:'Basketball-style lateral fake on ice. Weight shift + edge change.'},
-    {id:'h-mirror-skating',name:'Mirror Skating',type:'defensive',level:'intermediate',prereqs:['h-gap-control','h-backwards-cross-full'],bv:0,
+    {id:'h-mirror-skating',name:'Defensive Side Position (Man-You-Net)',type:'defensive',level:'intermediate',prereqs:['h-gap-control','h-backwards-cross-full'],bv:0,
      tip:'Match the attacker move for move while skating backward. React instantly to direction changes.'},
-    {id:'h-closeout',name:'Close-Out Skating',type:'defensive',level:'advanced',prereqs:['h-angling','h-top-speed'],bv:0,
+    {id:'h-closeout',name:'Closing the Gap',type:'defensive',level:'advanced',prereqs:['h-angling','h-top-speed'],bv:0,
      tip:'Sprint to close the gap on a puck carrier, then transition to controlled defensive position.'},
     {id:'h-box-out',name:'Box-Out Positioning',type:'defensive',level:'expert',prereqs:['h-lateral','h-angling'],bv:0,
      tip:'Use body position to separate opponent from the puck. Low center of gravity, wide base.'},
@@ -1677,7 +1669,7 @@ const SKILLS = {
      tip:'Top hand at the butt end, bottom hand halfway down. Keep the blade flat on the ice.'},
     {id:'h-stationary-puck',name:'Stationary Puck Control',type:'stick',level:'beginner',prereqs:['h-stick-grip'],bv:0,
      tip:'Roll the puck side to side with wrists. Keep your head up.'},
-    {id:'h-fwd-dribble',name:'Forward Dribble',type:'stick',level:'beginner',prereqs:['f-fwd-stroke','h-stationary-puck'],bv:0,
+    {id:'h-fwd-dribble',name:'Front-to-Back Dribble',type:'stick',level:'beginner',prereqs:['f-fwd-stroke','h-stationary-puck'],bv:0,
      tip:'Push the puck ahead, skate to it. Keep it within stick reach.'},
     {id:'h-wrist-shot',name:'Wrist Shot',type:'stick',level:'beginner',prereqs:['h-stick-grip'],bv:0,
      tip:'Pull the puck back, roll wrists, snap through. Follow through at the target.'},
@@ -1687,7 +1679,7 @@ const SKILLS = {
      tip:'Cup the puck on the backhand. Sweep through with wrist roll.'},
     {id:'h-receiving',name:'Receiving Passes',type:'stick',level:'beginner',prereqs:['h-forehand-pass'],bv:0,
      tip:'Soft hands — cushion the puck on the blade. Give with the pass, don\'t stab at it.'},
-    {id:'h-skating-dribble',name:'Skating with Puck',type:'stick',level:'beginner',prereqs:['h-fwd-dribble','f-fwd-crossover'],bv:0,
+    {id:'h-skating-dribble',name:'Open-Ice Carry',type:'stick',level:'beginner',prereqs:['h-fwd-dribble','f-fwd-crossover'],bv:0,
      tip:'Head up, feel the puck. Practice at full speed, not just slow.'},
     {id:'h-snap-shot',name:'Snap Shot',type:'stick',level:'intermediate',prereqs:['h-wrist-shot'],bv:0,
      tip:'Quick release — load and snap the blade. Less windup than wrist shot.'},
@@ -1706,14 +1698,14 @@ const SKILLS = {
     {id:'h-shooting-stride',name:'Shooting in Stride',type:'stick',level:'intermediate',prereqs:['h-wrist-shot','h-skating-dribble'],bv:0,
      tip:'Release the shot while skating at full speed without stopping. Transfer weight through the shot.'},
     {id:'h-between-legs',name:'Between the Legs',type:'stick',level:'expert',prereqs:['h-toe-drag','h-deke'],bv:0,
-     tip:'Pull puck between legs while skating. Elite deception move.'},
+     tip:'Pull puck between legs while skating. Elite deception move.',shelf:'show'},
     {id:'h-michigan',name:'The Michigan (Lacrosse)',type:'stick',level:'expert',prereqs:['h-toe-drag'],bv:0,
-     tip:'Scoop puck onto blade behind the net. Tuck it shelf from behind the goal.'},
-    {id:'h-no-look-pass',name:'No-Look Pass',type:'stick',level:'advanced',prereqs:['h-forehand-pass','h-skating-dribble'],bv:0,
+     tip:'Scoop puck onto blade behind the net. Tuck it shelf from behind the goal.',shelf:'show'},
+    {id:'h-no-look-pass',name:'Deception While Passing',type:'stick',level:'advanced',prereqs:['h-forehand-pass','h-skating-dribble'],bv:0,
      tip:'Eyes one direction, pass another. Sell the look with head and body.'},
     {id:'h-backhand-shelf',name:'Backhand Top Shelf',type:'stick',level:'expert',prereqs:['h-backhand-shot','h-deke'],bv:0,
      tip:'Backhand with lift. Roll the wrists to elevate. Aim high glove.'},
-    {id:'h-quick-release',name:'Quick Release Shot',type:'stick',level:'expert',prereqs:['h-snap-shot','h-shooting-stride'],bv:0,
+    {id:'h-quick-release',name:'Shots in Close / Stick Position in Scoring Areas',type:'stick',level:'expert',prereqs:['h-snap-shot','h-shooting-stride'],bv:0,
      tip:'Minimal backswing, maximum deception. Release before goalie expects it. Load and fire instantly.'},
     {id:'h-deflection',name:'Deflection / Tip-In',type:'stick',level:'intermediate',prereqs:['h-receiving'],bv:0,
      tip:'Redirect a shot or pass past the goalie. Soft hands, angle the blade. Position in front of the net.'},
@@ -1760,9 +1752,7 @@ const SKILLS = {
     {id:'h-stop-and-go',name:"Stop and Go (with Puck)",type:'stick',level:'expert',prereqs:['h-protect-puck','h-1ft-stop'],bv:0,
      tip:"SP 14U Puck Control (o)"},
     {id:'h-shoulder-check',name:"Shoulder Check / Receiving a Body Check",type:'defensive',level:'expert',prereqs:['h-contact-confidence'],bv:0,
-     tip:"SP 14U Body Contact (j)(k); body checking is step 4 and is introduced at 14U/U15, never earlier"},
-    {id:'goalie[]',name:"goalie[]",type:'skating',level:'beginner',prereqs:[],bv:0,
-     tip:"Goaltending is one of USA Hockey's six individual-skill performance areas, with a full branch in SP at 10U, 12U, 14U and 16/18U"}
+     tip:"SP 14U Body Contact (j)(k); body checking is step 4 and is introduced at 14U/U15, never earlier"}
   ]
 };
 
@@ -1876,7 +1866,7 @@ const SKILL_GUIDES = {
   'f-fwd-inside-edge': { visual:'Skater glides on one foot on the inside edge, tracing a curve on the ice.', focus:['Lean slightly inward','Hold the edge through the curve','Practice both feet'], balance:'Body weight over the inside of the blade. Hip and shoulder alignment controls the curve.', yt:'FR9RsC9nNH8' },
   'f-bwd-outside-edge': { visual:'Skater glides backward on one foot, outside edge, tracing a curve.', focus:['Control curve with hip position','Keep free leg extended','Look over shoulder'], balance:'Weight over outside edge. Shoulder and hip alignment dictate the curve radius.', yt:'FR9RsC9nNH8' },
   'f-bwd-inside-edge': { visual:'Skater glides backward on one foot, inside edge, tracing a curve.', focus:['Control curve with shoulder position','Keep free leg extended','Maintain balance over blade'], balance:'Weight over inside edge. Core stability is critical for clean edge hold.', yt:'FR9RsC9nNH8' },
-  'f-edge-control': { visual:'Skater traces curves on inside and outside edges, alternating feet in serpentine patterns.', focus:['Feel blade angle on each edge','Alternate inside/outside edges','Maintain steady speed through curves'], balance:'Shift weight precisely over the edge. Core engaged to maintain body position.', yt:'FR9RsC9nNH8' },
+  'f-fwd-outside-edge': { visual:'Skater traces curves on inside and outside edges, alternating feet in serpentine patterns.', focus:['Feel blade angle on each edge','Alternate inside/outside edges','Maintain steady speed through curves'], balance:'Shift weight precisely over the edge. Core engaged to maintain body position.', yt:'FR9RsC9nNH8' },
   'f-fwd-slalom': { visual:'Skater weaves side to side on two feet, using edge pressure to change direction.', focus:['Knees drive direction changes','Stay on edges, not flats','Smooth rhythm side to side'], balance:'Weight shifts from edge to edge. Upper body stays quiet while legs do the work.', yt:'FR9RsC9nNH8' },
   'f-2ft-spin': { visual:'Skater enters from a small circle and rotates on both feet, pulling arms in.', focus:['Enter from crossover circle','Pull arms in tight','Aim for 2-4 revolutions'], balance:'Weight on balls of both feet. Tight core prevents travel across the ice.', yt:'49zi_73pm1Q' },
   'f-hockey-stop': { visual:'Both feet turn 90 degrees sideways, shaving the ice to stop. Ice spray visible.', focus:['Turn both feet together','Lean away from travel direction','Bend knees deep'], balance:'Weight shifts away from direction of travel. Practice both sides equally.', yt:'iCyKRom_IEM' },
@@ -1885,13 +1875,13 @@ const SKILL_GUIDES = {
   'f-fwd-outside-3turn': { visual:'Skater turns from forward outside edge to backward inside edge, tracing a "3" on the ice.', focus:['Rotate shoulders first','Check with opposite arm after turn','Practice R and L'], balance:'All weight on one foot throughout. Stay centered over the blade during the turn.', yt:'Lyw2i92aYaA' },
   'f-fwd-inside-3turn': { visual:'Skater turns from forward inside edge to backward outside edge on one foot.', focus:['Enter on inside edge','Rotate shoulders into turn','Check firmly after turn'], balance:'Maintain balance on one foot. The check after the turn prevents over-rotation.', yt:'Lyw2i92aYaA' },
   'f-fwd-spiral': { visual:'Skater glides on one foot with free leg extended behind at hip height or higher, arms out.', focus:['Free leg at hip height or above','Back arched, chest up','Hold position 3+ seconds'], balance:'All weight on skating foot. Core strength holds the position. Slight forward lean.', yt:'k9MOjnsAilo' },
-  'f-bwd-stroking-adv': { visual:'Powerful backward skating with full extension on each stroke and controlled edge work.', focus:['Full leg extension on push','Smooth crossovers','Control edges through turns'], balance:'Strong core engagement. Weight centered over skating foot on each stroke.', yt:'ZgTtxBCBTHs' },
+  'f-bwd-stroke': { visual:'Powerful backward skating with full extension on each stroke and controlled edge work.', focus:['Full leg extension on push','Smooth crossovers','Control edges through turns'], balance:'Strong core engagement. Weight centered over skating foot on each stroke.', yt:'ZgTtxBCBTHs' },
   'f-1ft-spin': { visual:'Skater spins on one foot, free foot pulled to ankle, arms in tight, 4+ revolutions.', focus:['Enter from back crossover','Snap free foot to ankle','Arms in tight for speed'], balance:'All weight on ball of spinning foot. Tight core minimizes travel.', yt:'49zi_73pm1Q' },
   'f-lunge': { visual:'Skater performs a deep forward lunge while gliding, back knee nearly touching the ice.', focus:['Deep bend in front knee','Back leg trails behind','Arms out for balance'], balance:'Weight centered over front foot. Core stability prevents tipping.', yt:'k9MOjnsAilo' },
   'f-shoot-the-duck': { visual:'Skater squats deeply on one foot while gliding, free leg extended forward.', focus:['Deep squat on skating leg','Free leg straight forward','Arms forward for balance'], balance:'Weight entirely on skating foot in deep squat. Extreme quad strength required.', yt:'k9MOjnsAilo' },
   // Figure Skating
-  '2ft-spin': { visual:'Skater rotates on both feet in one spot, pulling arms in to speed up.', focus:['Start from a small circle','Pull arms in tight','Spot with your eyes'], balance:'Keep weight on balls of feet. Tight core prevents wobble.', yt:'49zi_73pm1Q' },
-  '3turn': { visual:'Skater traces a "3" shape on ice — forward to backward on one foot with a half-turn.', focus:['Shoulders rotate first','Hips follow the turn','Check with opposite arm'], balance:'Critical — all on one foot during the turn. Stay over the blade.', yt:'Lyw2i92aYaA' },
+  'f-2ft-spin': { visual:'Skater rotates on both feet in one spot, pulling arms in to speed up.', focus:['Start from a small circle','Pull arms in tight','Spot with your eyes'], balance:'Keep weight on balls of feet. Tight core prevents wobble.', yt:'49zi_73pm1Q' },
+  'f-fwd-outside-3turn': { visual:'Skater traces a "3" shape on ice — forward to backward on one foot with a half-turn.', focus:['Shoulders rotate first','Hips follow the turn','Check with opposite arm'], balance:'Critical — all on one foot during the turn. Stay over the blade.', yt:'Lyw2i92aYaA' },
   'mohawk': { visual:'Skater transitions forward to backward by stepping from one foot to the other, heel-to-heel.', focus:['Open hip of free foot','Keep shoulders square','Smooth step, no bounce'], balance:'Weight transfers quickly between feet. Keep low.', yt:'9zUUwG1VkmY' },
   'waltz': { visual:'Half-rotation jump — step onto left foot, swing right leg up, land on right foot backward.', focus:['Strong forward edge entry','Swing free leg up','Land on one foot backward'], balance:'Arms and free leg control rotation. Land with knee bent to absorb.', yt:'Vcj3q_lTOxk' },
   'toe': { visual:'Skater picks with toe pick, rotates from back outside edge, lands on back outside edge.', focus:['Clean toe pick','Rotate from back outside edge','Arms tight on landing'], balance:'Strong checking position on landing. Free leg extended behind.', yt:'Vcj3q_lTOxk' },
@@ -1925,7 +1915,7 @@ const SKILL_GUIDES = {
   'h-fwd-bwd-pivot': { visual:'Skater opens hips and pivots from forward to backward skating in one smooth motion.', focus:['Open hips smoothly','Keep stick on ice','Maintain speed through pivot'], balance:'Stay low through the pivot. Hips and shoulders rotate together.', yt:'9zUUwG1VkmY' },
   'h-bwd-fwd-pivot': { visual:'Skater pivots from backward to forward and immediately explodes into forward stride.', focus:['Open hips from backward','Immediate forward explosion','First stride is critical'], balance:'Transition speed separates good from great. Stay low, explode forward.', yt:'9zUUwG1VkmY' },
   'h-mohawk': { visual:'Heel-to-heel pivot transitioning from forward to backward or vice versa at speed.', focus:['Heel-to-heel pivot','Stay low throughout','Maintain speed'], balance:'Quick weight transfer between feet. Low center of gravity is essential.', yt:'9zUUwG1VkmY' },
-  'h-power-stop': { visual:'Full-body slide turning sideways, creating maximum ice spray.', focus:['Turn whole body sideways','Both feet slide together','Maximum edge pressure'], balance:'Lean away from direction of travel. Strong core holds the slide.', yt:'iCyKRom_IEM' },
+  'h-1ft-stop': { visual:'Full-body slide turning sideways, creating maximum ice spray.', focus:['Turn whole body sideways','Both feet slide together','Maximum edge pressure'], balance:'Lean away from direction of travel. Strong core holds the slide.', yt:'iCyKRom_IEM' },
   'h-edge-work': { visual:'Skater performs slalom patterns using inside and outside edges alternately.', focus:['Alternate edges smoothly','Feel each edge grip','Maintain speed through transitions'], balance:'Precise weight shifts over each edge. Core stability essential.', yt:'HV5v8-Na8vI' },
   'h-lateral': { visual:'Skater shuffles sideways using inside edges, staying in defensive position.', focus:['Push sideways with inside edges','Stay low in stance','Keep stick active'], balance:'Low center of gravity. Never cross feet — maintain defensive ready position.', yt:'oYBSyPG-utA' },
   'h-quick-feet': { visual:'Rapid short strides through cones, changing direction quickly.', focus:['Rapid short strides','React to direction changes','Stay on balls of feet'], balance:'Light on feet, quick reactions. Core stability during rapid direction changes.', yt:'oYBSyPG-utA' },
@@ -1986,7 +1976,38 @@ function saveData(d) {
   const key = pid ? dbKeyForProfile(pid) : 'rinkbuddy_v2';
   localStorage.setItem(key, JSON.stringify(d));
 }
-let APP = loadData();
+// Skills merged or removed when the trees were corrected against the official
+// curricula (2026-09-19). Existing tags, logs and progress follow the id.
+const SKILL_ID_MIGRATIONS = {
+  '3turn': 'f-fwd-outside-3turn',
+  '2ft-spin': 'f-2ft-spin',
+  'h-power-stop': 'h-1ft-stop',
+  'f-bwd-stroking-adv': 'f-bwd-stroke',
+  'f-edge-control': 'f-fwd-outside-edge'
+};
+function migrateSkillIds(app) {
+  if (!app) return app;
+  const map = id => SKILL_ID_MIGRATIONS[id] || id;
+  if (app.skills) {
+    const next = {};
+    Object.entries(app.skills).forEach(([id, d]) => {
+      const to = map(id);
+      if (next[to]) { next[to].attempts += d.attempts || 0; next[to].landed += d.landed || 0; }
+      else next[to] = Object.assign({}, d);
+    });
+    app.skills = next;
+  }
+  (app.elementLogs || []).forEach(l => { l.elementId = map(l.elementId); });
+  (app.tags || []).forEach(t => { t.skillId = map(t.skillId); if (t.aiSkillId) t.aiSkillId = map(t.aiSkillId); });
+  if (app.milestones) {
+    const next = {};
+    Object.entries(app.milestones).forEach(([id, m]) => { next[map(id)] = Object.assign({}, next[map(id)] || {}, m); });
+    app.milestones = next;
+  }
+  return app;
+}
+
+let APP = migrateSkillIds(loadData());
 
 // Handle Stripe checkout return
 (function checkStripeReturn() {
@@ -2019,10 +2040,10 @@ let APP = loadData();
     saveProfiles(profiles);
     setActiveProfileId(id);
     if (legacy) localStorage.setItem(dbKeyForProfile(id), legacy);
-    APP = loadData();
+    APP = migrateSkillIds(loadData());
   } else if (!getActiveProfileId()) {
     setActiveProfileId(profiles[0].id);
-    APP = loadData();
+    APP = migrateSkillIds(loadData());
   }
 })();
 
@@ -2041,7 +2062,7 @@ function createProfile() {
 
 function switchProfile(id) {
   setActiveProfileId(id);
-  APP = loadData();
+  APP = migrateSkillIds(loadData());
   videoFiles = []; activeVideoIdx = -1;
   document.getElementById('videoPlayerArea').style.display = 'none';
   renderAll();
@@ -2176,6 +2197,10 @@ function switchTab(section) {
   const btn = document.querySelector('.nav-btn[data-section="' + section + '"]');
   if (btn) btn.click();
 }
+
+// Show-moves (The Michigan, between-the-legs) appear in no official progression.
+// They are displayed for fun and never gate or unlock anything.
+function isShowMove(skill) { return !!skill.shelf; }
 
 function isUnlocked(skill) {
   if (!skill.prereqs || !skill.prereqs.length) return true;
@@ -2656,7 +2681,10 @@ const VideoDB = {
       videoFiles.push(entry);
       if (!entry.fps) detectFps(entry, rec.blob);
     });
-    videoFiles.forEach(v => { if (v.annotations && v.annotations.length) syncTagsToApp(v); });
+    videoFiles.forEach(v => {
+      (v.annotations || []).forEach(a => { if (SKILL_ID_MIGRATIONS[a.element]) a.element = SKILL_ID_MIGRATIONS[a.element]; });
+      if (v.annotations && v.annotations.length) syncTagsToApp(v);
+    });
     saveData(APP);
     renderVideoLibrary(); renderUploadArea();
     if (typeof renderDashboard === 'function') { renderDashboard(); renderSkillTree(); }
@@ -4164,7 +4192,7 @@ async function doLogin() {
   // Auto-pull data from cloud
   const pull = await CloudAccount.pullData();
   if (pull.ok && pull.data) {
-    APP = pull.data;
+    APP = migrateSkillIds(pull.data);
     saveData(APP);
     renderAll();
     const session = CloudAccount.getSession();
@@ -4236,7 +4264,7 @@ async function handleGoogleResponse(response) {
     // Pull data
     const pull = await CloudAccount.pullData();
     if (pull.ok && pull.data) {
-      APP = pull.data;
+      APP = migrateSkillIds(pull.data);
       saveData(APP);
       renderAll();
       const session = CloudAccount.getSession();
@@ -4537,7 +4565,7 @@ async function doLandingLogin() {
   // Auto-pull data from cloud
   const pull = await CloudAccount.pullData();
   if (pull.ok && pull.data) {
-    APP = pull.data;
+    APP = migrateSkillIds(pull.data);
     saveData(APP);
   }
   updateView();
@@ -4593,7 +4621,7 @@ doLogin = async function() {
 
   const pull = await CloudAccount.pullData();
   if (pull.ok && pull.data) {
-    APP = pull.data;
+    APP = migrateSkillIds(pull.data);
     saveData(APP);
     renderAll();
     const session = CloudAccount.getSession();
