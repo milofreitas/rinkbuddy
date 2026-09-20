@@ -202,3 +202,19 @@ test('favicon.svg exists and the old mark is gone', () => {
   assert.ok(!fs.existsSync(path.join(REPO, 'icon-192.svg')), 'old icon-192.svg still present');
   assert.ok(!fs.existsSync(path.join(REPO, 'icon-512.svg')), 'old icon-512.svg still present');
 });
+
+test('the runtime icon generator is gone', () => {
+  assert.doesNotMatch(INDEX, /function generateIcon/);
+  assert.doesNotMatch(INDEX, /toDataURL\('image\/png'\)/);
+});
+
+test('the head points at the new icons', () => {
+  assert.match(INDEX, /<link rel="icon" type="image\/svg\+xml" href="favicon\.svg">/);
+  assert.match(INDEX, /<link rel="apple-touch-icon" href="apple-touch-icon-180\.png">/);
+  assert.doesNotMatch(INDEX, /icon-192\.svg/);
+});
+
+test('both headers use the same mark', () => {
+  const marks = INDEX.match(/<svg[^>]*class="rb-mark"/g) || [];
+  assert.strictEqual(marks.length, 2, 'expected the mark in the landing nav and the app header');
+});
