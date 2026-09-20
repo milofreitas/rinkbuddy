@@ -94,6 +94,15 @@ const DENSITIES = [
   { name: 'xxhdpi', legacy: 144, foreground: 324 },
   { name: 'xxxhdpi', legacy: 192, foreground: 432 },
 ];
+// Measured, not guessed: at 0.58 the farthest opaque pixel sat 155.6px from centre on a
+// 432px canvas, past both the 132px safe radius and the 144px visible radius. 0.49 (scaled
+// by 132/155.6) re-measured at 131.57px — inside the 132px limit, but only by 0.43px, too
+// thin a margin to trust across rasteriser/threshold variance. 0.48 re-measured at 128.74px
+// at xxxhdpi (margin +3.26px) and holds proportionally at every other density (ratio of
+// farthest-opaque-px to half-canvas ~0.596-0.603 throughout) — a real buffer, and geometry,
+// not a rasterisation accident. Re-verify by re-measuring if this artwork or canvas size
+// ever changes.
+const ADAPTIVE_SCALE = 0.48;
 const SPLASHES = [
   ['drawable', 480, 320], ['drawable-land-mdpi', 480, 320], ['drawable-land-hdpi', 800, 480],
   ['drawable-land-xhdpi', 1280, 720], ['drawable-land-xxhdpi', 1600, 960], ['drawable-land-xxxhdpi', 1920, 1280],
@@ -106,9 +115,14 @@ function android() {
     for (const name of ['ic_launcher.png', 'ic_launcher_round.png']) {
       render({ out: `${ANDROID}/mipmap-${d.name}/${name}`, width: d.legacy, height: d.legacy, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.74 });
     }
-    // Adaptive foreground: transparent, mark inside the 66dp safe circle (61% of the canvas).
-    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_foreground.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: 0.58, transparent: true });
-    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_monochrome.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: 0.58, transparent: true });
+    // Adaptive foreground: transparent, and scaled so the mark's INK fits the 66dp safe
+    // CIRCLE. Do not reason from the bounding box: markScale sizes the artwork's square
+    // box, and a square of side 58% still pushes its diagonal corners outside a circle of
+    // diameter 61%, which is how the blade's toe ended up clipped by Pixel's round mask.
+    // Derive the scale from the measured ink radius: render, find the farthest opaque
+    // pixel from centre, and scale until that radius is <= 132px on the 432px canvas.
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_foreground.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: ADAPTIVE_SCALE, transparent: true });
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_monochrome.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: ADAPTIVE_SCALE, transparent: true });
   }
   for (const [dir, w, h] of SPLASHES) {
     render({ out: `${ANDROID}/${dir}/splash.png`, width: w, height: h, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.3 });
