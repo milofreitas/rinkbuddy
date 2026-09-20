@@ -114,7 +114,7 @@ Generated with Nano Banana 2 from prompts built on real skate references (Wikime
 
 ## 6. Surfaces to update
 
-**Assets to generate:** favicon SVG plus 32 and 16px PNG; `apple-touch-icon` 180px PNG (iOS ignores SVG here); PWA 192 and 512 plus maskable; iOS AppIcon 1024 (no alpha, App Store rejects transparency); Android adaptive icon foreground, background and monochrome layers plus legacy mipmaps at five densities; splash screens for both themes; an OG image at 1200×630 for the ad test.
+**Assets to generate:** favicon SVG plus 32 and 16px PNG; `apple-touch-icon` 180px PNG (iOS ignores SVG here); PWA 192 and 512 plus maskable; iOS AppIcon 1024 (no alpha, App Store rejects transparency); Android adaptive icon foreground, background and monochrome layers plus legacy mipmaps at five densities; splash screens (one navy treatment, used in both themes — the splash is a brand moment, not a UI surface); an OG image at 1200×630 for the ad test.
 
 **Code:**
 
