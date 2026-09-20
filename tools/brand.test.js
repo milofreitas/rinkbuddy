@@ -112,3 +112,9 @@ test('the theme is applied before first paint and can be overridden', () => {
   assert.match(INDEX, /rinkbuddy_theme/);
   assert.match(INDEX, /prefers-color-scheme:\s*dark/);
 });
+
+test('the app header has a theme toggle wired to setTheme', () => {
+  assert.match(INDEX, /id="themeToggle"/);
+  assert.match(INDEX, /function toggleTheme\(\)/);
+  assert.match(INDEX, /window\.setTheme\((?:'|")(?:light|dark)(?:'|")\)|setTheme\(next\)/);
+});
