@@ -55,7 +55,7 @@ Contact (email or phone) **________________________________**
 Reference: `LIC-2026-____`
 
 **Coach:** ________________________________
-**Certification:** ________________________ (e.g. PSA rating, USA Hockey level)
+**Certification:** ________________________ (US Figure Skating coach rating, USA Hockey level)
 **Session:** **____ / ____ / ________** at **________________________________**
 **Fee:** **$__________**, paid within 7 days of the session.
 

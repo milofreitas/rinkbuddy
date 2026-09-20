@@ -372,10 +372,10 @@ Cheaper per usable clip than anything licensable, and the only version we own.
 Somebody actually counted this instead of hand-waving, by censusing the Reddit
 archive over the year to 2026-09-20.
 
-**About 521 distinct adults a year — 43 a month — already film themselves
-skating and post it publicly asking for feedback.** That is the entire organic
-supply, nationally, across every skating subreddit. It is a real channel and a
-small one.
+**About 39 genuine self-filmed critique posts a month, from roughly 30–35
+distinct adults**, across every skating subreddit combined — after hand-checking
+a sample of each to strip out fan content and parents filming their kids. That is
+the entire organic supply, nationally. It is a real channel and a small one.
 
 | Sub | Subscribers | Self-filmed critique posts/mo | Distinct people/yr | Median comments |
 |---|---|---|---|---|
@@ -387,6 +387,17 @@ Real examples, all adult beginners filming themselves: *"My crossover is so bad
 that I don't know where to start fixing"* (53 comments), *"Back 3 turns 😭 I'm
 desperate for tips"* (61), *"Started skating mid-March, no coach. How's my
 technique?"* (47).
+
+**And the channel is comments, not posts.** Posting gets removed in
+r/FigureSkating and ignored in r/hockeyplayers. Replying to someone's own
+critique request is welcome everywhere and isn't promotion at all. Answer ~39
+posts a month with real analysis, convert 20–35%, and that's 25–80 clips a month
+in steady state for about 15 hours of work.
+
+A useful benchmark: mature form-check communities convert **1.6–1.9% of
+subscribers into a clip a month** (r/formcheck gets 1,189 video posts from 76k
+subs; r/GolfSwing 2,078 from 109k). **No skating subreddit runs a form-check
+thread at all.** r/iceskating's weekly open thread is the slot.
 
 ### The channel is r/iceskating, and it is not the obvious one
 
@@ -430,7 +441,15 @@ contributors a month. It is also precisely what the comparable products did:
 - **Hudl** had two customers for about two years.
 
 **Collect the ugly ones first.** That is the inverse of HomeCourt's Stanford
-problem, and it is what our own eval set needs.
+problem, and it is what our own eval set needs. Two more numbers worth carrying:
+**PopSign got 200,686 videos from 47 signers** — design for thirty obsessives,
+not a crowd. And **Google's SCIN got 10,000+ consented images in eight months
+from search ads with no incentive at all**, because it sat at the moment of
+search intent. Ours is the moment someone types "how do I fix my crossovers".
+
+**Seasonality, which contradicts our own report 05:** critique posts peak in
+July–August and January–March, and bottom out in September–October. Demand for
+feedback and demand for learn-to-skate signups peak at different times.
 
 ### The organisational doors, with dates
 
@@ -455,16 +474,44 @@ is the gap they left open, and it is exactly where we are.
 
 Four items must close before the first stranger's clip is accepted:
 
-1. **The AI-training clause wording** for the Terms, benchmarked against the
-   versions that caused public backlash (Zoom 2023, Dropbox 2023, Adobe 2024) so
-   we avoid their phrasing.
-2. **Whether pose extraction is a biometric identifier under Illinois BIPA**, and
-   what its written-policy and written-consent sections require.
+1. **The AI-training clause wording**, benchmarked against the versions that
+   caused public backlash — Zoom 2023, Dropbox 2023, Adobe 2024. In every case
+   the fury was about *vague scope discovered later*, never about training
+   itself. Worth noting: HomeCourt's current wording, "to improve the Services",
+   is in the danger zone. Don't copy our closest competitor here.
+2. **Pose is probably not biometric — because it cannot identify.** *Zellmer v.
+   Meta* (9th Cir. 2024) held that face signatures which "cannot identify" are
+   not biometric identifiers; BIPA's list is closed (retina, iris, fingerprint,
+   voiceprint, hand and face geometry); Washington expressly excludes data
+   generated from video; and a search of BIPA case law returns no skeletal-data
+   opinions. **That defence dies the moment we ship face clustering or "who else
+   is in this clip".** Make it an engineering constraint and write the design
+   note now. The amended COPPA rule does list gait patterns as personal
+   information, so this is a state-law argument only.
 3. **Bystander capture** — public-session footage contains minors in the
-   background. This is the highest-risk unresolved item and it is unavoidable at
-   a rink.
-4. **Defensible adults-only enforcement** — age gate wording, "actual knowledge"
-   under COPPA, and the 2025–26 state app-store age-verification laws.
+   background. Highest-risk unresolved item, unavoidable at a rink. COPPA doesn't
+   reach them (it governs collection *from* a child) and incidental-use doctrine
+   has never been tested on a training corpus, so don't lean on it. Follow
+   Ego4D's rule: **controlled and consented, or public and blurred — there is no
+   third category**, and blur before ingest, not after.
+4. **Defensible adults-only enforcement** — a neutral age gate (blank month and
+   year, no cutoff shown, no retry), read the platform age signal, take the lower
+   of the two, block recording under 18. Dramatically cheaper than building a
+   verifiable-parental-consent flow.
+5. **Consent to upload is not consent to train.** Apple's rule 5.1.2(ii): *"Data
+   collected for one purpose may not be repurposed without further consent."*
+   Training needs its own unbundled in-app opt-in; Google requires the disclosure
+   be in the app itself and not bundled with others.
+
+**One strategic flag that belongs in front of Milo, not a lawyer.**
+`SESSION_NOTES.md` records targeting kids and teens as customers. That is
+survivable only if the **customer base and the training corpus are
+architecturally separated**, and only if the investor deck, the App Store copy
+and the consent flow all say the same thing. *FTC v. Everalbum* establishes that
+the remedy is deletion of **the models trained on the data**, not just the data;
+*Musical.ly* establishes that youth "easily apparent" in profile pictures counts
+as actual knowledge. Both YouTube and Epic were won on inconsistency between
+stated audiences.
 
 `RELEASE-FORMS.md` covers the shoot-day case. It does not cover a stranger
 uploading from the internet.

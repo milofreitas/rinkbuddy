@@ -56,7 +56,10 @@ Where to find one:
   50–300 families, which is also the distribution channel we want later.
 - **Adult-class coaches.** Adult learners are the beachhead, and adult-class
   coaches understand that market better than elite coaches do.
-- **PSA-rated coaches** for figure, **USA Hockey Level 3+** for hockey skating.
+- **US Figure Skating-rated coaches** for figure, **USA Hockey Level 3+** for hockey.
+  (The Professional Skaters Association dissolved after the 2023-24 season and its
+  ratings moved into US Figure Skating, so there is no separate PSA list to work
+  from — and no central coach directory either. It is rink by rink.)
 - The boards in the footage so far read Henderson / America First, so start at
   the home rink and ask the front desk who teaches the adult classes.
 
