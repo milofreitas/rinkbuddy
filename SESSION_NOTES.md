@@ -17,6 +17,13 @@ Read this, then `research/README.md` (8 research reports + converging plan).
 - Capture: camera requests 60 fps; imported MP4/MOV true fps read from container (`readVideoFps`), Slo-mo clips play at 0.25x, frame-step uses real fps.
 - AI: `/api/analyze-video` requires login token; model `claude-opus-5` via @anthropic-ai/sdk. STILL samples 1 fps (known weakness — see research/03).
 
+## Footage & in-chat scanning (added 2026-09-19)
+- `tools/clips.py` turns footage into numbered timestamped contact sheets Claude reads IN CHAT — no API, no per-scan cost. `list` / `sheets <clip>` / `burst <clip> <t>`.
+- `bash tools/ingest.sh` moves clips from Downloads/Desktop into `footage/` and probes them.
+- `labels/*.json` = hand-built ground truth (schema in labels/README.md). Batch 1 = 8 clips labeled.
+- `FILMING-GUIDE.md` = what batch 1 taught us (framing, clothing, shot list). Keep it updated after every batch.
+- Batch 1 yield: ~3 s of labelable skill from ~8 min of footage. Two clean forward-swizzle sequences in IMG_1791.
+
 ## Next up (from research)
 1. Phone checks by Milo: camera shows 60 fps? Imported iPhone Slo-Mo shows "Slo-mo 240 fps" (if 30 → Photos picker is transcoding).
 2. AI v1: motion-peak bursts at 12–15 fps + skater crop + cached guide + "unsure" output (research/03 §v1). Cuts cost ~$0.75–1.30 → ~$0.25–0.45/min.
