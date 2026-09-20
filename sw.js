@@ -1,5 +1,5 @@
-const CACHE = 'rinkbuddy-v1';
-const ASSETS = ['/index.html', '/manifest.json'];
+const CACHE = 'rinkbuddy-v2';
+const ASSETS = ['/index.html', '/manifest.json', '/favicon.svg', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));

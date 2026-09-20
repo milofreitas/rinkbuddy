@@ -218,3 +218,19 @@ test('both headers use the same mark', () => {
   const marks = INDEX.match(/<svg[^>]*class="rb-mark"/g) || [];
   assert.strictEqual(marks.length, 2, 'expected the mark in the landing nav and the app header');
 });
+
+test('the manifest uses the new icons and brand colours', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(REPO, 'manifest.json'), 'utf8'));
+  assert.strictEqual(manifest.background_color, '#0F2338');
+  assert.strictEqual(manifest.theme_color, '#0F2338');
+  for (const icon of manifest.icons) {
+    assert.ok(fs.existsSync(path.join(REPO, icon.src)), `manifest lists a missing icon: ${icon.src}`);
+  }
+  assert.ok(manifest.icons.some(i => i.purpose === 'maskable'), 'no maskable icon');
+});
+
+test('the service worker caches the icons it serves offline', () => {
+  const sw = fs.readFileSync(path.join(REPO, 'sw.js'), 'utf8');
+  assert.match(sw, /icon-192\.png/);
+  assert.match(sw, /rinkbuddy-v2/);
+});
