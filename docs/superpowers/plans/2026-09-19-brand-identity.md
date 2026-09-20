@@ -598,14 +598,29 @@ test('no brand-coloured gradients remain', () => {
 test('no gradient text remains', () => {
   assert.doesNotMatch(INDEX, /background-clip:\s*text/);
 });
+
+// The hex/rgba lint cannot see CSS named colours. `stroke="white"` on an icon is
+// invisible on a light surface just as surely as #fff is, and measured 2.0-2.3:1 in
+// dark theme where Task 5 found them.
+const NAMED_COLOUR = /(stroke|fill|color|background(?:-color)?)\s*[:=]\s*["']?\s*(white|black|red|blue|green|yellow|orange|purple|pink|gray|grey|silver|gold|navy|teal|cyan|magenta|lime|maroon|olive|aqua|fuchsia)\b/gi;
+
+test('no CSS named colours are used for colour-bearing properties', () => {
+  const found = [...INDEX.matchAll(NAMED_COLOUR)].map(m => `${m[1]}=${m[2]}`);
+  assert.deepStrictEqual(found, [],
+    `named colours left: ${found.slice(0, 10).join(', ')}`);
+});
 ```
+
+Note: `transparent`, `currentColor`, `none` and `inherit` are not colours in this sense and are not matched.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL on all three: about 49 literals, some gradients, some gradient text.
+Expected: FAIL on all four: about 49 literals, some gradients, some gradient text, and nine named colours (seven `color=white`, one `stroke=white`, one `fill=red`).
 
 - [ ] **Step 3: Migrate the remaining markup and script colours**
+
+The nine named colours go the same way as the literals: `white` used as text or an icon on an accent fill becomes `var(--on-accent)`; `white` on a surface becomes `var(--text)`; `red` becomes `var(--danger)`.
 
 The canvas drawings need live token values rather than hard-coded ones. Add this helper next to the chart code and use it for every `fillStyle` and `strokeStyle`:
 
