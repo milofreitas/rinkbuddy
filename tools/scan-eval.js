@@ -133,6 +133,21 @@ function grade(clipName, opts = {}) {
 
   console.log(`\n${path.basename(file)}  ${info.seconds.toFixed(0)}s  ${info.w}x${info.h}` +
     `${rotate ? `  rotate ${rotate}` : ''}  ${mode}  scanned in ${secs.toFixed(1)}s`);
+  // How much of the session was actually filmable: the skater present, and big
+  // enough in frame for pose to work. FILMING-GUIDE asks for a third of frame
+  // height; pose needs roughly 150-200 px of person, which is a sixth at 1080p.
+  if (mode !== 'whole frame') {
+    const present = track.filter(Boolean);
+    const heights = present.map(b => b.h).sort((a, b) => a - b);
+    const med = heights.length ? heights[Math.floor(heights.length / 2)] : 0;
+    const bigEnough = present.filter(b => b.h >= 1 / 6).length;
+    const wellFramed = present.filter(b => b.h >= 1 / 3).length;
+    const n = series.length;
+    console.log(`  framing: skater in shot ${(present.length / n * 100).toFixed(0)}% of the clip` +
+      `, median height ${(med * 100).toFixed(0)}% of frame` +
+      `, usable (>=1/6) ${(bigEnough / n * 100).toFixed(0)}%` +
+      `, well framed (>=1/3) ${(wellFramed / n * 100).toFixed(0)}%`);
+  }
   console.log(`  windows ${windows.length} (${handheld} flagged camera-moving)` +
     `   airtime ${airtime.toFixed(1)}s = ${(airtime / info.seconds * 100).toFixed(0)}% of the clip` +
     `   tiles ${plan.reduce((n, p) => n + p.tiles, 0)}`);
