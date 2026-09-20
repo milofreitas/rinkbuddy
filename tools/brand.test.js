@@ -118,3 +118,13 @@ test('the app header has a theme toggle wired to setTheme', () => {
   assert.match(INDEX, /function toggleTheme\(\)/);
   assert.match(INDEX, /window\.setTheme\((?:'|")(?:light|dark)(?:'|")\)|setTheme\(next\)/);
 });
+
+const GOOGLE_BRAND = ['#4285f4', '#34a853', '#fbbc05', '#ea4335'];
+// Ratchet: this number only ever goes down. Task 4 → 60, Task 5 → 45, Task 6 → 0.
+const MAX_LITERALS = 60;
+
+test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
+  const found = colourLiterals(INDEX, GOOGLE_BRAND);
+  assert.ok(found.length <= MAX_LITERALS,
+    `${found.length} literals left, budget is ${MAX_LITERALS}. First ten: ${found.slice(0, 10).join(', ')}`);
+});

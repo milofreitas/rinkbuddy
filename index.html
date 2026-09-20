@@ -60,8 +60,8 @@
     }
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-    .header{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
-    .logo{display:flex;align-items:center;gap:8px;font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .header{background:var(--bg);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+    .logo{display:flex;align-items:center;gap:8px;font-size:1.3rem;font-weight:700;color:var(--accent)}
     .logo svg{width:28px;height:28px}
     .header-right{display:flex;align-items:center;gap:8px}
     .streak-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:0.75rem;color:var(--warning);font-weight:600}
@@ -69,12 +69,12 @@
     .skill-trace svg{width:100%;height:auto;display:block}
     .discipline-toggle{display:inline-flex;background:var(--surface2);border-radius:8px;overflow:hidden;border:1px solid var(--border)}
     .disc-btn{padding:7px 18px;border:none;background:none;color:var(--text-dim);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s}
-    .disc-btn.active{background:var(--accent);color:white}
+    .disc-btn.active{background:var(--accent);color:var(--on-accent)}
     .nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
     .nav::-webkit-scrollbar{display:none}
     .nav-btn{flex:1;min-width:56px;padding:10px 4px;background:none;border:none;color:var(--text-dim);font-size:0.65rem;font-weight:500;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s}
     .nav-btn:hover{color:var(--text);background:var(--surface2)}
-    .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(56,189,248,0.05)}
+    .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:color-mix(in srgb, var(--accent) 5%, transparent)}
     .nav-btn svg{width:18px;height:18px}
     .nav-btn-primary:not(.active){color:var(--accent);position:relative}
     .nav-btn-primary:not(.active) svg{stroke:var(--accent)}
@@ -85,14 +85,14 @@
     .card-title{font-size:0.95rem;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
     .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
     .stat-box{background:var(--surface2);border-radius:10px;padding:14px;text-align:center}
-    .stat-value{font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-value{font-size:1.6rem;font-weight:700;color:var(--accent)}
     .stat-label{font-size:0.7rem;color:var(--text-dim);margin-top:2px}
     .btn{padding:10px 18px;border-radius:8px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
-    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
+    .btn-primary{background:var(--accent);color:var(--on-accent)}
     .btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
     .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
     .btn-secondary:hover{background:var(--border)}
-    .btn-danger{background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.3)}
+    .btn-danger{background:color-mix(in srgb, var(--danger) 15%, transparent);color:var(--danger);border:1px solid color-mix(in srgb, var(--danger) 30%, transparent)}
     .btn-google{background:#fff;color:#333;border:1px solid #ddd;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 16px;border-radius:8px;font-size:0.85rem;cursor:pointer;transition:all 0.2s}
     .btn-google:hover{background:#f5f5f5;border-color:#bbb}
     .btn-google svg{width:18px;height:18px;flex-shrink:0}
@@ -113,19 +113,19 @@
     .onboard-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:400px;margin:0 auto}
     .onboard-card{background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:24px 16px;cursor:pointer;transition:all 0.2s}
     .onboard-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-    .onboard-card.selected{border-color:var(--accent);background:rgba(56,189,248,0.08)}
+    .onboard-card.selected{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent)}
     .onboard-card svg{width:48px;height:48px;margin-bottom:10px}
     .onboard-card h3{font-size:0.95rem;margin-bottom:4px}
     .onboard-card p{font-size:0.75rem;color:var(--text-dim);margin:0}
 
     /* Skill Tree */
     .skill-level{margin-bottom:16px}
-    .skill-level-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .skill-level-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid color-mix(in srgb, var(--text) 6%, transparent)}
     .level-badge{padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
-    .level-beginner{background:rgba(52,211,153,0.2);color:var(--success)}
-    .level-intermediate{background:rgba(56,189,248,0.2);color:var(--accent)}
-    .level-advanced{background:rgba(129,140,248,0.2);color:var(--accent2)}
-    .level-expert{background:rgba(244,114,182,0.2);color:var(--accent3)}
+    .level-beginner{background:color-mix(in srgb, var(--success) 20%, transparent);color:var(--success)}
+    .level-intermediate{background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent)}
+    .level-advanced{background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent)}
+    .level-expert{background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent)}
     .level-title{font-size:0.85rem;font-weight:600}
     .level-desc{font-size:0.7rem;color:var(--text-dim);margin-left:auto}
     .skill-grid{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
@@ -138,34 +138,34 @@
     .skill-card-thumb img{width:100%;height:100%;object-fit:cover}
     .skill-card-body{padding:10px 12px 12px}
     .skill-card:hover{border-color:var(--accent)}
-    .skill-card.mastered{border-color:var(--success);background:rgba(52,211,153,0.05)}
-    .skill-card.learning{border-color:var(--warning);background:rgba(251,191,36,0.05)}
+    .skill-card.mastered{border-color:var(--success);background:color-mix(in srgb, var(--success) 5%, transparent)}
+    .skill-card.learning{border-color:var(--warning);background:color-mix(in srgb, var(--warning) 5%, transparent)}
     .skill-card.locked{opacity:0.5}
     .skill-name{font-size:0.8rem;font-weight:600;margin-bottom:3px}
     .skill-rate{font-size:1.1rem;font-weight:700}
     .skill-attempts{font-size:0.65rem;color:var(--text-dim)}
     .skill-status{display:inline-block;padding:2px 7px;border-radius:10px;font-size:0.6rem;font-weight:600;margin-top:4px}
-    .status-mastered{background:rgba(52,211,153,0.2);color:var(--success)}
-    .status-learning{background:rgba(251,191,36,0.2);color:var(--warning)}
-    .status-new{background:rgba(148,163,184,0.2);color:var(--text-dim)}
-    .status-locked{background:rgba(148,163,184,0.1);color:var(--text-dim)}
+    .status-mastered{background:color-mix(in srgb, var(--success) 20%, transparent);color:var(--success)}
+    .status-learning{background:color-mix(in srgb, var(--warning) 20%, transparent);color:var(--warning)}
+    .status-new{background:color-mix(in srgb, var(--text-dim) 20%, transparent);color:var(--text-dim)}
+    .status-locked{background:color-mix(in srgb, var(--text-dim) 10%, transparent);color:var(--text-dim)}
     .skill-prereq{font-size:0.6rem;color:var(--text-dim);margin-top:3px;font-style:italic}
-    .start-here{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:var(--success);color:#000;font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase;white-space:nowrap;z-index:1}
+    .start-here{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:var(--success);color:var(--on-accent);font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase;white-space:nowrap;z-index:1}
 
     /* Video */
     .video-library{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:12px}
     .video-thumb{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;transition:all 0.2s;position:relative}
     .video-thumb:hover{border-color:var(--accent);transform:translateY(-2px)}
-    .video-thumb.active{border-color:var(--accent);box-shadow:0 0 20px rgba(56,189,248,0.15)}
+    .video-thumb.active{border-color:var(--accent);box-shadow:0 0 20px color-mix(in srgb, var(--accent) 15%, transparent)}
     .video-thumb-preview{width:100%;aspect-ratio:16/9;background:#000;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
     .video-thumb-preview video{width:100%;height:100%;object-fit:cover}
     .video-thumb-name{font-size:0.8rem;font-weight:600}
     .video-thumb-meta{font-size:0.65rem;color:var(--text-dim)}
-    .video-thumb-badge{position:absolute;top:6px;right:6px;background:var(--accent3);color:white;font-size:0.6rem;font-weight:700;padding:2px 6px;border-radius:4px}
+    .video-thumb-badge{position:absolute;top:6px;right:6px;background:var(--accent);color:var(--on-accent);font-size:0.6rem;font-weight:700;padding:2px 6px;border-radius:4px}
     .upload-mini{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface2);border:1px dashed var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.8rem;color:var(--text-dim);margin-bottom:12px}
     .upload-mini:hover{border-color:var(--accent);color:var(--text)}
     .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:50px 20px;text-align:center;cursor:pointer;transition:all 0.3s}
-    .upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(56,189,248,0.05)}
+    .upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 5%, transparent)}
     .upload-zone svg{color:var(--text-dim);margin-bottom:12px}
     .upload-zone p{color:var(--text-dim);font-size:0.85rem}
     .upload-zone .highlight{color:var(--accent);font-weight:600}
@@ -175,9 +175,9 @@
     .video-preview{width:100%;border-radius:8px;background:#000;max-height:450px}
     .video-controls{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
     .timeline-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;cursor:pointer;position:relative;min-width:180px}
-    .timeline-progress{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;width:0%}
+    .timeline-progress{height:100%;background:var(--accent);border-radius:4px;width:0%}
     .timeline-marker{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;cursor:pointer;z-index:2}
-    .timeline-marker.jump{background:var(--accent3)}.timeline-marker.spin{background:var(--accent)}.timeline-marker.step{background:var(--success)}.timeline-marker.stick{background:var(--accent2)}.timeline-marker.other{background:var(--warning)}
+    .timeline-marker.jump{background:var(--accent)}.timeline-marker.spin{background:var(--accent)}.timeline-marker.step{background:var(--success)}.timeline-marker.stick{background:var(--accent)}.timeline-marker.other{background:var(--warning)}
     .time-display{font-size:0.75rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
 
     /* Annotation toolbar */
@@ -185,32 +185,32 @@
     .anno-toolbar-label{font-size:0.75rem;color:var(--text-dim);font-weight:600;width:100%;margin-bottom:4px}
     .anno-btn{padding:8px 14px;border-radius:8px;border:2px solid transparent;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px}
     .anno-btn:hover{transform:translateY(-1px)}
-    .anno-btn-jump{background:rgba(244,114,182,0.15);color:var(--accent3);border-color:rgba(244,114,182,0.3)}
-    .anno-btn-jump:hover{background:rgba(244,114,182,0.25)}
-    .anno-btn-spin{background:rgba(56,189,248,0.15);color:var(--accent);border-color:rgba(56,189,248,0.3)}
-    .anno-btn-spin:hover{background:rgba(56,189,248,0.25)}
-    .anno-btn-step{background:rgba(52,211,153,0.15);color:var(--success);border-color:rgba(52,211,153,0.3)}
-    .anno-btn-step:hover{background:rgba(52,211,153,0.25)}
-    .anno-btn-note{background:rgba(251,191,36,0.15);color:var(--warning);border-color:rgba(251,191,36,0.3)}
-    .anno-btn-note:hover{background:rgba(251,191,36,0.25)}
+    .anno-btn-jump{background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);border-color:color-mix(in srgb, var(--accent) 30%, transparent)}
+    .anno-btn-jump:hover{background:color-mix(in srgb, var(--accent) 25%, transparent)}
+    .anno-btn-spin{background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);border-color:color-mix(in srgb, var(--accent) 30%, transparent)}
+    .anno-btn-spin:hover{background:color-mix(in srgb, var(--accent) 25%, transparent)}
+    .anno-btn-step{background:color-mix(in srgb, var(--success) 15%, transparent);color:var(--success);border-color:color-mix(in srgb, var(--success) 30%, transparent)}
+    .anno-btn-step:hover{background:color-mix(in srgb, var(--success) 25%, transparent)}
+    .anno-btn-note{background:color-mix(in srgb, var(--warning) 15%, transparent);color:var(--warning);border-color:color-mix(in srgb, var(--warning) 30%, transparent)}
+    .anno-btn-note:hover{background:color-mix(in srgb, var(--warning) 25%, transparent)}
 
     .annotation-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background 0.2s}
     .annotation-item:hover{background:var(--border)}
     .annotation-time{font-size:0.72rem;color:var(--accent);font-weight:600;min-width:45px;font-variant-numeric:tabular-nums}
     .annotation-tag{padding:2px 7px;border-radius:4px;font-size:0.65rem;font-weight:600}
-    .tag-jump{background:rgba(244,114,182,0.2);color:var(--accent3)}
-    .tag-spin{background:rgba(56,189,248,0.2);color:var(--accent)}
-    .tag-step{background:rgba(52,211,153,0.2);color:var(--success)}
-    .tag-stick{background:rgba(129,140,248,0.2);color:var(--accent2)}
-    .tag-other{background:rgba(251,191,36,0.2);color:var(--warning)}
+    .tag-jump{background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent)}
+    .tag-spin{background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent)}
+    .tag-step{background:color-mix(in srgb, var(--success) 20%, transparent);color:var(--success)}
+    .tag-stick{background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent)}
+    .tag-other{background:color-mix(in srgb, var(--warning) 20%, transparent);color:var(--warning)}
     .annotation-text{flex:1;font-size:0.8rem}
     .quality-dot{width:7px;height:7px;border-radius:50%;background:var(--border);display:inline-block}
     .quality-dot.filled{background:var(--success)}.quality-dot.warn{background:var(--warning)}.quality-dot.bad{background:var(--danger)}
 
     /* Video Processing Overlay */
-    .video-processing{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(11,17,32,0.92);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:fadeIn 0.3s ease}
+    .video-processing{position:fixed;top:0;left:0;right:0;bottom:0;background:color-mix(in srgb, var(--bg) 92%, transparent);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:fadeIn 0.3s ease}
     .processing-spinner{width:56px;height:56px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
-    .processing-title{font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .processing-title{font-size:1.1rem;font-weight:700;color:var(--text)}
     .processing-status{font-size:0.82rem;color:var(--text-dim);text-align:center;max-width:300px}
     .processing-steps{list-style:none;margin-top:8px;font-size:0.78rem;color:var(--text-dim)}
     .processing-steps li{padding:4px 0;display:flex;align-items:center;gap:8px}
@@ -219,30 +219,30 @@
     .processing-steps li .check{width:16px;text-align:center}
     .processing-results{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:12px;max-width:340px;width:90%}
     .processing-results h3{font-size:0.9rem;margin-bottom:10px}
-    .result-skill{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.82rem}
+    .result-skill{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid color-mix(in srgb, var(--text) 5%, transparent);font-size:0.82rem}
     .result-skill:last-child{border-bottom:none}
     .result-badge{padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:600}
-    .result-badge.good{background:rgba(52,211,153,0.2);color:var(--success)}
-    .result-badge.ok{background:rgba(251,191,36,0.2);color:var(--warning)}
+    .result-badge.good{background:color-mix(in srgb, var(--success) 20%, transparent);color:var(--success)}
+    .result-badge.ok{background:color-mix(in srgb, var(--warning) 20%, transparent);color:var(--warning)}
 
     /* AI Video Scan */
-    .scan-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:6px 14px;border-radius:var(--radius);font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s}
-    .scan-btn:hover{transform:scale(1.03);box-shadow:0 0 16px rgba(56,189,248,0.3)}
+    .scan-btn{background:var(--accent);color:var(--on-accent);border:none;padding:6px 14px;border-radius:var(--radius);font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s}
+    .scan-btn:hover{transform:scale(1.03);box-shadow:0 0 16px color-mix(in srgb, var(--accent) 30%, transparent)}
     .scan-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
     .scan-btn svg{width:16px;height:16px}
     .scan-progress{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:10px 0}
     .scan-progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:8px 0}
-    .scan-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.3s ease;width:0%}
+    .scan-progress-fill{height:100%;background:var(--accent);border-radius:3px;transition:width 0.3s ease;width:0%}
     .scan-progress-text{font-size:0.75rem;color:var(--text-dim);text-align:center}
     .scan-result-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin:4px 0;font-size:0.8rem;cursor:pointer;transition:border-color 0.2s}
     .scan-result-item:hover{border-color:var(--accent)}
     .scan-result-time{color:var(--accent);font-weight:600;font-family:monospace;min-width:42px}
     .scan-result-skill{flex:1}
     .scan-result-confidence{font-size:0.7rem;padding:2px 6px;border-radius:6px;font-weight:600}
-    .scan-result-confidence.high{background:rgba(52,211,153,0.2);color:var(--success)}
-    .scan-result-confidence.medium{background:rgba(251,191,36,0.2);color:var(--warning)}
-    .scan-result-confidence.low{background:rgba(248,113,113,0.2);color:var(--danger)}
-    .result-badge.new{background:rgba(56,189,248,0.2);color:var(--accent)}
+    .scan-result-confidence.high{background:color-mix(in srgb, var(--success) 20%, transparent);color:var(--success)}
+    .scan-result-confidence.medium{background:color-mix(in srgb, var(--warning) 20%, transparent);color:var(--warning)}
+    .scan-result-confidence.low{background:color-mix(in srgb, var(--danger) 20%, transparent);color:var(--danger)}
+    .result-badge.new{background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent)}
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* Session & Comp */
@@ -252,11 +252,11 @@
     .session-day{font-size:1.3rem;font-weight:700;color:var(--accent)}
     .session-month{font-size:0.65rem;color:var(--text-dim);text-transform:uppercase}
     .session-info{flex:1}.session-title{font-weight:600;font-size:0.85rem}.session-meta{font-size:0.7rem;color:var(--text-dim);margin-top:2px}
-    .session-score{font-size:1rem;font-weight:700;color:var(--accent2)}
-    .comp-card{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--accent2)}
+    .session-score{font-size:1rem;font-weight:700;color:var(--accent)}
+    .comp-card{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--accent)}
     .comp-scores{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
     .comp-score-item{text-align:center}.comp-score-label{font-size:0.65rem;color:var(--text-dim)}.comp-score-value{font-size:1.1rem;font-weight:700}
-    .tes-color{color:var(--accent)}.pcs-color{color:var(--accent2)}.total-color{color:var(--accent3)}
+    .tes-color{color:var(--accent)}.pcs-color{color:var(--accent)}.total-color{color:var(--text)}
 
     /* Training cards */
     .train-card{background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid var(--accent)}
@@ -267,13 +267,13 @@
     .train-desc{font-size:0.8rem;color:var(--text-dim)}
     .train-drill{background:var(--bg);border-radius:6px;padding:8px 10px;margin-top:8px;font-size:0.78rem}
     .train-drill-title{font-weight:600;color:var(--accent);font-size:0.72rem;margin-bottom:3px}
-    .next-skill-card{background:linear-gradient(135deg,rgba(56,189,248,0.1),rgba(129,140,248,0.1));border:1px solid rgba(56,189,248,0.3);border-radius:10px;padding:14px;margin-bottom:10px}
+    .next-skill-card{background:color-mix(in srgb, var(--accent) 10%, transparent);border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);border-radius:10px;padding:14px;margin-bottom:10px}
     .next-skill-title{font-weight:700;font-size:0.9rem;color:var(--accent);margin-bottom:4px}
     .next-skill-why{font-size:0.78rem;color:var(--text-dim)}
     .next-skill-prereqs{font-size:0.72rem;margin-top:6px}
 
     /* Plan */
-    .plan-day{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .plan-day{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid color-mix(in srgb, var(--text) 5%, transparent)}
     .plan-day:last-child{border-bottom:none}
     .plan-day-name{min-width:36px;font-size:0.78rem;font-weight:600;color:var(--accent)}
     .plan-tasks{flex:1;font-size:0.82rem}
@@ -297,7 +297,7 @@
 
     .sub-tabs{display:flex;gap:4px;background:var(--surface2);padding:3px;border-radius:8px;margin-bottom:14px}
     .sub-tab{flex:1;padding:7px 10px;background:none;border:none;color:var(--text-dim);font-size:0.75rem;font-weight:500;cursor:pointer;border-radius:6px;transition:all 0.2s}
-    .sub-tab.active{background:var(--accent);color:white}
+    .sub-tab.active{background:var(--accent);color:var(--on-accent)}
 
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px}
     .modal-overlay.active{display:flex}
@@ -307,14 +307,14 @@
 
     .empty-state{text-align:center;padding:30px 20px;color:var(--text-dim)}
     .empty-state p{margin-bottom:12px;font-size:0.85rem}
-    .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--success);color:#000;padding:12px 24px;border-radius:10px;font-size:0.85rem;font-weight:600;z-index:300;transition:transform 0.3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+    .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--success);color:var(--on-accent);padding:12px 24px;border-radius:10px;font-size:0.85rem;font-weight:600;z-index:300;transition:transform 0.3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
     .toast.show{transform:translateX(-50%) translateY(0)}
 
     /* Guide callout */
-    .guide-callout{background:linear-gradient(135deg,rgba(56,189,248,0.08),rgba(129,140,248,0.08));border:1px solid rgba(56,189,248,0.2);border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.82rem;line-height:1.5}
+    .guide-callout{background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 20%, transparent);border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.82rem;line-height:1.5}
     .guide-callout strong{color:var(--accent)}
     .guide-step{display:flex;align-items:start;gap:10px;margin-bottom:8px}
-    .guide-num{background:var(--accent);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0}
+    .guide-num{background:var(--accent);color:var(--on-accent);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0}
 
     /* Coach session items need relative positioning for delete btn */
     #lessonLogList .session-item{position:relative;padding-right:40px}
@@ -329,29 +329,29 @@
     #appContainer{display:none}
     #appContainer.active{display:block}
 
-    .lp-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(11,17,32,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(30,58,95,0.5);transition:background 0.3s}
-    .lp-nav-logo{display:flex;align-items:center;gap:8px;font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+    .lp-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:color-mix(in srgb, var(--bg) 85%, transparent);backdrop-filter:blur(16px);border-bottom:1px solid color-mix(in srgb, var(--border) 50%, transparent);transition:background 0.3s}
+    .lp-nav-logo{display:flex;align-items:center;gap:8px;font-size:1.3rem;font-weight:700;color:var(--accent);text-decoration:none}
     .lp-nav-links{display:flex;align-items:center;gap:24px}
     .lp-nav-links a{color:var(--text-dim);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s}
     .lp-nav-links a:hover{color:var(--text)}
-    .lp-btn{padding:10px 22px;border-radius:8px;border:none;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
-    .lp-btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
-    .lp-btn-primary:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px rgba(56,189,248,0.3)}
+    .lp-btn{padding:10px 22px;border-radius:8px;border:none;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--text)}
+    .lp-btn-primary{background:var(--accent);color:var(--on-accent)}
+    .lp-btn-primary:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px color-mix(in srgb, var(--accent) 30%, transparent)}
     .lp-btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
-    .lp-btn-outline:hover{background:rgba(56,189,248,0.1)}
+    .lp-btn-outline:hover{background:color-mix(in srgb, var(--accent) 10%, transparent)}
     .lp-btn-lg{padding:14px 32px;font-size:1rem;border-radius:10px}
-    .lp-btn-pro{background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white}
-    .lp-btn-pro:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px rgba(244,114,182,0.3)}
+    .lp-btn-pro{background:var(--warning);color:var(--on-accent)}
+    .lp-btn-pro:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px color-mix(in srgb, var(--warning) 30%, transparent)}
 
     .lp-hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
-    .lp-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 0%,rgba(56,189,248,0.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(129,140,248,0.08) 0%,transparent 50%),radial-gradient(ellipse at 20% 80%,rgba(244,114,182,0.06) 0%,transparent 50%);pointer-events:none}
-    .lp-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);border-radius:20px;padding:6px 16px;font-size:0.78rem;color:var(--accent);font-weight:600;margin-bottom:24px}
-    .lp-hero h1{font-size:3.2rem;font-weight:800;line-height:1.15;margin-bottom:20px;max-width:700px;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .lp-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb, var(--accent) 12%, transparent) 0%,transparent 60%),radial-gradient(ellipse at 80% 50%,color-mix(in srgb, var(--accent) 8%, transparent) 0%,transparent 50%),radial-gradient(ellipse at 20% 80%,color-mix(in srgb, var(--accent) 6%, transparent) 0%,transparent 50%);pointer-events:none}
+    .lp-hero-badge{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb, var(--accent) 10%, transparent);border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);border-radius:20px;padding:6px 16px;font-size:0.78rem;color:var(--accent);font-weight:600;margin-bottom:24px}
+    .lp-hero h1{font-size:3.2rem;font-weight:800;line-height:1.15;margin-bottom:20px;max-width:700px;color:var(--text)}
     .lp-hero p{font-size:1.15rem;color:var(--text-dim);max-width:540px;line-height:1.6;margin-bottom:36px}
     .lp-hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
     .lp-hero-stats{display:flex;gap:40px;margin-top:60px;position:relative;justify-content:center}
     .lp-hero-stat{text-align:center}
-    .lp-hero-stat-value{font-size:1.8rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .lp-hero-stat-value{font-size:1.8rem;font-weight:700;color:var(--accent)}
     .lp-hero-stat-label{font-size:0.78rem;color:var(--text-dim);margin-top:2px}
 
     .lp-section{padding:80px 24px;max-width:1100px;margin:0 auto}
@@ -367,11 +367,11 @@
     .lp-feature p{font-size:0.85rem;color:var(--text-dim);line-height:1.5}
 
     .lp-how{display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:step;position:relative;max-width:1000px;margin:0 auto}
-    .lp-how::before{content:'';position:absolute;top:52px;left:calc(12.5% + 20px);right:calc(12.5% + 20px);height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3),#a78bfa);border-radius:2px;z-index:0}
+    .lp-how::before{content:'';position:absolute;top:52px;left:calc(12.5% + 20px);right:calc(12.5% + 20px);height:3px;background:var(--accent);border-radius:2px;z-index:0}
     .lp-how-step{text-align:center;padding:16px 12px;position:relative;z-index:1}
     .lp-how-step .hiw-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.8rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
-    .lp-how-step .hiw-num{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:0.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);z-index:2}
-    .lp-how-step h3{font-size:1.05rem;font-weight:700;margin-bottom:6px;color:#fff}
+    .lp-how-step .hiw-num{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:0.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);z-index:2}
+    .lp-how-step h3{font-size:1.05rem;font-weight:700;margin-bottom:6px;color:var(--text)}
     .lp-how-step p{font-size:0.8rem;color:var(--text-dim);line-height:1.5}
     .lp-how-step .hiw-tag{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:20px;font-size:0.65rem;font-weight:600;letter-spacing:0.3px;text-transform:uppercase}
     @media(max-width:700px){.lp-how{grid-template-columns:1fr 1fr;gap:16px}.lp-how::before{display:none}}
@@ -379,11 +379,11 @@
     .lp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:720px;margin:0 auto}
     .lp-price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative;transition:all 0.3s}
     .lp-price-card:hover{transform:translateY(-4px)}
-    .lp-price-card.featured{border-color:var(--accent);box-shadow:0 0 40px rgba(56,189,248,0.12)}
-    .lp-price-card.featured::before{content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:0.65rem;font-weight:700;padding:4px 14px;border-radius:12px;letter-spacing:0.5px}
+    .lp-price-card.featured{border-color:var(--accent);box-shadow:0 0 40px color-mix(in srgb, var(--accent) 12%, transparent)}
+    .lp-price-card.featured::before{content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--on-accent);font-size:0.65rem;font-weight:700;padding:4px 14px;border-radius:12px;letter-spacing:0.5px}
     .lp-price-name{font-size:1.1rem;font-weight:700;margin-bottom:4px}
-    .lp-price-amount{font-size:2.5rem;font-weight:800;margin:12px 0;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .lp-price-amount span{font-size:1rem;font-weight:500;-webkit-text-fill-color:var(--text-dim)}
+    .lp-price-amount{font-size:2.5rem;font-weight:800;margin:12px 0;color:var(--text)}
+    .lp-price-amount span{font-size:1rem;font-weight:500;color:var(--text-dim)}
     .lp-price-list{list-style:none;margin:20px 0;font-size:0.85rem}
     .lp-price-list li{padding:8px 0;color:var(--text-dim);display:flex;align-items:center;gap:8px}
     .lp-price-list li::before{content:'\2713';color:var(--success);font-weight:700;font-size:0.9rem}
@@ -394,11 +394,11 @@
     .lp-testimonial{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
     .lp-testimonial-text{font-size:0.9rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;font-style:italic}
     .lp-testimonial-author{display:flex;align-items:center;gap:10px}
-    .lp-testimonial-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.85rem}
+    .lp-testimonial-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--on-accent);font-size:0.85rem}
     .lp-testimonial-name{font-size:0.82rem;font-weight:600}
     .lp-testimonial-role{font-size:0.7rem;color:var(--text-dim)}
 
-    .lp-signup-section{background:linear-gradient(135deg,rgba(56,189,248,0.06),rgba(129,140,248,0.06));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 24px}
+    .lp-signup-section{background:color-mix(in srgb, var(--accent) 6%, transparent);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 24px}
     .lp-signup-form{max-width:420px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px}
     .lp-signup-form h3{font-size:1.2rem;font-weight:700;margin-bottom:4px;text-align:center}
     .lp-signup-form p{font-size:0.82rem;color:var(--text-dim);text-align:center;margin-bottom:20px}
@@ -410,14 +410,14 @@
     .lp-footer-copy{font-size:0.75rem;color:var(--text-dim)}
 
     /* Upgrade banner for free users */
-    .upgrade-banner{background:linear-gradient(135deg,rgba(244,114,182,0.1),rgba(129,140,248,0.1));border:1px solid rgba(244,114,182,0.3);border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .upgrade-banner{background:color-mix(in srgb, var(--warning) 10%, transparent);border:1px solid color-mix(in srgb, var(--warning) 30%, transparent);border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
     .upgrade-banner-text{flex:1;font-size:0.85rem}
-    .upgrade-banner-text strong{color:var(--accent3)}
+    .upgrade-banner-text strong{color:var(--warning)}
     .tier-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
-    .tier-free{background:rgba(148,163,184,0.2);color:var(--text-dim)}
-    .tier-pro{background:linear-gradient(135deg,rgba(244,114,182,0.2),rgba(129,140,248,0.2));color:var(--accent3)}
+    .tier-free{background:color-mix(in srgb, var(--text-dim) 20%, transparent);color:var(--text-dim)}
+    .tier-pro{background:color-mix(in srgb, var(--warning) 20%, transparent);color:var(--warning)}
     .gated-overlay{position:relative}
-    .gated-overlay::after{content:'PRO';position:absolute;inset:0;background:rgba(11,17,32,0.7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--accent3);border-radius:inherit;cursor:pointer}
+    .gated-overlay::after{content:'PRO';position:absolute;inset:0;background:color-mix(in srgb, var(--bg) 70%, transparent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--warning);border-radius:inherit;cursor:pointer}
 
     @media(max-width:600px){
       .lp-hero h1{font-size:2rem}
@@ -488,14 +488,14 @@
       </div>
       <div class="lp-feature">
         <div class="lp-feature-icon" style="background:rgba(129,140,248,0.12)">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
         </div>
         <h3>Skill Tracking</h3>
         <p>Full skill trees for figure skating and hockey. Track attempts, success rates, and unlock prerequisites as you progress.</p>
       </div>
       <div class="lp-feature">
         <div class="lp-feature-icon" style="background:rgba(244,114,182,0.12)">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         </div>
         <h3>Training Plans</h3>
         <p>AI-generated weekly training plans based on your weakest skills. Drills, focus areas, and progress tracking built in.</p>
@@ -521,13 +521,13 @@
         <h3>New Ice Skaters</h3>
         <p>Never skated before? RinkBuddy guides you from your first glide to confident crossovers. Visual skill trees show exactly what to learn next, and beginner-friendly drills build your foundation step by step.</p>
       </div>
-      <div class="lp-feature" style="border-top:3px solid var(--accent2)">
+      <div class="lp-feature" style="border-top:3px solid var(--accent)">
         <img src="https://images.unsplash.com/photo-1548044792-c05cb81e637f?w=400&fit=crop&q=80" alt="Figure skater performing" loading="lazy" style="width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:12px">
         <div class="lp-feature-icon" style="background:rgba(129,140,248,0.12);font-size:2rem">&#9976;</div>
         <h3>Figure Skaters</h3>
         <p>Track every jump, spin, and step sequence from waltz jumps to triple axels. AI video analysis detects your elements, logs base values, and generates training plans for your next competition level.</p>
       </div>
-      <div class="lp-feature" style="border-top:3px solid var(--accent3)">
+      <div class="lp-feature" style="border-top:3px solid var(--accent)">
         <img src="https://images.unsplash.com/photo-1515703407324-5f753afd8be8?w=400&fit=crop&q=80" alt="Hockey player on ice" loading="lazy" style="width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:12px">
         <div class="lp-feature-icon" style="background:rgba(244,114,182,0.12);font-size:2rem">&#127954;</div>
         <h3>Hockey Players</h3>
@@ -675,7 +675,7 @@
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)">
               <div style="font-size:1.1rem">🏒</div>
               <span style="font-weight:700;font-size:0.9rem">RinkBuddy</span>
-              <span style="margin-left:auto;font-size:0.7rem;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:2px 8px;border-radius:10px;color:white;font-weight:600">PRO</span>
+              <span style="margin-left:auto;font-size:0.7rem;background:var(--warning);padding:2px 8px;border-radius:10px;color:white;font-weight:600">PRO</span>
             </div>
             <!-- Fake dashboard stats -->
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
@@ -684,11 +684,11 @@
                 <div style="font-size:0.6rem;color:var(--text-dim)">Sessions</div>
               </div>
               <div style="background:rgba(129,140,248,0.08);border-radius:10px;padding:10px 6px;text-align:center">
-                <div style="font-size:1.2rem;font-weight:800;color:var(--accent2)">18h</div>
+                <div style="font-size:1.2rem;font-weight:800;color:var(--accent)">18h</div>
                 <div style="font-size:0.6rem;color:var(--text-dim)">Ice Time</div>
               </div>
               <div style="background:rgba(244,114,182,0.08);border-radius:10px;padding:10px 6px;text-align:center">
-                <div style="font-size:1.2rem;font-weight:800;color:var(--accent3)">47</div>
+                <div style="font-size:1.2rem;font-weight:800;color:var(--accent)">47</div>
                 <div style="font-size:0.6rem;color:var(--text-dim)">Skills</div>
               </div>
               <div style="background:rgba(16,185,129,0.08);border-radius:10px;padding:10px 6px;text-align:center">
@@ -704,9 +704,9 @@
               </div>
               <div style="display:flex;flex-direction:column;gap:6px">
                 <div><div style="display:flex;justify-content:space-between;font-size:0.65rem;margin-bottom:2px"><span>Forward Crossovers</span><span style="color:#34d399">Mastered ✓</span></div><div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:3px"></div></div></div>
-                <div><div style="display:flex;justify-content:space-between;font-size:0.65rem;margin-bottom:2px"><span>Waltz Jump</span><span style="color:var(--accent)">78%</span></div><div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden"><div style="width:78%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:0.65rem;margin-bottom:2px"><span>Waltz Jump</span><span style="color:var(--accent)">78%</span></div><div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden"><div style="width:78%;height:100%;background:var(--accent);border-radius:3px"></div></div></div>
                 <div><div style="display:flex;justify-content:space-between;font-size:0.65rem;margin-bottom:2px"><span>Backward Stroking</span><span style="color:#f59e0b">52%</span></div><div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden"><div style="width:52%;height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:3px"></div></div></div>
-                <div><div style="display:flex;justify-content:space-between;font-size:0.65rem;margin-bottom:2px"><span>Single Salchow</span><span style="color:var(--accent3)">25%</span></div><div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden"><div style="width:25%;height:100%;background:linear-gradient(90deg,var(--accent3),#f472b6);border-radius:3px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:0.65rem;margin-bottom:2px"><span>Single Salchow</span><span style="color:var(--accent)">25%</span></div><div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden"><div style="width:25%;height:100%;background:var(--accent);border-radius:3px"></div></div></div>
               </div>
             </div>
             <!-- Fake nav bar -->
@@ -821,7 +821,7 @@
       <div class="lp-section-title">Take RinkBuddy Everywhere</div>
       <div class="lp-section-sub" style="margin-bottom:28px">Install RinkBuddy on your phone or tablet — works on iPhone, Android, and desktop. No app store needed, no waiting.</div>
       <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
-        <button id="installBtnCta" onclick="installApp()" style="display:none;padding:14px 28px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-weight:700;font-size:0.95rem;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(56,189,248,0.3)">
+        <button id="installBtnCta" onclick="installApp()" style="display:none;padding:14px 28px;border-radius:12px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:0.95rem;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(56,189,248,0.3)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Install App Now
         </button>
@@ -1095,8 +1095,8 @@
       <div class="chart-container"><canvas id="compChart" class="chart-canvas"></canvas></div>
       <div class="chart-legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>TES</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>PCS</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--accent3)"></div>Total</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>PCS</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--text)"></div>Total</div>
       </div>
     </div>
   </div>
@@ -1397,7 +1397,7 @@
     <!-- Logged in state -->
     <div id="accountLoggedIn" style="display:none">
       <div style="text-align:center;padding:10px 0">
-        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.5rem;font-weight:700;color:#fff" id="accAvatar">M</div>
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.5rem;font-weight:700;color:#fff" id="accAvatar">M</div>
         <div style="font-size:1.1rem;font-weight:700" id="accLoggedName">User</div>
         <div style="font-size:0.78rem;color:var(--text-dim)" id="accLoggedUser">@username</div>
         <span class="tier-badge tier-free" id="accTierBadge">FREE</span>
@@ -1408,10 +1408,10 @@
         <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px">Subscription</div>
         <div id="accSubFree">
           <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong>Free</strong> plan. Upgrade to Pro for unlimited videos and AI skill suggestions.</p>
-          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;background:linear-gradient(135deg,var(--accent3),var(--accent2))" onclick="doSubscribe()">Upgrade to Pro — $9.99/mo</button>
+          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;background:var(--warning)" onclick="doSubscribe()">Upgrade to Pro — $9.99/mo</button>
         </div>
         <div id="accSubPro" style="display:none">
-          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong style="color:var(--accent3)">Pro</strong> plan. All features are unlocked.</p>
+          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong style="color:var(--warning)">Pro</strong> plan. All features are unlocked.</p>
           <button class="btn btn-danger btn-sm" style="width:100%;justify-content:center" onclick="doCancelSubscription()">Cancel Subscription</button>
         </div>
       </div>
@@ -2040,7 +2040,7 @@ function renderProfileList() {
   c.innerHTML = profiles.map(p => {
     const isActive = p.id === activeId;
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isActive?'rgba(56,189,248,0.1)':'var(--surface2)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="switchProfile('${p.id}')">
-      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white">${p.name.charAt(0).toUpperCase()}</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white">${p.name.charAt(0).toUpperCase()}</div>
       <div style="flex:1"><div style="font-weight:600;font-size:0.85rem">${p.name}</div><div style="font-size:0.7rem;color:var(--text-dim)">${isActive ? 'Active' : 'Tap to switch'}</div></div>
       <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();renameProfile('${p.id}')" style="padding:4px 8px" title="Rename">✏️</button>
       ${profiles.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProfile('${p.id}')" style="padding:4px 8px">x</button>` : ''}
@@ -2102,7 +2102,7 @@ function renderOnboarding() {
         <p>Shared basics: stroking, crossovers, stops, glides</p>
       </div>
       <div class="onboard-card" onclick="switchDiscipline('figure')">
-        <svg viewBox="0 0 48 48" fill="none" stroke="var(--accent2)" stroke-width="1.5"><circle cx="24" cy="24" r="20"/><path d="M18 32c2-6 4-10 6-16 2 6 4 10 6 16" stroke-linecap="round"/><line x1="18" y1="32" x2="30" y2="32" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="24" cy="24" r="20"/><path d="M18 32c2-6 4-10 6-16 2 6 4 10 6 16" stroke-linecap="round"/><line x1="18" y1="32" x2="30" y2="32" stroke-linecap="round"/></svg>
         <h3>Figure Skating</h3>
         <p>Jumps, spins, footwork, choreography</p>
       </div>
@@ -2284,12 +2284,12 @@ function showSkillDetail(id) {
     html += `<div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px">
       <div style="font-size:0.78rem;font-weight:600;color:var(--accent);margin-bottom:6px">What it looks like:</div>
       <div style="font-size:0.82rem;margin-bottom:8px">${guide.visual}</div>
-      <div style="font-size:0.75rem;font-weight:600;color:var(--accent2);margin-bottom:4px">Key focus points:</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--accent);margin-bottom:4px">Key focus points:</div>
       <ul style="font-size:0.78rem;color:var(--text-dim);padding-left:16px;margin-bottom:8px">${guide.focus.map(f => '<li>' + f + '</li>').join('')}</ul>
       ${guide.balance ? `<div style="font-size:0.75rem;padding:8px;background:rgba(251,191,36,0.1);border-radius:6px;border-left:3px solid var(--warning)"><strong style="color:var(--warning)">Balance:</strong> <span style="color:var(--text-dim)">${guide.balance}</span></div>` : ''}
     </div>`;
     if (guide.yt) html += `<details style="margin-bottom:12px;background:var(--surface2);border-radius:8px" ontoggle="mountTutorial(this,'${guide.yt}')">
-      <summary style="cursor:pointer;padding:10px 12px;font-size:0.78rem;font-weight:600;color:var(--accent3)">▸ Watch the tutorial</summary>
+      <summary style="cursor:pointer;padding:10px 12px;font-size:0.78rem;font-weight:600;color:var(--accent)">▸ Watch the tutorial</summary>
       <div style="padding:0 12px 12px"></div></details>`;
   }
   if (sk.tip) html += `<div style="font-size:0.82rem;color:var(--text-dim);padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);margin-bottom:12px"><strong>Tip:</strong> ${sk.tip}</div>`;
@@ -2669,7 +2669,7 @@ function renderUploadArea() {
   const hasVids = videoFiles.length > 0;
   // Free tier: show limit message
   if (videoLimitReached()) {
-    area.innerHTML = `<div class="upgrade-banner" style="margin-top:10px"><div class="upgrade-banner-text"><strong>Video limit reached</strong> — Free plan allows 3 videos. Upgrade to Pro for unlimited uploads.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>`;
+    area.innerHTML = `<div class="upgrade-banner" style="margin-top:10px"><div class="upgrade-banner-text"><strong>Video limit reached</strong> — Free plan allows 3 videos. Upgrade to Pro for unlimited uploads.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>`;
     return;
   }
   area.innerHTML = `<div class="upload-zone${hasVids?' compact':''}" id="uploadZone">
@@ -3706,7 +3706,7 @@ function renderGoals() {
   if (!c) return;
   if (!APP.goals.length) { c.innerHTML='<div class="empty-state"><p>Set a goal!</p></div>'; return; }
   c.innerHTML = APP.goals.map(g => { const pct=Math.min(100,Math.round((g.progress/g.target)*100));
-    const color=pct>=100?'var(--success)':pct>=50?'var(--accent)':'var(--accent3)';
+    const color=pct>=100?'var(--success)':pct>=50?'var(--accent)':'var(--warning)';
     return `<div class="goal-item"><div class="goal-header"><span class="goal-name">${g.name}</span><span class="goal-deadline">${g.deadline||''}</span></div>
     <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:${pct}%;background:${color}"></div></div>
     <div class="goal-progress-text">${g.progress}/${g.target} (${pct}%)</div></div>`; }).join('');
@@ -3766,7 +3766,7 @@ function getSkillClipHTML(skillId) {
 function renderSuggestions() {
   const c = document.getElementById('trainingSuggestions');
   if (!isProUser()) {
-    c.innerHTML = '<div class="upgrade-banner"><div class="upgrade-banner-text"><strong>Pro Feature</strong> — Personalized training suggestions and AI-generated weekly plans require a Pro subscription.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>';
+    c.innerHTML = '<div class="upgrade-banner"><div class="upgrade-banner-text"><strong>Pro Feature</strong> — Personalized training suggestions and AI-generated weekly plans require a Pro subscription.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>';
     return;
   }
   const skills = getSkills(); let html = '';
@@ -4278,7 +4278,7 @@ function showAccError(msg) {
 function updateCloudBtn() {
   const btn = document.getElementById('cloudBtn');
   if (CloudAccount.isLoggedIn()) {
-    btn.style.background = 'linear-gradient(135deg,var(--accent),var(--accent2))';
+    btn.style.background = 'var(--accent)';
     btn.style.borderColor = 'transparent';
     btn.title = 'Synced: ' + (CloudAccount.getSession()?.displayName || 'Account');
   } else {
@@ -4432,8 +4432,8 @@ function renderUpgradeBanners() {
     const banner = document.createElement('div');
     banner.className = 'upgrade-banner';
     banner.innerHTML = CloudAccount.isLoggedIn()
-      ? `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`
-      : `<div class="upgrade-banner-text"><strong>Saved on this device</strong> — your videos, tags and progress stay in this browser. Create a free account to sync to your other devices and use AI Scan.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="goToSignup()">Create account</button>`;
+      ? `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`
+      : `<div class="upgrade-banner-text"><strong>Saved on this device</strong> — your videos, tags and progress stay in this browser. Create a free account to sync to your other devices and use AI Scan.</div><button class="btn btn-sm" style="background:var(--warning);color:white;white-space:nowrap" onclick="goToSignup()">Create account</button>`;
     dash.insertBefore(banner, dash.firstChild);
   }
 }
@@ -5137,7 +5137,7 @@ function renderLessonLog() {
             </div>`).join('')}
           </div>
         </details>` : ''}
-        ${l.nextFocus ? `<div style="font-size:0.72rem;color:var(--accent2);margin-top:4px">→ Next: ${l.nextFocus}</div>` : ''}
+        ${l.nextFocus ? `<div style="font-size:0.72rem;color:var(--accent);margin-top:4px">→ Next: ${l.nextFocus}</div>` : ''}
         ${l.videoKey ? `<button class="btn btn-secondary btn-sm" onclick="playLessonVideo('${l.videoKey}','${l.id}')" style="margin-top:6px;font-size:0.7rem;gap:4px">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           Watch Video</button>
