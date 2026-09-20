@@ -885,6 +885,7 @@
           <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
           <button class="disc-btn" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
           <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
+          <button class="disc-btn" data-disc="goalie" onclick="switchDiscipline('goalie')">Goalie</button>
         </div>
       </div>
     </div>
@@ -982,6 +983,7 @@
         <button class="disc-btn" data-disc="foundations" onclick="switchDiscipline('foundations')">Foundations</button>
         <button class="disc-btn active" data-disc="figure" onclick="switchDiscipline('figure')">Figure</button>
         <button class="disc-btn" data-disc="hockey" onclick="switchDiscipline('hockey')">Hockey</button>
+          <button class="disc-btn" data-disc="goalie" onclick="switchDiscipline('goalie')">Goalie</button>
       </div>
       <div id="skillTree"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="openElementModal()">+ Custom Skill</button>
@@ -1650,7 +1652,7 @@ const SKILLS = {
     {id:'h-gap-control',name:'Gap Control',type:'defensive',level:'intermediate',prereqs:['h-bwd-cross','h-lateral'],bv:0,
      tip:'Maintain optimal distance from the attacker while skating backward. Not too close, not too far.'},
     {id:'h-angling',name:'Angling',type:'defensive',level:'intermediate',prereqs:['h-lateral','h-hockey-stop'],bv:0,
-     tip:'Steer the puck carrier toward the boards using body position and skating angle. Cut off lanes.'},
+     tip:'Skate at the spot the puck carrier is heading for, not at the player, so they run out of ice instead of you running into them.'},
     {id:'h-top-speed',name:'Top Speed Sprint',type:'skating',level:'expert',prereqs:['h-power-start','h-quick-feet'],bv:0,
      tip:'Full stride extension. Arm swing for power. Build to max speed over full ice.'},
     {id:'h-backwards-cross-full',name:'Full-Speed Backward',type:'skating',level:'advanced',prereqs:['h-bwd-cross','h-lateral'],bv:0,
@@ -1747,12 +1749,90 @@ const SKILLS = {
      tip:"SP 12U Puck Control (l); also the honest home for the 'no-look' and 'Euro step' nodes"},
     {id:'h-backward-puck-control',name:"Backward Puck Control",type:'stick',level:'advanced',prereqs:['h-bwd-cross','h-skating-dribble'],bv:0,
      tip:"SP 12U Puck Control (k)"},
-    {id:'h-contact-confidence',name:"Body Contact: Delivering and Receiving (Contact Confidence)",type:'defensive',level:'advanced',prereqs:['h-angling','h-stick-lift'],bv:0,
+    {id:'h-contact-confidence',name:"Receiving Body Contact (Contact Confidence)",type:'defensive',level:'advanced',prereqs:['h-angling','h-stick-lift'],bv:0,
      tip:"SP 12U Body Contact (h)(i); step 3 of the four-step checking progression, taught at 12U in preparation for body checking at 14U"},
     {id:'h-stop-and-go',name:"Stop and Go (with Puck)",type:'stick',level:'expert',prereqs:['h-protect-puck','h-1ft-stop'],bv:0,
      tip:"SP 14U Puck Control (o)"},
-    {id:'h-shoulder-check',name:"Shoulder Check / Receiving a Body Check",type:'defensive',level:'expert',prereqs:['h-contact-confidence'],bv:0,
-     tip:"SP 14U Body Contact (j)(k); body checking is step 4 and is introduced at 14U/U15, never earlier"}
+    {id:'h-shoulder-check',name:"Shoulder Check (Scan)",type:'defensive',level:'expert',prereqs:['h-contact-confidence'],bv:0,
+     tip:"SP 14U Body Contact (j)(k); body checking is step 4 and is introduced at 14U/U15, never earlier"},
+    {id:'h-steering',name:'Steering',type:'defensive',level:'intermediate',prereqs:['h-angling'],bv:0,
+     tip:'Use your body angle to herd the puck carrier toward the boards instead of letting them pick their own lane.'},
+    {id:'h-tap-check',name:'Tap Check',type:'defensive',level:'intermediate',prereqs:['h-stick-on-puck','h-angling'],bv:0,
+     tip:'From just behind their hip, give one short tap on the blade to knock the puck loose.'},
+    {id:'h-sweep-check',name:'Sweep Check',type:'defensive',level:'intermediate',prereqs:['h-poke-check'],bv:0,
+     tip:'Lay the stick flat and sweep a wide arc across the ice - it is big and slow, so time it rather than lunging.'},
+    {id:'h-stick-press',name:'Stick Press',type:'defensive',level:'advanced',prereqs:['h-stick-lift','h-steering'],bv:0,
+     tip:'Pin their blade to the ice with yours and hold it there until a teammate takes the puck.'},
+    {id:'h-pry-check',name:'Pry Check',type:'defensive',level:'advanced',prereqs:['h-stick-lift'],bv:0,
+     tip:'Hook your blade under theirs and pry it up and away to free the puck in a battle.'},
+    {id:'h-board-protection',name:'Protecting Yourself on the Boards',type:'defensive',level:'intermediate',prereqs:['h-ready-stance','h-hockey-stop'],bv:0,
+     tip:'Inside foot, knee and hip tight to the boards, elbow up on the top board, head high - lean into the contact, never duck.'},
+    {id:'h-deliver-body-contact',name:'Delivering Body Contact',type:'defensive',level:'advanced',prereqs:['h-angling','h-steering'],bv:0,
+     tip:'Use your body to take away their lane while you play the puck - this is blocking a path, not hitting anyone.'},
+    {id:'h-rubbing-out',name:'Rubbing Out',type:'defensive',level:'advanced',prereqs:['h-deliver-body-contact','h-angling'],bv:0,
+     tip:'Skate parallel to the puck carrier and gradually cut off their line of travel into the boards.'},
+    {id:'h-screen-out',name:'Screening Out',type:'defensive',level:'advanced',prereqs:['h-deliver-body-contact'],bv:0,
+     tip:'Hold your ground in front of your net so the opponent cannot get to the puck or the rebound.'},
+    {id:'h-pinning',name:'Pinning',type:'defensive',level:'advanced',prereqs:['h-rubbing-out'],bv:0,
+     tip:'Control the opponent against the boards with your top hand and hips while a teammate comes for the puck.'},
+    {id:'h-receive-body-check',name:'Receiving a Body Check',type:'defensive',level:'expert',prereqs:['h-shoulder-check','h-board-protection'],bv:0,
+     tip:'Turn your shoulder and hip toward the checker, tighten up, and lean in - never turn your back or duck.'},
+    {id:'h-body-check',name:'Delivering a Body Check',type:'defensive',level:'expert',prereqs:['h-receive-body-check','h-deliver-body-contact'],bv:0,
+     tip:'Legal only from 14U: trunk only, above the knees and at or below the shoulders, stick blade below the knees, and only on the puck carrier - never legal in Girls\'/Women\'s hockey at any age.'},
+    {id:'h-hip-check',name:'Hip Check',type:'defensive',level:'expert',prereqs:['h-body-check'],bv:0,
+     tip:'Drop low and turn your hip into the puck carrier along the boards - the hardest check to time, so learn it last.'},
+    {id:'h-contain-stall',name:'Containing / Stalling',type:'defensive',level:'expert',prereqs:['h-body-check','h-gap-control'],bv:0,
+     tip:'Sometimes the right play is not to hit - hold your gap and stall the rush until help arrives.'}
+  ],
+  goalie: [
+    {id:'g-stance',name:'Goalie Stance',type:'balance',level:'intermediate',prereqs:['f-dip'],bv:0,
+     tip:'Knees bent, weight on the balls of your feet, glove and blocker out in front, chest up and eyes on the puck.'},
+    {id:'g-fwd-bwd',name:'Forward & Backward Movement',type:'skating',level:'intermediate',prereqs:['g-stance'],bv:0,
+     tip:'Move out to challenge and back to your post without ever standing up out of your stance.'},
+    {id:'g-shuffle',name:'Parallel Shuffle',type:'skating',level:'intermediate',prereqs:['g-stance'],bv:0,
+     tip:'Short side steps with your feet staying square to the puck - no crossing over.'},
+    {id:'g-t-push',name:'Lateral T-Push',type:'skating',level:'intermediate',prereqs:['g-shuffle'],bv:0,
+     tip:'Point the lead skate where you are going, make a T with the back skate, and push once - hard.'},
+    {id:'g-c-cuts',name:'Goalie C-Cuts',type:'edge',level:'intermediate',prereqs:['g-stance'],bv:0,
+     tip:'Carve a C with one skate to glide in or out of the crease while staying set and square.'},
+    {id:'g-angles',name:'Angles & Squareness',type:'move',level:'intermediate',prereqs:['g-stance','g-shuffle'],bv:0,
+     tip:'Line your chest up with the puck so the shooter sees the same amount of net on both sides of you.'},
+    {id:'g-puck-tracking',name:'Puck Tracking (Eyes, Chin, Shoulders)',type:'balance',level:'intermediate',prereqs:['g-stance'],bv:0,
+     tip:'Lead every movement and every save with your eyes and chin, and watch the puck all the way into your body.'},
+    {id:'g-stick-save',name:'Stick Saves',type:'defensive',level:'intermediate',prereqs:['g-stance','g-puck-tracking'],bv:0,
+     tip:'Angle the blade so low shots deflect into the corner instead of back into the slot - let the puck come to you.'},
+    {id:'g-glove-save',name:'Glove & Blocker Saves',type:'defensive',level:'intermediate',prereqs:['g-stance','g-puck-tracking'],bv:0,
+     tip:'Catch with the glove out in front of you; angle the blocker down and to the corner.'},
+    {id:'g-body-save',name:'Body & Pad Saves',type:'defensive',level:'intermediate',prereqs:['g-stance'],bv:0,
+     tip:'Get your chest behind the puck and let it die in your body rather than bouncing off.'},
+    {id:'g-butterfly',name:'Butterfly',type:'defensive',level:'intermediate',prereqs:['g-stance','g-c-cuts'],bv:0,
+     tip:'Drop both knees together with the pads flat and the chest up - down to seal the ice, not down to sit.'},
+    {id:'g-recovery',name:'Butterfly Recovery',type:'balance',level:'intermediate',prereqs:['g-butterfly'],bv:0,
+     tip:'First leg up is the one furthest from the puck - get back to your stance before the next shot.'},
+    {id:'g-sliding-butterfly',name:'Sliding Butterfly',type:'defensive',level:'advanced',prereqs:['g-butterfly','g-t-push'],bv:0,
+     tip:'Push, then drop - one strong push while you go down so you arrive square and sealed, not sliding past the post.'},
+    {id:'g-rebound-control',name:'Rebound Control & Cradling',type:'defensive',level:'advanced',prereqs:['g-body-save','g-puck-tracking'],bv:0,
+     tip:'Smother what you can and steer the rest to the corners - track the rebound and start recovering the instant the puck hits you.'},
+    {id:'g-depth',name:'Depth & Crease Movement',type:'move',level:'advanced',prereqs:['g-angles'],bv:0,
+     tip:'Challenge out to take away net, then back in on a pass - how far out you play is as important as being square.'},
+    {id:'g-behind-net',name:'Stopping the Puck Behind the Net',type:'stick',level:'advanced',prereqs:['g-stance'],bv:0,
+     tip:'Get there first, stop the puck square for your defenceman, and get back to the post before the play turns.'},
+    {id:'g-screen-shots',name:'Tracking Through a Screen',type:'defensive',level:'advanced',prereqs:['g-puck-tracking','g-butterfly'],bv:0,
+     tip:'Find a lane around the screen instead of over it, and get set before the shot rather than guessing.'},
+    {id:'g-walkout-wraparound',name:'Walkouts & Wraparounds (Post Integration)',type:'move',level:'advanced',prereqs:['g-t-push','g-sliding-butterfly'],bv:0,
+     tip:'Seal the post with your skate and pad, then move with the puck around the net without leaving a gap behind you.'},
+    {id:'g-rvh',name:'Reverse-VH Post Play',type:'defensive',level:'expert',prereqs:['g-walkout-wraparound','g-sliding-butterfly'],bv:0,
+     tip:'Pad up the post, hands ready, and scan the ice in front of you before you transition out - use it for tight plays only, not as a default.'},
+    {id:'g-puck-handling',name:'Passing & Clearing (Forehand and Backhand)',type:'stick',level:'expert',prereqs:['g-behind-net'],bv:0,
+     tip:'Know where your outlet is before the puck arrives, and make the simple pass up the wall rather than the fancy one.'},
+    {id:'g-breakaways',name:'Breakaways',type:'move',level:'expert',prereqs:['g-depth','g-rebound-control'],bv:0,
+     tip:'Come out, match their speed backwards, and stay patient - make the shooter commit first.'},
+    {id:'g-line-rushes',name:'Line Rushes (Odd and Even)',type:'move',level:'expert',prereqs:['g-angles','g-depth'],bv:0,
+     tip:'Read who has the puck and who is the real threat on a 2-on-1 or 3-on-2, and take away the shooter while your D takes the pass.'},
+    {id:'g-dz-faceoffs',name:'Defensive-Zone Face-offs',type:'move',level:'expert',prereqs:['g-angles'],bv:0,
+     tip:'Set your depth and angle for the face-off dot before the puck drops, and be square for the quick shot off the draw.'},
+    {id:'g-communication',name:'Communication with Teammates',type:'move',level:'expert',prereqs:['g-dz-faceoffs'],bv:0,
+     tip:'You see the whole ice - call the puck, call the pressure, and tell your D who is coming.'}
   ]
 };
 
@@ -2134,7 +2214,26 @@ function updateProfileButton() {
   }
 }
 
-function getSkills() { return SKILLS[APP.discipline] || SKILLS.foundations; }
+// Every discipline in one place: its label, and the tree it builds on.
+// Goalies skate, so they inherit the foundations; foundations stands alone.
+const DISCIPLINES = {
+  foundations: { label: 'Foundations', base: null,          session: 'Foundations Practice' },
+  figure:      { label: 'Figure',      base: 'foundations', session: 'Freestyle' },
+  hockey:      { label: 'Hockey',      base: 'foundations', session: 'Hockey Practice' },
+  goalie:      { label: 'Goalie',      base: 'foundations', session: 'Goalie Practice' }
+};
+function discInfo(d) { return DISCIPLINES[d] || DISCIPLINES.foundations; }
+function skillsFor(d) {
+  const info = discInfo(d);
+  const base = info.base ? (SKILLS[info.base] || []) : [];
+  const own = SKILLS[d] || [];
+  const seen = new Set(), out = [];
+  base.concat(own).forEach(sk => { if (!seen.has(sk.id)) { seen.add(sk.id); out.push(sk); } });
+  return out;
+}
+function allSkillsEverywhere() { return Object.values(SKILLS).flat(); }
+
+function getSkills() { return skillsFor(APP.discipline); }
 function getSkillData(id) {
   if (!APP.skills[id]) APP.skills[id] = { attempts: 0, landed: 0 };
   return APP.skills[id];
@@ -2193,6 +2292,20 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 // ═══════════════════════════════════════════
 //  SKILL TREE
 // ═══════════════════════════════════════════
+// A short, sourced note per discipline — the things a parent or skater should
+// know before reading the tree, rather than a wall of locked cards.
+const DISCIPLINE_NOTES = {
+  goalie: 'USA Hockey rotates every player through goal at 8U and does not expect a full-time goalie before about 12–13, so goaltending starts at the intermediate tier. The skating skills below it are the same ones every skater learns.',
+  hockey: 'Checking is a four-step progression. Angling, stick checks and body contact are taught at every age; <strong>delivering a body check is legal only from 14U</strong>, and never in Girls\'/Women\'s hockey.'
+};
+function renderDisciplineNote() {
+  const el = document.getElementById('skillGuide');
+  if (!el) return;
+  const note = DISCIPLINE_NOTES[APP.discipline];
+  el.innerHTML = note ? `<div style="font-size:0.78rem;line-height:1.5">${note}</div>` : '';
+  el.style.display = note ? '' : 'none';
+}
+
 function switchTab(section) {
   const btn = document.querySelector('.nav-btn[data-section="' + section + '"]');
   if (btn) btn.click();
@@ -2239,7 +2352,7 @@ function renderSkillTree() {
   };
 
   const discLabel = document.getElementById('skillDiscLabel');
-  if (discLabel) discLabel.textContent = APP.discipline === 'hockey' ? 'Hockey Skating' : APP.discipline === 'foundations' ? 'Foundations' : 'Figure Skating';
+  if (discLabel) discLabel.textContent = discInfo(APP.discipline).label;
 
   let html = '';
   levels.forEach(lv => {
@@ -2284,6 +2397,7 @@ function renderSkillTree() {
   });
 
   document.getElementById('skillTree').innerHTML = html;
+  renderDisciplineNote();
 
 }
 
@@ -3019,7 +3133,7 @@ function isConfirmedTag(a) { return a.status !== 'suggested'; }
 function allTaggableSkills() {
   const disc = APP.discipline || 'foundations';
   const seen = new Set(), out = [];
-  (disc === 'foundations' ? SKILLS.foundations : SKILLS.foundations.concat(SKILLS[disc] || [])).forEach(sk => { if (!seen.has(sk.id)) { seen.add(sk.id); out.push(sk); } });
+  skillsFor(disc).forEach(sk => { if (!seen.has(sk.id)) { seen.add(sk.id); out.push(sk); } });
   return out;
 }
 function findSkill(id) { return Object.values(SKILLS).flat().find(s => s.id === id); }
@@ -3030,8 +3144,9 @@ function tagSkillNames(v) {
 }
 function fillSkillSelect(sel, selectedId, withBlank) {
   const disc = APP.discipline || 'foundations';
-  const groups = disc === 'foundations' ? [['Foundations', SKILLS.foundations]]
-    : [['Foundations', SKILLS.foundations], [disc === 'hockey' ? 'Hockey' : 'Figure', SKILLS[disc] || []]];
+  const info = discInfo(disc);
+  const groups = info.base ? [[discInfo(info.base).label, SKILLS[info.base] || []], [info.label, SKILLS[disc] || []]]
+                           : [[info.label, SKILLS[disc] || []]];
   sel.innerHTML = (withBlank ? '<option value="">Not sure / general practice</option>' : '') +
     groups.map(([label, list]) => `<optgroup label="${label}">` + list.map(sk => `<option value="${sk.id}"${sk.id === selectedId ? ' selected' : ''}>${escHtml(sk.name)}</option>`).join('') + '</optgroup>').join('');
 }
@@ -3399,7 +3514,7 @@ async function scanVideoWithAI() {
 
     // Step 2: Send frames to Claude Vision API via server
     const disc = APP.discipline || 'foundations';
-    const allSkills = disc === 'foundations' ? SKILLS.foundations : SKILLS.foundations.concat(SKILLS[disc] || []);
+    const allSkills = skillsFor(disc);
     const skillNames = allSkills.map(s => ({ id: s.id, name: s.name, type: s.type }));
 
     const results = await analyzeFramesWithAI(frames, skillNames, (pct, msg) => {
@@ -4106,7 +4221,7 @@ function renderAll() {
   document.getElementById('streakBadge').textContent=(APP.settings.streak||0)+' day streak';
   // Show stick button only for hockey
   const stickBtn = document.getElementById('stickAnnoBtn');
-  if (stickBtn) stickBtn.style.display = APP.discipline === 'hockey' ? '' : 'none';
+  if (stickBtn) stickBtn.style.display = (APP.discipline === 'hockey' || APP.discipline === 'goalie') ? '' : 'none';
   updateProfileButton();
   // Show upgrade banners for free users (only if function exists yet)
   if (typeof renderUpgradeBanners === 'function') renderUpgradeBanners();
@@ -4753,7 +4868,7 @@ createProfile = function() {
       APP.elementLogs.push({
         id: Date.now() + Math.random(),
         elementId: s.id,
-        elementName: (SKILLS.foundations.concat(SKILLS.figure).concat(SKILLS.hockey)).find(sk => sk.id === s.id)?.name || s.id,
+        elementName: allSkillsEverywhere().find(sk => sk.id === s.id)?.name || s.id,
         date: '2026-03-26',
         attempts: s.attempts,
         landed: s.landed,
@@ -4769,7 +4884,7 @@ createProfile = function() {
     title: 'Video Analysis Session — 4 Videos',
     date: '2026-03-26',
     duration: 6, // ~6 min total across 4 videos
-    type: APP.discipline === 'hockey' ? 'Hockey Practice' : APP.discipline === 'foundations' ? 'Foundations Practice' : 'Freestyle',
+    type: discInfo(APP.discipline).session,
     focus: 'Forward Skating, Gliding, Crossovers, Stopping',
     rating: 4,
     notes: 'Skills auto-detected by RinkBuddy AI from video analysis of IMG_9494, IMG_9495, IMG_9497, IMG_9498. Recorded at Henderson Silver Knights arena and Vegas rink.'
