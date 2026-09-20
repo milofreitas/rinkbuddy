@@ -67,8 +67,11 @@ const bladeEdge = (x, y, side) => {
     `</g></g>`;
 };
 
+// width + inline style so a diagram fills its container on its own: an SVG with
+// only a viewBox collapses to a few pixels inside a flex or grid parent.
 const svg = (id, body) =>
-  `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ice trace">` +
+  `<svg viewBox="0 0 200 120" width="100%" style="display:block;width:100%;height:auto" ` +
+  `xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ice trace">` +
   `<defs><marker id="ar-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto">` +
   `<path d="M0,0 L10,5 L0,10 z" fill="${ACC}"/></marker>` +
   `<marker id="ard-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">` +
