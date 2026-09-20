@@ -416,7 +416,8 @@
     <h1>Master the Ice.<br>Track Every Move.</h1>
     <p>The all-in-one skating performance platform. Record sessions, analyze video, track skills, and follow AI-powered training plans to reach your next level.</p>
     <div class="lp-hero-btns">
-      <a href="#lp-signup" class="lp-btn lp-btn-primary lp-btn-lg">Get Started Free</a>
+      <button class="lp-btn lp-btn-primary lp-btn-lg" onclick="enterLocalMode()">Start Free — No Account</button>
+      <a href="#lp-signup" class="lp-btn lp-btn-lg" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2)">Create an Account</a>
       <a href="#pricing" class="lp-btn lp-btn-pro lp-btn-lg">Go Pro — $9.99/mo</a>
       <button id="installBtn" class="lp-btn lp-btn-lg" onclick="installApp()" style="display:none;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);backdrop-filter:blur(8px);gap:8px">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -3130,6 +3131,17 @@ async function scanVideoWithAI() {
   const btn = document.getElementById('scanVideoBtn');
   const prog = document.getElementById('scanProgress');
 
+  // AI Scan runs on our servers, so it's the one thing that needs an account.
+  if (!CloudAccount.isLoggedIn()) {
+    prog.style.display = 'block';
+    prog.innerHTML = `<div class="scan-progress">
+      <div style="font-size:0.82rem;font-weight:600">AI Scan needs a free account</div>
+      <div class="scan-progress-text">Tagging skills by hand works without one, and stays on this device. Scanning runs on our servers.</div>
+      <button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="goToSignup()">Create a free account</button>
+    </div>`;
+    return;
+  }
+
   btn.disabled = true;
   btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin-icon" style="animation:spin 1s linear infinite"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg> Scanning...';
 
@@ -4043,9 +4055,11 @@ async function pullData() {
 
 function doLogout() {
   CloudAccount.clearSession();
+  leaveLocalMode();
   updateCloudBtn();
-  showToast('Logged out');
+  showToast('Logged out — your videos and progress stay on this device');
   closeModal('accountModal');
+  updateView();
 }
 
 function resetAllProgress() {
@@ -4081,7 +4095,7 @@ function updateCloudBtn() {
   } else {
     btn.style.background = '';
     btn.style.borderColor = '';
-    btn.title = 'Cloud Account';
+    btn.title = 'Create a free account to sync';
   }
 }
 
@@ -4113,8 +4127,26 @@ function showLandingView() {
   document.getElementById('landingPage').classList.add('active');
 }
 
+// ── Local mode: the app with no account ──
+// Videos, tags and progress live in this browser. Only AI Scan and syncing
+// between devices need an account.
+const LOCAL_MODE_KEY = 'rinkbuddy_local_mode';
+function isLocalMode() { try { return localStorage.getItem(LOCAL_MODE_KEY) === '1'; } catch (e) { return false; } }
+function enterLocalMode() {
+  try { localStorage.setItem(LOCAL_MODE_KEY, '1'); } catch (e) {}
+  updateView();
+  switchTab('video');
+  showToast('Everything saves on this device. Create an account any time to sync.');
+}
+function leaveLocalMode() { try { localStorage.removeItem(LOCAL_MODE_KEY); } catch (e) {} }
+function goToSignup() {
+  leaveLocalMode();
+  showLandingView();
+  window.location.hash = '#lp-signup';
+}
+
 function updateView() {
-  if (CloudAccount.isLoggedIn()) {
+  if (CloudAccount.isLoggedIn() || isLocalMode()) {
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname);
     showAppView();
     // Redraw charts after app becomes visible (canvas needs non-zero size)
@@ -4204,12 +4236,15 @@ function renderUpgradeBanners() {
   // Remove existing banners
   document.querySelectorAll('.upgrade-banner').forEach(b => b.remove());
   if (isProUser()) return;
-  // Add upgrade banner to dashboard
+  // Add banner to dashboard: local-only users get told where their data lives,
+  // signed-in free users get the upgrade pitch.
   const dash = document.getElementById('sec-dashboard');
   if (dash && !dash.querySelector('.upgrade-banner')) {
     const banner = document.createElement('div');
     banner.className = 'upgrade-banner';
-    banner.innerHTML = `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`;
+    banner.innerHTML = CloudAccount.isLoggedIn()
+      ? `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`
+      : `<div class="upgrade-banner-text"><strong>Saved on this device</strong> — your videos, tags and progress stay in this browser. Create a free account to sync to your other devices and use AI Scan.</div><button class="btn btn-sm" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));color:white;white-space:nowrap" onclick="goToSignup()">Create account</button>`;
     dash.insertBefore(banner, dash.firstChild);
   }
 }
