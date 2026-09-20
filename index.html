@@ -1887,6 +1887,7 @@ function loadData() {
   return {
     discipline: null,
     sessions: [], skills: {}, elementLogs: [],
+    tags: [], milestones: {}, skillNotes: {},
     competitions: [], goals: [], trainingPlans: [],
     settings: { streak: 0, lastSessionDate: null }
   };
@@ -2148,18 +2149,12 @@ function renderSkillTree() {
       const statusLabels = {mastered:'Mastered',learning:'Learning',new:'Ready',locked:'Locked'};
       const startHere = isStartHere(sk);
 
-      // Find best video clip for this skill
-      let bestClip = null;
-      videoFiles.forEach((v, vi) => {
-        v.annotations.filter(a => a.element === sk.id && isConfirmedTag(a)).forEach(a => {
-          if (!bestClip || a.quality > bestClip.quality) {
-            bestClip = { videoIdx: vi, time: a.time, quality: a.quality, blob: v._blob, url: v.url };
-          }
-        });
-      });
+      // Best saved still for this skill — comes from the durable record,
+      // so the card keeps its picture even after the video leaves the device.
+      const bestRec = tagRecords(sk.id).filter(t => t.thumb).sort((a, b) => b.quality - a.quality)[0];
 
       html += `<div class="skill-card ${status}" onclick="showSkillDetail('${sk.id}')" title="${sk.tip||''}">
-        ${bestClip ? `<div class="skill-card-thumb" id="thumb-${sk.id}"></div>` : ''}
+        ${bestRec ? `<div class="skill-card-thumb"><img src="${bestRec.thumb}" alt="${sk.name}"></div>` : ''}
         <div class="skill-card-body">
         ${startHere ? '<div class="start-here">START HERE</div>' : ''}
         ${startHere ? '<div style="height:10px"></div>' : ''}
@@ -2176,54 +2171,6 @@ function renderSkillTree() {
 
   document.getElementById('skillTree').innerHTML = html;
 
-  // Extract thumbnails for skill cards with video clips
-  requestAnimationFrame(() => {
-    const allSkills = getSkills();
-    allSkills.forEach(sk => {
-      const thumbEl = document.getElementById('thumb-' + sk.id);
-      if (!thumbEl) return;
-      let bestClip = null;
-      videoFiles.forEach(v => {
-        v.annotations.filter(a => a.element === sk.id && isConfirmedTag(a)).forEach(a => {
-          if (!bestClip || a.quality > bestClip.quality) {
-            bestClip = { time: a.time, blob: v._blob, url: v.url };
-          }
-        });
-      });
-      if (bestClip) {
-        extractFrameThumbnail(bestClip.blob || bestClip.url, bestClip.time, (dataUrl) => {
-          if (dataUrl) {
-            thumbEl.innerHTML = `<img src="${dataUrl}" alt="${sk.name}">`;
-          } else {
-            thumbEl.remove();
-          }
-        });
-      }
-    });
-  });
-
-  // skill guide
-  const totalSkills = skills.length;
-  const mastered = skills.filter(s => getStatus(s) === 'mastered').length;
-  const learning = skills.filter(s => getStatus(s) === 'learning').length;
-  const ready = skills.filter(s => getStatus(s) === 'new').length;
-  const guide = document.getElementById('skillGuide');
-
-  if (mastered === 0 && learning === 0) {
-    guide.innerHTML = `<div class="guide-step"><div class="guide-num">1</div><div>Look for skills marked <strong>"START HERE"</strong> — these are ready for you to begin practicing.</div></div>
-      <div class="guide-step"><div class="guide-num">2</div><div>Log your attempts using <strong>Quick Log</strong> below, or annotate them in your <strong>Videos</strong>.</div></div>
-      <div class="guide-step"><div class="guide-num">3</div><div>Once you hit <strong>80% success over 5+ attempts</strong>, a skill is "Mastered" and unlocks the next ones.</div></div>`;
-  } else {
-    guide.innerHTML = `<strong>${mastered}</strong> mastered, <strong>${learning}</strong> in progress, <strong>${ready}</strong> ready to start out of ${totalSkills} skills.
-      ${ready > 0 ? ` Look for <strong>"START HERE"</strong> badges on skills you're ready to learn next.` : ''}`;
-  }
-
-  // populate log dropdown
-  const sel = document.getElementById('logElement');
-  sel.innerHTML = '';
-  skills.filter(s => isUnlocked(s)).forEach(sk => {
-    sel.innerHTML += `<option value="${sk.id}">${sk.name}</option>`;
-  });
 }
 
 function showSkillDetail(id) {
@@ -2231,136 +2178,117 @@ function showSkillDetail(id) {
   if (!sk) return;
   const d = getSkillData(id);
   const status = getStatus(sk);
-  const rate = d.attempts > 0 ? Math.round((d.landed/d.attempts)*100) : 0;
-
-  // Find video clips for this skill
-  const clips = [];
-  videoFiles.forEach((v, vi) => {
-    v.annotations.filter(a => a.element === id && isConfirmedTag(a)).forEach(a => {
-      clips.push({ videoIdx: vi, videoName: v.name, time: a.time, quality: a.quality, note: a.note, url: v.url });
-    });
-  });
-  clips.sort((a, b) => b.quality - a.quality); // best quality first
-
+  const rate = d.attempts > 0 ? Math.round((d.landed / d.attempts) * 100) : 0;
   const guide = SKILL_GUIDES[id];
-  let html = `<div style="margin-bottom:12px">
-    <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
-      <span class="skill-status status-${status}" style="font-size:0.75rem">${status === 'mastered' ? 'Mastered' : status === 'learning' ? 'Learning' : status === 'new' ? 'Ready' : 'Locked'}</span>
-      <span style="font-size:1.4rem;font-weight:700;color:${rate>=80?'var(--success)':rate>=50?'var(--warning)':'var(--text-dim)'}">${d.attempts > 0 ? rate+'%' : '--'}</span>
-      <span style="font-size:0.8rem;color:var(--text-dim)">${d.attempts} attempts / ${d.landed} landed</span>
-    </div>
-    ${guide ? `<div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="font-size:0.78rem;font-weight:600;color:var(--accent);margin-bottom:6px">What it looks like:</div>
-      <div style="font-size:0.82rem;color:var(--text);margin-bottom:8px">${guide.visual}</div>
-      <div style="font-size:0.75rem;font-weight:600;color:var(--accent2);margin-bottom:4px">Key focus points:</div>
-      <ul style="font-size:0.78rem;color:var(--text-dim);padding-left:16px;margin-bottom:8px">${guide.focus.map(f=>'<li>'+f+'</li>').join('')}</ul>
-      ${guide.balance ? `<div style="font-size:0.75rem;padding:8px;background:rgba(251,191,36,0.1);border-radius:6px;border-left:3px solid var(--warning)"><strong style="color:var(--warning)">Balance:</strong> <span style="color:var(--text-dim)">${guide.balance}</span></div>` : ''}
-    </div>` : ''}
-    ${guide && guide.yt ? `<div style="margin-bottom:12px">
-      <div style="font-size:0.78rem;font-weight:600;color:var(--accent3);margin-bottom:8px">📺 Tutorial Video:</div>
-      <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:10px;overflow:hidden;background:#000">
-        <iframe src="https://www.youtube.com/embed/${guide.yt}?rel=0" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen loading="lazy"></iframe>
-      </div>
-    </div>` : ''}
-    ${sk.tip ? `<div style="font-size:0.82rem;color:var(--text-dim);padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);margin-bottom:12px"><strong>Tip:</strong> ${sk.tip}</div>` : ''}
-    ${sk.prereqs.length ? `<div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:8px">Prerequisites: ${sk.prereqs.map(p => getSkills().find(s=>s.id===p)?.name||p).join(', ')}</div>` : ''}
+  const recs = tagRecords(id);                       // durable: survives losing the video
+  const m = (APP.milestones || {})[id] || {};
+  const notes = (APP.skillNotes || {})[id] || {};
+  const fmtDate = ds => ds ? new Date(ds + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
+  const dots = q => { let o = ''; for (let i = 1; i <= 5; i++) o += `<span class="quality-dot ${i <= q ? (q >= 4 ? 'filled' : q >= 3 ? 'warn' : 'bad') : ''}"></span>`; return o; };
+  const thumb = (t, h) => t.thumb
+    ? `<img src="${t.thumb}" style="width:100%;height:${h};object-fit:cover;display:block">`
+    : `<div style="height:${h};display:flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--text-dim);font-size:0.7rem">no still</div>`;
+
+  let html = `<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <span class="skill-status status-${status}" style="font-size:0.75rem">${status === 'mastered' ? 'Mastered' : status === 'learning' ? 'Learning' : status === 'new' ? 'Ready' : 'Locked'}</span>
+    <span style="font-size:1.4rem;font-weight:700;color:${rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--text-dim)'}">${d.attempts > 0 ? rate + '%' : '--'}</span>
+    <span style="font-size:0.8rem;color:var(--text-dim)">${d.attempts} attempts / ${d.landed} landed &bull; ${recs.length} tagged clip${recs.length === 1 ? '' : 's'}</span>
   </div>`;
 
-  if (clips.length > 0) {
-    const best = clips[0];
-    const clipStart = Math.max(0, best.time - 1);
-    const clipEnd = best.time + 4;
-    const hasYT = guide && guide.yt;
-    html += `<div style="margin-bottom:12px">
-      <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px">${hasYT ? 'Compare: You vs. Tutorial' : status === 'mastered' ? 'Your best performance:' : 'Your clips:'}</div>
-      <div style="display:${hasYT?'grid':'block'};grid-template-columns:1fr 1fr;gap:8px">
-        <div>
-          ${hasYT?'<div style="font-size:0.68rem;color:var(--accent);font-weight:600;margin-bottom:4px">Your Clip</div>':''}
-          <video id="skillClipPlayer" src="${best.url}" controls playsinline style="width:100%;border-radius:8px;max-height:250px;background:#000"></video>
-          <div style="font-size:0.68rem;color:var(--text-dim);margin-top:3px">${best.videoName} — ${fmtTime(clipStart)}–${fmtTime(clipEnd)} Q${best.quality}/5</div>
-        </div>
-        ${hasYT ? `<div>
-          <div style="font-size:0.68rem;color:var(--accent3);font-weight:600;margin-bottom:4px">Reference</div>
-          <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:8px;overflow:hidden;background:#000">
-            <iframe src="https://www.youtube.com/embed/${guide.yt}?rel=0" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen loading="lazy"></iframe>
-          </div>
-        </div>` : ''}
+  // ── Milestones: the answer to "what did I actually learn, and when?" ──
+  html += `<div class="card-grid" style="margin-bottom:14px">
+    ${[['First tried', m.firstAttempt], ['First clean', m.firstClean], ['Mastered', m.mastered]].map(([label, val]) => `
+      <div class="stat-box"><div class="stat-value" style="font-size:0.9rem">${fmtDate(val) || '—'}</div><div class="stat-label">${label}</div></div>`).join('')}
+  </div>`;
+
+  // ── Then vs now ──
+  if (recs.length >= 2) {
+    const first = recs[0], last = recs[recs.length - 1];
+    const days = Math.round((new Date(last.date) - new Date(first.date)) / 86400000);
+    html += `<div style="margin-bottom:14px">
+      <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px">Then vs now${days > 0 ? ` <span style="font-weight:400;color:var(--text-dim)">— ${days} day${days === 1 ? '' : 's'} apart</span>` : ''}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[[first, 'First attempt'], [last, 'Latest']].map(([t, label]) => `
+          <div style="cursor:pointer;border-radius:8px;overflow:hidden;background:var(--surface2)" onclick="playTagRecord('${t.tagId}')">
+            <div style="font-size:0.68rem;color:var(--accent);font-weight:600;padding:5px 8px 3px">${label} &bull; ${fmtDate(t.date)}</div>
+            ${thumb(t, '120px')}
+            <div style="padding:5px 8px;font-size:0.68rem;color:var(--text-dim)">${dots(t.quality)}${t.clipDeleted ? ' &bull; clip deleted' : videoByRecord(t) ? '' : ' &bull; clip not on this device'}</div>
+          </div>`).join('')}
       </div>
     </div>`;
-    // Set video to exact clip segment and auto-stop at end
-    setTimeout(() => {
-      const vid = document.getElementById('skillClipPlayer');
-      if (vid) {
-        vid.currentTime = clipStart;
-        vid.play().catch(()=>{});
-        const cEnd = clipEnd, cStart = clipStart;
-        const stopHandler = () => {
-          if (vid.currentTime >= cEnd) { vid.pause(); vid.currentTime = cStart; }
-        };
-        vid.addEventListener('timeupdate', stopHandler);
-        vid._stopHandler = stopHandler;
-      }
-    }, 300);
+  }
 
-    if (clips.length > 1) {
-      html += `<div style="font-size:0.78rem;font-weight:600;margin-bottom:6px">All clips (${clips.length}):</div>`;
-      clips.forEach((cl, i) => {
-        const cs = Math.max(0, cl.time - 1), ce = cl.time + 4;
-        html += `<div class="annotation-item" onclick="playSkillClip(${cl.videoIdx},${cl.time})" style="cursor:pointer">
-          <span class="annotation-time">${fmtTime(cs)}–${fmtTime(ce)}</span>
-          <span style="font-size:0.78rem">${cl.videoName}</span>
-          <span style="font-size:0.72rem;color:var(--text-dim)">Q${cl.quality}${cl.note ? ' — '+cl.note : ''}</span>
-        </div>`;
-      });
-    }
-  } else {
+  // ── What it looks like (reference) ──
+  if (guide) {
+    html += `<div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--accent);margin-bottom:6px">What it looks like:</div>
+      <div style="font-size:0.82rem;margin-bottom:8px">${guide.visual}</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--accent2);margin-bottom:4px">Key focus points:</div>
+      <ul style="font-size:0.78rem;color:var(--text-dim);padding-left:16px;margin-bottom:8px">${guide.focus.map(f => '<li>' + f + '</li>').join('')}</ul>
+      ${guide.balance ? `<div style="font-size:0.75rem;padding:8px;background:rgba(251,191,36,0.1);border-radius:6px;border-left:3px solid var(--warning)"><strong style="color:var(--warning)">Balance:</strong> <span style="color:var(--text-dim)">${guide.balance}</span></div>` : ''}
+    </div>`;
+    if (guide.yt) html += `<div style="margin-bottom:12px">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--accent3);margin-bottom:8px">Tutorial</div>
+      <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:10px;overflow:hidden;background:#000">
+        <iframe src="https://www.youtube.com/embed/${guide.yt}?rel=0" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen loading="lazy"></iframe>
+      </div></div>`;
+  }
+  if (sk.tip) html += `<div style="font-size:0.82rem;color:var(--text-dim);padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);margin-bottom:12px"><strong>Tip:</strong> ${sk.tip}</div>`;
+
+  // ── Full history ──
+  html += `<div style="font-size:0.82rem;font-weight:600;margin:14px 0 8px">History (${recs.length})</div>`;
+  if (!recs.length) {
     html += `<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.82rem;background:var(--surface2);border-radius:8px">
-      No video clips yet. Record or upload yourself doing it and tag the moment.
-    </div>`;
+      Nothing recorded yet. Record or upload yourself doing it, then tag the moment — every tag is kept here with its date.</div>`;
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">' +
+      recs.slice().reverse().map(t => {
+        const gone = t.clipDeleted || !videoByRecord(t);
+        return `<div style="border-radius:8px;overflow:hidden;background:var(--surface2);cursor:${gone ? 'default' : 'pointer'}" ${gone ? '' : `onclick="playTagRecord('${t.tagId}')"`}>
+          ${thumb(t, '92px')}
+          <div style="padding:6px 8px">
+            <div style="font-size:0.72rem;font-weight:600">${fmtDate(t.date)}</div>
+            <div style="font-size:0.68rem;color:var(--text-dim);margin:2px 0">${dots(t.quality)} ${t.source === 'ai' ? '<span style="color:var(--success)">AI ✓</span>' : ''}</div>
+            ${t.note ? `<div style="font-size:0.68rem;color:var(--text-dim)">${escHtml(t.note)}</div>` : ''}
+            ${gone ? '<div style="font-size:0.64rem;color:var(--warning)">clip not on this device</div>' : ''}
+          </div></div>`;
+      }).join('') + '</div>';
   }
 
-  // Show thumbnail frames from AI-detected annotations
-  const frameClips = [];
-  videoFiles.forEach((v, vi) => {
-    v.annotations.filter(a => a.element === id && isConfirmedTag(a)).forEach(a => {
-      frameClips.push({ videoIdx: vi, videoName: v.name, time: a.time, quality: a.quality, note: a.note || '', blob: v._blob, url: v.url });
-    });
-  });
-  if (frameClips.length > 0) {
-    html += `<div style="margin-top:12px">
-      <div style="font-size:0.78rem;font-weight:600;margin-bottom:8px">Detected frames (${frameClips.length}):</div>
-      <div id="skillFrameGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px"></div>
-    </div>`;
-    // Extract thumbnails after render
-    setTimeout(() => {
-      const grid = document.getElementById('skillFrameGrid');
-      if (!grid) return;
-      frameClips.forEach((cl, i) => {
-        const card = document.createElement('div');
-        card.style.cssText = 'position:relative;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;aspect-ratio:16/9';
-        card.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:0.72rem">Loading...</div>`;
-        card.onclick = () => { switchTab('video'); selectVideo(cl.videoIdx); setTimeout(()=>{ const vp=document.getElementById('videoPlayer'); if(vp){vp.currentTime=cl.time;vp.play().catch(()=>{});} },300); closeModal('skillDetailModal'); };
-        grid.appendChild(card);
-        extractFrameThumbnail(cl.blob || cl.url, cl.time, (dataUrl) => {
-          if (dataUrl) {
-            card.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">
-              <div style="position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(transparent,rgba(0,0,0,0.8));font-size:0.68rem;color:#fff">
-                <div style="font-weight:600">${fmtTime(cl.time)}</div>
-                <div style="opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cl.note.replace(' [AI detected]','')}</div>
-              </div>`;
-          } else {
-            card.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:0.72rem;flex-direction:column;gap:2px">
-              <span>${fmtTime(cl.time)}</span><span style="opacity:0.6">${cl.videoName}</span></div>`;
-          }
-        });
-      });
-    }, 100);
-  }
+  // ── Notes: the part a person writes, and reads six months later ──
+  html += `<div style="margin-top:14px">
+    <div style="font-size:0.82rem;font-weight:600;margin-bottom:6px">My notes</div>
+    <textarea class="form-input" id="note-mine" rows="2" placeholder="What finally made it click?" style="resize:vertical">${escHtml(notes.mine || '')}</textarea>
+    <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="saveSkillNote('${id}','mine')">Save note</button>
+    <div style="font-size:0.82rem;font-weight:600;margin:12px 0 6px">Coach notes</div>
+    <textarea class="form-input" id="note-coach" rows="2" placeholder="What your coach told you to fix" style="resize:vertical">${escHtml(notes.coach || '')}</textarea>
+    <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="saveSkillNote('${id}','coach')">Save note</button>
+  </div>`;
 
-  html += `<button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="practiceSkill('${sk.id}')">Record / upload this skill</button>`;
+  html += `<button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="practiceSkill('${id}')">Record / upload this skill</button>`;
+
   document.getElementById('skillDetailTitle').textContent = sk.name;
   document.getElementById('skillDetailContent').innerHTML = html;
   document.getElementById('skillDetailModal').classList.add('active');
+}
+
+function saveSkillNote(id, which) {
+  APP.skillNotes = APP.skillNotes || {};
+  const n = APP.skillNotes[id] = APP.skillNotes[id] || {};
+  n[which] = document.getElementById('note-' + which).value;
+  n.updated = todayStr();
+  saveData(APP);
+  showToast('Note saved');
+}
+
+function playTagRecord(tagId) {
+  const t = (APP.tags || []).find(x => x.tagId === tagId);
+  if (!t) return;
+  const idx = videoFiles.findIndex(v => v.id === t.videoId);
+  if (idx < 0) return showToast('That clip is not on this device');
+  closeModal('skillDetailModal');
+  switchTab('video'); selectVideo(idx);
+  setTimeout(() => { videoPlayer.currentTime = Math.max(0, t.time - 1); videoPlayer.play().catch(() => {}); }, 400);
 }
 
 function playSkillClip(videoIdx, time) {
@@ -2631,6 +2559,8 @@ const VideoDB = {
       videoFiles.push(entry);
       if (!entry.fps) detectFps(entry, rec.blob);
     });
+    videoFiles.forEach(v => { if (v.annotations && v.annotations.length) syncTagsToApp(v); });
+    saveData(APP);
     renderVideoLibrary(); renderUploadArea();
     if (typeof renderDashboard === 'function') { renderDashboard(); renderSkillTree(); }
   } catch(e) { console.warn('Could not restore videos:', e); }
@@ -2894,7 +2824,7 @@ function deleteVideo(i) {
   const v = videoFiles[i];
   if (!confirm('Delete "' + v.name + '"?')) return;
   // Remove from IndexedDB
-  if (v.id) VideoDB.remove(v.id).catch(()=>{});
+  if (v.id) { VideoDB.remove(v.id).catch(()=>{}); (APP.tags || []).forEach(t => { if (t.videoId === v.id) t.clipDeleted = true; }); saveData(APP); }
   // Revoke blob URL
   if (v.url && v._urlCreated) URL.revokeObjectURL(v.url);
   videoFiles.splice(i, 1);
@@ -2993,6 +2923,77 @@ function practiceSkill(id) {
   document.getElementById('practiceCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ═══════════════════════════════════════════
+//  DURABLE SKILL RECORD
+//  Tags live on the video (IndexedDB, this device) AND as records in APP.tags,
+//  which syncs to the account. Lose the phone and the record survives: dates,
+//  quality, notes and a thumbnail. Only the full video is device-local.
+// ═══════════════════════════════════════════
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function ensureTagId(a) { if (!a.tagId) a.tagId = 'tg_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); return a.tagId; }
+
+function tagRecords(skillId) {
+  return (APP.tags || []).filter(t => t.skillId === skillId).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+}
+function videoByRecord(t) { return videoFiles.find(v => v.id === t.videoId); }
+
+function syncTagsToApp(v) {
+  APP.tags = (APP.tags || []).filter(t => t.videoId !== v.id);
+  v.annotations.filter(isConfirmedTag).forEach(a => {
+    ensureTagId(a);
+    APP.tags.push({
+      tagId: a.tagId, skillId: a.element, skillName: a.elementName,
+      date: a.date || todayStr(), createdAt: a.createdAt || Date.now(),
+      quality: a.quality, note: a.note || '', source: a.source || 'manual',
+      aiSkillId: a.aiSkillId || null, videoId: v.id, videoName: v.name,
+      time: a.time, fps: v.fps || null, thumb: a.thumb || null
+    });
+  });
+  updateMilestones();
+}
+
+function updateMilestones() {
+  APP.milestones = APP.milestones || {};
+  const bySkill = {};
+  (APP.tags || []).forEach(t => { (bySkill[t.skillId] = bySkill[t.skillId] || []).push(t); });
+  Object.entries(bySkill).forEach(([id, list]) => {
+    list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const m = APP.milestones[id] = APP.milestones[id] || {};
+    m.firstAttempt = m.firstAttempt || list[0].date;
+    const clean = list.find(t => t.quality >= 4);
+    if (clean && !m.firstClean) m.firstClean = clean.date;
+    const sk = findSkill(id);
+    if (sk && !m.mastered && getStatus(sk) === 'mastered') m.mastered = todayStr();
+  });
+}
+
+// Freeze a small still of the moment, so the record still shows something
+// after the video is gone from this device.
+function captureTagThumb(v, a) {
+  const src = v._blob || v.file || v.url;
+  if (a.thumb || !src) return;
+  extractFrameThumbnail(src, a.time, dataUrl => {
+    if (!dataUrl) return;
+    a.thumb = dataUrl;
+    if (v.id) VideoDB.updateAnnotations(v.id, v.annotations).catch(() => {});
+    const rec = (APP.tags || []).find(t => t.tagId === a.tagId);
+    if (rec) { rec.thumb = dataUrl; pruneThumbs(); saveData(APP); renderSkillTree(); }
+  }, 240, 0.55);
+}
+
+// Stills ride along in the synced account data, so keep the set bounded:
+// per skill keep the first, the best and the 8 most recent.
+function pruneThumbs() {
+  const bySkill = {};
+  (APP.tags || []).forEach(t => { if (t.thumb) (bySkill[t.skillId] = bySkill[t.skillId] || []).push(t); });
+  Object.values(bySkill).forEach(list => {
+    if (list.length <= 10) return;
+    list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const keep = new Set([list[0], list.slice().sort((a, b) => b.quality - a.quality)[0], ...list.slice(-8)]);
+    list.forEach(t => { if (!keep.has(t)) t.thumb = null; });
+  });
+}
+
 // Count a confirmed tag toward skill progress exactly once; reversible.
 function countTag(a) {
   if (a.logId || !a.element || !isConfirmedTag(a)) return;
@@ -3016,6 +3017,7 @@ function uncountTag(a) {
 function persistTags(v) {
   v.annotations.sort((a, b) => a.time - b.time);
   if (v.id) VideoDB.updateAnnotations(v.id, v.annotations).catch(() => {});
+  syncTagsToApp(v);
   saveData(APP);
   renderAnnotations(); renderVideoLibrary(); renderSkillTree(); renderDashboard();
 }
@@ -3052,8 +3054,10 @@ function saveAnnotation() {
     countTag(a);
     showToast('Tag updated');
   } else {
-    const a = Object.assign({ time: videoPlayer.currentTime, source: 'manual', status: 'confirmed' }, fields);
-    v.annotations.push(a); countTag(a);
+    const a = Object.assign({ time: videoPlayer.currentTime, source: 'manual', status: 'confirmed',
+      date: todayStr(), createdAt: Date.now() }, fields);
+    ensureTagId(a);
+    v.annotations.push(a); countTag(a); captureTagThumb(v, a);
     showToast(sk.name + ' tagged');
   }
   closeModal('annotationModal');
@@ -3063,7 +3067,8 @@ function saveAnnotation() {
 function confirmTag(i) {
   const v = videoFiles[activeVideoIdx], a = v.annotations[i];
   a.status = 'confirmed'; if (!a.aiSkillId) a.aiSkillId = a.element;
-  countTag(a); persistTags(v); showToast('Confirmed: ' + a.elementName);
+  a.date = a.date || todayStr(); a.createdAt = a.createdAt || Date.now(); ensureTagId(a);
+  countTag(a); captureTagThumb(v, a); persistTags(v); showToast('Confirmed: ' + a.elementName);
 }
 function deleteTag(i) {
   const v = videoFiles[activeVideoIdx], a = v.annotations[i];
@@ -3243,7 +3248,7 @@ async function extractVideoFrames(videoEntry, onProgress) {
   });
 }
 
-function extractFrameThumbnail(blobOrUrl, time, callback) {
+function extractFrameThumbnail(blobOrUrl, time, callback, maxW, quality) {
   const vid = document.createElement('video');
   vid.crossOrigin = 'anonymous';
   vid.muted = true;
@@ -3257,15 +3262,17 @@ function extractFrameThumbnail(blobOrUrl, time, callback) {
     clearTimeout(timeout);
     try {
       const c = document.createElement('canvas');
-      const scale = Math.min(1, 320 / vid.videoWidth);
+      const scale = Math.min(1, (maxW || 320) / vid.videoWidth);
       c.width = Math.round(vid.videoWidth * scale);
       c.height = Math.round(vid.videoHeight * scale);
       c.getContext('2d').drawImage(vid, 0, 0, c.width, c.height);
-      callback(c.toDataURL('image/jpeg', 0.7));
+      callback(c.toDataURL('image/jpeg', quality || 0.7));
     } catch(e) { callback(null); }
-    URL.revokeObjectURL(vid.src);
+    if (ownUrl) URL.revokeObjectURL(vid.src);   // never revoke a URL we were handed — it is shared with the player
   };
+  let ownUrl = false;
   if (blobOrUrl instanceof Blob) {
+    ownUrl = true;
     vid.src = URL.createObjectURL(blobOrUrl);
   } else {
     vid.src = blobOrUrl;
