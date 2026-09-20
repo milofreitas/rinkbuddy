@@ -22,7 +22,7 @@ The colour system has matching problems:
 
 - The palette is stock Tailwind (`sky-400`, `indigo-400`, `pink-400` on a navy base) with sky-to-indigo gradients on text and buttons. It reads as a generic AI startup — the aesthetic [research/05-demand-market.md](../../../research/05-demand-market.md) found adult skaters actively distrust, against a positioning of "progress journal + feedback between lessons".
 - White text on the primary button gradient scores **2.1:1 to 3.0:1**. WCAG AA needs 4.5:1 for text that size.
-- 247 hard-coded colour values — 107 hex (25 distinct) and 140 `rgba()` (66 distinct) — plus 53 gradients (43 carrying brand colour) and 7 gradient-text treatments, against only 8 named tokens.
+- 247 hard-coded colour values — 107 hex (33 distinct) and 140 `rgba()` (66 distinct) — plus 53 gradients (43 carrying brand colour) and 7 gradient-text treatments, against only 8 named tokens.
 - Dark mode only, with no light theme.
 
 ## 2. Decisions
