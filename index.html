@@ -6,17 +6,57 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="RinkBuddy">
-  <meta name="theme-color" content="#0b1120">
+  <meta name="theme-color" content="#F5F8FA">
+  <script>
+    (function () {
+      var stored = null;
+      try { stored = localStorage.getItem('rinkbuddy_theme'); } catch (e) {}
+      var system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      var mode = (stored === 'light' || stored === 'dark') ? stored : system;
+      document.documentElement.dataset.theme = mode;
+      window.setTheme = function (choice) {
+        try {
+          if (choice === 'system') localStorage.removeItem('rinkbuddy_theme');
+          else localStorage.setItem('rinkbuddy_theme', choice);
+        } catch (e) {}
+        var next = (choice === 'light' || choice === 'dark')
+          ? choice
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = next;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', next === 'dark' ? '#0B1826' : '#F5F8FA');
+      };
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+        var saved = null;
+        try { saved = localStorage.getItem('rinkbuddy_theme'); } catch (e) {}
+        if (!saved) window.setTheme('system');
+      });
+      if (mode === 'dark') {
+        document.addEventListener('DOMContentLoaded', function () {
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', '#0B1826');
+        });
+      }
+    })();
+  </script>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>RinkBuddy — Skating Performance Analyzer</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
-      --bg: #0b1120; --surface: #131b2e; --surface2: #1a2540;
-      --accent: #38bdf8; --accent2: #818cf8; --accent3: #f472b6;
-      --success: #34d399; --warning: #fbbf24; --danger: #f87171;
-      --text: #e2e8f0; --text-dim: #94a3b8; --border: #1e3a5f; --radius: 12px;
+      --bg: #F5F8FA; --surface: #FFFFFF; --surface2: #EDF2F6; --border: #E1E8ED;
+      --text: #0F2338; --text-dim: #566B7D;
+      --accent: #0F6E92; --accent-wash: #E1F1F8; --accent-text: #0A4A63; --on-accent: #FFFFFF;
+      --success: #1E7A4D; --warning: #9A6200; --danger: #B4362C;
+      --radius: 12px;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0B1826; --surface: #13293D; --surface2: #1B3550; --border: #24435E;
+      --text: #E8F1F7; --text-dim: #8FA8BC;
+      --accent: #4FC3E8; --accent-wash: #0F3448; --accent-text: #9FD8EC; --on-accent: #0F2338;
+      --success: #4FBE86; --warning: #E3A44A; --danger: #F08B80;
+      --radius: 12px;
     }
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}

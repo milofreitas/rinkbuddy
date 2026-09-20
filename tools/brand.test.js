@@ -72,3 +72,43 @@ test('parseThemes with compact dark theme block does not skip dark tokens', () =
   assert.strictEqual(themes.light['--bg'], '#F5F8FA');
   assert.strictEqual(themes.dark['--bg'], '#0B1826');
 });
+
+const fs = require('node:fs');
+const path = require('node:path');
+const INDEX = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+const TOKENS = [
+  '--bg', '--surface', '--surface2', '--border', '--text', '--text-dim',
+  '--accent', '--accent-wash', '--accent-text', '--on-accent',
+  '--success', '--warning', '--danger', '--radius',
+];
+
+test('both themes define exactly the same token names', () => {
+  const { light, dark } = parseThemes(INDEX);
+  assert.deepStrictEqual(Object.keys(light).sort(), TOKENS.slice().sort());
+  assert.deepStrictEqual(Object.keys(dark).sort(), TOKENS.slice().sort());
+});
+
+test('every text-on-background pair passes WCAG AA in both themes', () => {
+  const themes = parseThemes(INDEX);
+  const pairs = [
+    ['--text', '--bg'], ['--text', '--surface'], ['--text', '--surface2'],
+    ['--text-dim', '--bg'], ['--text-dim', '--surface'],
+    ['--on-accent', '--accent'], ['--accent-text', '--accent-wash'],
+    ['--success', '--bg'], ['--warning', '--bg'], ['--danger', '--bg'],
+    ['--success', '--surface'], ['--warning', '--surface'], ['--danger', '--surface'],
+  ];
+  for (const [name, theme] of Object.entries(themes)) {
+    for (const [fg, bg] of pairs) {
+      const ratio = contrastRatio(theme[fg], theme[bg]);
+      assert.ok(ratio >= 4.5,
+        `${name}: ${fg} (${theme[fg]}) on ${bg} (${theme[bg]}) is ${ratio.toFixed(2)}:1, needs 4.5`);
+    }
+  }
+});
+
+test('the theme is applied before first paint and can be overridden', () => {
+  assert.match(INDEX, /document\.documentElement\.dataset\.theme/);
+  assert.match(INDEX, /rinkbuddy_theme/);
+  assert.match(INDEX, /prefers-color-scheme:\s*dark/);
+});
