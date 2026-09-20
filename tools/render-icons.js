@@ -10,7 +10,27 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+// Resolved lazily so importing this file never throws, and overridable because the
+// whole point of generating icons from a script is that anyone can regenerate them.
+let chromePath = null;
+function chrome() {
+  if (chromePath) return chromePath;
+  const candidates = [
+    process.env.CHROME_PATH,
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ].filter(Boolean);
+  chromePath = candidates.find(c => fs.existsSync(c));
+  if (!chromePath) {
+    throw new Error(
+      'Chrome or Chromium not found, so the icons cannot be rendered.\n' +
+      'Set CHROME_PATH to the binary. Tried:\n  ' + candidates.join('\n  '));
+  }
+  return chromePath;
+}
 const REPO = path.join(__dirname, '..');
 const BRAND = path.join(REPO, 'brand');
 const NAVY = '#0F2338';
@@ -34,7 +54,7 @@ function render({ out, width, height, background, mark, markScale, transparent =
   ];
   if (transparent) args.push('--default-background-color=00000000');
   args.push(tmp);
-  execFileSync(CHROME, args, { stdio: 'ignore' });
+  execFileSync(chrome(), args, { stdio: 'ignore' });
   fs.unlinkSync(tmp);
   console.log(`wrote ${out} (${width}x${height})`);
 }
