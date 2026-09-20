@@ -23,7 +23,7 @@
           ? choice
           : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.dataset.theme = next;
-        if (typeof drawRadarChart === 'function') requestAnimationFrame(drawRadarChart);
+        if (typeof redrawThemedCharts === 'function') requestAnimationFrame(redrawThemedCharts);
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', next === 'dark' ? '#0B1826' : '#F5F8FA');
       };
@@ -4023,6 +4023,16 @@ function drawCompChart() {
   });
 }
 
+// Every canvas whose fillStyle/strokeStyle reads a live token, redrawn together: on
+// window resize (canvas sizing depends on layout) and on theme change (token() resolves
+// to the new theme's colours only once something re-runs the draw call — a canvas keeps
+// the pixels it was painted with otherwise). Add new theme-dependent charts here so
+// neither call site has to be remembered separately.
+function redrawThemedCharts() {
+  drawRadarChart();
+  drawCompChart();
+}
+
 // ═══════════════════════════════════════════
 //  STREAK & UTILS
 // ═══════════════════════════════════════════
@@ -4734,7 +4744,7 @@ renderAll();
 requestDurableStorage();
 // Check subscription status on page load (in case tier changed server-side)
 if (CloudAccount.isLoggedIn()) checkSubscriptionStatus();
-window.addEventListener('resize',()=>{drawRadarChart();drawCompChart();});
+window.addEventListener('resize', redrawThemedCharts);
 
 // PWA Service Worker
 if ('serviceWorker' in navigator) {
