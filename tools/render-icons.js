@@ -60,18 +60,18 @@ function render({ out, width, height, background, mark, markScale, transparent =
 }
 
 const WEB = [
-  { out: 'favicon-32.png', width: 32, height: 32, background: NAVY, mark: 'rinkbuddy-skate-simple.svg', markScale: 0.82 },
-  { out: 'favicon-16.png', width: 16, height: 16, background: NAVY, mark: 'rinkbuddy-skate-simple.svg', markScale: 0.86 },
-  { out: 'apple-touch-icon-180.png', width: 180, height: 180, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.78 },
-  { out: 'icon-192.png', width: 192, height: 192, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.78 },
-  { out: 'icon-512.png', width: 512, height: 512, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.78 },
+  { out: 'favicon-32.png', width: 32, height: 32, background: NAVY, mark: 'rinkbuddy-skater-simple.svg', markScale: 0.82 },
+  { out: 'favicon-16.png', width: 16, height: 16, background: NAVY, mark: 'rinkbuddy-skater-simple.svg', markScale: 0.86 },
+  { out: 'apple-touch-icon-180.png', width: 180, height: 180, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.78 },
+  { out: 'icon-192.png', width: 192, height: 192, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.78 },
+  { out: 'icon-512.png', width: 512, height: 512, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.78 },
   // Maskable: Android crops to a circle, so the mark sits inside the 80% safe zone.
-  { out: 'icon-maskable-512.png', width: 512, height: 512, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.58 },
-  { out: 'og-image.png', width: 1200, height: 630, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.42 },
+  { out: 'icon-maskable-512.png', width: 512, height: 512, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.58 },
+  { out: 'og-image.png', width: 1200, height: 630, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.42 },
 ];
 
 // favicon.svg has to stay a vector (browsers prefer it over the PNG favicons), but the
-// brand/rinkbuddy-skate-simple.svg master is frost-on-transparent — it's meant to be
+// brand/rinkbuddy-skater-simple.svg master is frost-on-transparent — it's meant to be
 // composited onto a navy surface by whatever uses it, the same way the PNG favicons get
 // their navy field from render()'s `background` box. Copying the master verbatim skipped
 // that compositing step, so the tab icon was frost-on-nothing: invisible on a light tab
@@ -79,10 +79,10 @@ const WEB = [
 // as a small SVG document instead of a raster, reusing markScale from the favicon-32 job
 // above so the vector and raster favicons read as the same icon.
 function faviconSvg() {
-  const master = fs.readFileSync(path.join(BRAND, 'rinkbuddy-skate-simple.svg'), 'utf8');
+  const master = fs.readFileSync(path.join(BRAND, 'rinkbuddy-skater-simple.svg'), 'utf8');
   const viewBox = /viewBox="([^"]+)"/.exec(master);
   const inner = /<svg[^>]*>([\s\S]*)<\/svg>/.exec(master);
-  if (!viewBox || !inner) throw new Error('rinkbuddy-skate-simple.svg is not the shape faviconSvg() expects');
+  if (!viewBox || !inner) throw new Error('rinkbuddy-skater-simple.svg is not the shape faviconSvg() expects');
   const markScale = WEB.find(j => j.out === 'favicon-32.png').markScale;
   const size = 100;
   const markSize = size * markScale;
@@ -103,9 +103,9 @@ function web() {
 const IOS = 'ios/App/App/Assets.xcassets';
 
 function ios() {
-  render({ out: `${IOS}/AppIcon.appiconset/AppIcon-512@2x.png`, width: 1024, height: 1024, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.78 });
+  render({ out: `${IOS}/AppIcon.appiconset/AppIcon-512@2x.png`, width: 1024, height: 1024, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.78 });
   for (const name of ['splash-2732x2732.png', 'splash-2732x2732-1.png', 'splash-2732x2732-2.png']) {
-    render({ out: `${IOS}/Splash.imageset/${name}`, width: 2732, height: 2732, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.26 });
+    render({ out: `${IOS}/Splash.imageset/${name}`, width: 2732, height: 2732, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.26 });
   }
 }
 
@@ -125,7 +125,7 @@ const DENSITIES = [
 // farthest-opaque-px to half-canvas ~0.596-0.603 throughout) — a real buffer, and geometry,
 // not a rasterisation accident. Re-verify by re-measuring if this artwork or canvas size
 // ever changes.
-const ADAPTIVE_SCALE = 0.48;
+const ADAPTIVE_SCALE = 0.57;
 const SPLASHES = [
   ['drawable', 480, 320], ['drawable-land-mdpi', 480, 320], ['drawable-land-hdpi', 800, 480],
   ['drawable-land-xhdpi', 1280, 720], ['drawable-land-xxhdpi', 1600, 960], ['drawable-land-xxxhdpi', 1920, 1280],
@@ -136,7 +136,7 @@ const SPLASHES = [
 function android() {
   for (const d of DENSITIES) {
     for (const name of ['ic_launcher.png', 'ic_launcher_round.png']) {
-      render({ out: `${ANDROID}/mipmap-${d.name}/${name}`, width: d.legacy, height: d.legacy, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.74 });
+      render({ out: `${ANDROID}/mipmap-${d.name}/${name}`, width: d.legacy, height: d.legacy, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.74 });
     }
     // Adaptive foreground: transparent, and scaled so the mark's INK fits the 66dp safe
     // CIRCLE. Do not reason from the bounding box: markScale sizes the artwork's square
@@ -144,11 +144,11 @@ function android() {
     // diameter 61%, which is how the blade's toe ended up clipped by Pixel's round mask.
     // Derive the scale from the measured ink radius: render, find the farthest opaque
     // pixel from centre, and scale until that radius is <= 132px on the 432px canvas.
-    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_foreground.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: ADAPTIVE_SCALE, transparent: true });
-    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_monochrome.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: ADAPTIVE_SCALE, transparent: true });
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_foreground.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skater.svg', markScale: ADAPTIVE_SCALE, transparent: true });
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_monochrome.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skater.svg', markScale: ADAPTIVE_SCALE, transparent: true });
   }
   for (const [dir, w, h] of SPLASHES) {
-    render({ out: `${ANDROID}/${dir}/splash.png`, width: w, height: h, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.3 });
+    render({ out: `${ANDROID}/${dir}/splash.png`, width: w, height: h, background: NAVY, mark: 'rinkbuddy-skater.svg', markScale: 0.3 });
   }
 }
 
