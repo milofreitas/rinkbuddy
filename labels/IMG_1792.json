@@ -4,37 +4,42 @@
   "skater": "milo",
   "discipline": "foundations",
   "camera": {
-    "fps": 120,
+    "fps": 119.94,
     "resolution": "3840x2160",
-    "distance_m": 8,
-    "angle": "follow",
     "handheld": true,
-    "rotation_tag_wrong": true,
-    "correct_rotation": 180
+    "rotation_note": "file is tagged 90 deg but is really landscape upside-down; decode with -display_rotation 0 then hflip,vflip"
   },
+  "usable_windows": [
+    [
+      46,
+      80
+    ]
+  ],
   "events": [
     {
-      "t_start": 50.0,
-      "t_end": 54.0,
-      "skill_id": "f-fwd-stroke",
-      "skill": "Forward Stroking/Skating",
+      "t_start": 58.4,
+      "t_end": 60.3,
+      "skill_id": "f-fwd-stroking",
+      "skill": "Forward stroking",
       "outcome": "clean",
-      "quality": 3,
-      "cues": "alternating side pushes with glide between them, upright posture, moving left across frame",
+      "quality": 4,
+      "cues": "clean side-on view: alternating pushes with the free leg extending behind, knee bend through each push, upper body upright and quiet",
+      "confidence": "high",
       "labeled_by": "claude",
-      "confidence": "medium"
+      "clip": "clips/fwd-stroking_1792_58.4s.mp4"
     },
     {
-      "t_start": 56.0,
-      "t_end": 60.0,
-      "skill_id": "f-fwd-stroke",
-      "skill": "Forward Stroking/Skating",
+      "t_start": 68.4,
+      "t_end": 70.3,
+      "skill_id": "f-fwd-stroking",
+      "skill": "Forward stroking",
       "outcome": "clean",
       "quality": 3,
-      "cues": "continues stroking across the frame, wider stance, camera panning with him",
+      "cues": "same drill further from camera; strokes shorter, less extension than the 58s pass",
+      "confidence": "medium",
       "labeled_by": "claude",
-      "confidence": "medium"
+      "clip": "clips/fwd-stroking_1792_68.4s.mp4"
     }
   ],
-  "notes": "Scanned at 0.5 fps over the whole clip and 2 fps over 48-72 s, with --rotate 180 (the file's 90 degree tag is wrong). Lens blocked 0-12 s. Busy public session with a kids' learn-to-skate class in frame throughout. This is general skating, not a drill: no repetitions of a named skill, so the boundaries above are approximate and both events need Milo's confirmation before they count as gold. Nothing else in this clip is labelable."
+  "verdict": "Two usable forward-stroking examples. No crossovers, stops or turns performed in this clip."
 }

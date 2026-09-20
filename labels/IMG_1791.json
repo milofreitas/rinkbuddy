@@ -76,7 +76,8 @@
       "quality": 3,
       "cues": "upright, small steps, arms low; no clear stroke extension",
       "confidence": "medium",
-      "labeled_by": "claude"
+      "labeled_by": "claude",
+      "clip": "clips/fwd-skating_1791_25.3s.mp4"
     },
     {
       "t_start": 26.3,
@@ -94,24 +95,26 @@
       "t_end": 104.0,
       "skill_id": "f-fwd-swizzle",
       "skill": "Forward swizzles (lemons)",
-      "outcome": "clean",
-      "quality": 3,
-      "cues": "faces camera, travels forward; feet open to a wide V then draw back together, repeated; arms come out wide at 103.3-103.5 for balance; knees only lightly bent",
+      "outcome": "shaky",
+      "quality": 2,
+      "cues": "feet open/close but balance is lost mid-sequence \u2014 arms fly out wide at 103.3-103.5 and the rhythm breaks; do not use as the reference example",
       "confidence": "medium",
       "labeled_by": "claude",
-      "coaching": "deeper knee bend and heels pressing out would make the lemons rounder; arms should stay steady at waist height rather than flying out"
+      "coaching": "deeper knee bend and heels pressing out would make the lemons rounder; arms should stay steady at waist height rather than flying out",
+      "clip": "clips/swizzles_shaky_1791_102.4s.mp4"
     },
     {
-      "t_start": 122.2,
-      "t_end": 123.5,
+      "t_start": 121.6,
+      "t_end": 124.4,
       "skill_id": "f-fwd-swizzle",
       "skill": "Forward swizzles (lemons)",
       "outcome": "clean",
-      "quality": 3,
-      "cues": "clearest example in the clip: 3-4 open/close cycles traveling toward the camera, feet symmetric, upper body quiet, hands held in front",
+      "quality": 4,
+      "cues": "best swizzle sequence in all footage: 4+ open/close cycles traveling toward camera, symmetric feet, quiet upper body, hands steady in front",
       "confidence": "high",
       "labeled_by": "claude",
-      "coaching": "good symmetry; push out through the heels and bend the knees more to widen each lemon"
+      "coaching": "good symmetry; push out through the heels and bend the knees more to widen each lemon",
+      "clip": "clips/swizzles_best_1791_121.6s.mp4"
     }
   ],
   "observations": [

@@ -36,7 +36,8 @@
       "cues": "slow rotation while gliding, feet stay together, upright posture, no visible edge change; one hand holds the phone which hides the right arm",
       "confidence": "low",
       "note": "could be an intentional two-foot turn or just turning around to talk",
-      "labeled_by": "claude"
+      "labeled_by": "claude",
+      "clip": "clips/two-foot-turn_1787_10.2s.mp4"
     },
     {
       "t_start": 25.4,
@@ -47,7 +48,8 @@
       "quality": 3,
       "cues": "travels away from camera with back turned, then rotates to face camera with knees bent; feet appear to stay on the ice throughout",
       "confidence": "low",
-      "labeled_by": "claude"
+      "labeled_by": "claude",
+      "clip": "clips/transition-bwd-fwd_1787_25.2s.mp4"
     }
   ],
   "verdict": "Best clip of the batch: landscape, subject 50-70% of frame. Two real transitions captured."
