@@ -58,3 +58,17 @@ test('pngInfo reads dimensions and colour type from the IHDR chunk', () => {
   assert.strictEqual(info.height, 1);
   assert.strictEqual(typeof info.colourType, 'number');
 });
+
+test('blockAfter handles compact CSS with no space before brace', () => {
+  const html = '<style>:root{--bg:#F5F8FA;}.x{color:#ff0000;}</style>';
+  const found = colourLiterals(html, []);
+  // Token colours must not leak through — only the .x rule's colour should be found
+  assert.deepStrictEqual(found, ['#ff0000']);
+});
+
+test('parseThemes with compact dark theme block does not skip dark tokens', () => {
+  const html = '<style>:root{--bg:#F5F8FA;}:root[data-theme="dark"]{--bg:#0B1826;}</style>';
+  const themes = parseThemes(html);
+  assert.strictEqual(themes.light['--bg'], '#F5F8FA');
+  assert.strictEqual(themes.dark['--bg'], '#0B1826');
+});

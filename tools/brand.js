@@ -29,11 +29,12 @@ function contrastRatio(a, b) {
 }
 
 function blockAfter(html, selector) {
-  const start = html.indexOf(selector);
-  if (start === -1) return '';
-  const open = html.indexOf('{', start);
+  const regex = new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\{');
+  const match = regex.exec(html);
+  if (!match) return '';
+  const open = match.index + match[0].length - 1;
   const close = html.indexOf('}', open);
-  if (open === -1 || close === -1) return '';
+  if (close === -1) return '';
   return html.slice(open + 1, close);
 }
 
@@ -47,14 +48,14 @@ function parseTokens(block) {
 
 function parseThemes(html) {
   return {
-    light: parseTokens(blockAfter(html, ':root {')),
-    dark: parseTokens(blockAfter(html, ':root[data-theme="dark"] {')),
+    light: parseTokens(blockAfter(html, ':root')),
+    dark: parseTokens(blockAfter(html, ':root[data-theme="dark"]')),
   };
 }
 
 function stripTokenBlocks(html) {
   let out = html;
-  for (const selector of [':root {', ':root[data-theme="dark"] {']) {
+  for (const selector of [':root', ':root[data-theme="dark"]']) {
     const block = blockAfter(out, selector);
     if (block) out = out.replace(block, '');
   }
