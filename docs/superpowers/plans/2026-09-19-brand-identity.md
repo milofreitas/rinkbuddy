@@ -38,7 +38,7 @@
 | `tools/render-icons.js` | Generates every raster icon from the SVG masters via headless Chrome. |
 | `favicon.svg`, `favicon-32.png`, `favicon-16.png`, `apple-touch-icon-180.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `og-image.png` | Web and PWA icons, served from the repo root |
 
-**Modified:** `index.html` (tokens, theme switching, three inline logos, `generateIcon()` removal, 218 colour literals), `manifest.json`, `capacitor.config.json`, `sw.js`, `build.sh`, the iOS asset catalogue and `LaunchScreen.storyboard`, the Android mipmaps, splash drawables, `ic_launcher_background.xml` and `mipmap-anydpi-v26/ic_launcher.xml`.
+**Modified:** `index.html` (tokens, theme switching, three inline logos, `generateIcon()` removal, 247 colour literals), `manifest.json`, `capacitor.config.json`, `sw.js`, `build.sh`, the iOS asset catalogue and `LaunchScreen.storyboard`, the Android mipmaps, splash drawables, `ic_launcher_background.xml` and `mipmap-anydpi-v26/ic_launcher.xml`.
 
 **Deleted:** `icon-192.svg`, `icon-512.svg` (the old mark), and the same two files under `www/`.
 
@@ -133,7 +133,7 @@ Create `tools/brand.js`:
 ```js
 'use strict';
 
-const HEX = /(?<![&\w])#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\b(?!;)/g;
+const HEX = /(?<![&\w])#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\b/g;
 const RGBA = /\brgba?\([^)]*\)/g;
 const GRADIENT = /(?:linear|radial|conic)-gradient\((?:[^()]|\([^()]*\))*\)/g;
 
@@ -439,7 +439,7 @@ git commit -m "Add a light and dark toggle to the app header"
 
 ---
 
-### Task 4: Migrate the stylesheet colours (159 literals)
+### Task 4: Migrate the stylesheet colours (179 literals)
 
 **Files:**
 - Modify: `index.html` — the `<style>` block, from `*{margin:0` down to the end of the landing-page CSS
@@ -455,8 +455,8 @@ Append to `tools/brand.test.js`:
 
 ```js
 const GOOGLE_BRAND = ['#4285f4', '#34a853', '#fbbc05', '#ea4335'];
-// Ratchet: this number only ever goes down. Task 4 → 59, Task 5 → 43, Task 6 → 0.
-const MAX_LITERALS = 59;
+// Ratchet: this number only ever goes down. Task 4 → 60, Task 5 → 45, Task 6 → 0.
+const MAX_LITERALS = 60;
 
 test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
   const found = colourLiterals(INDEX, GOOGLE_BRAND);
@@ -468,7 +468,7 @@ test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL — about 214 literals against a budget of 59.
+Expected: FAIL — about 239 literals against a budget of 60.
 
 - [ ] **Step 3: Migrate the stylesheet**
 
@@ -502,7 +502,7 @@ Rules while migrating:
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `node --test tools/brand.test.js`
-Expected: PASS at 59 or fewer literals.
+Expected: PASS at 60 or fewer literals.
 
 - [ ] **Step 5: Look at every screen in both themes**
 
@@ -517,7 +517,7 @@ git commit -m "Move the stylesheet onto colour tokens and drop the gradients"
 
 ---
 
-### Task 5: Migrate the landing-page markup (16 literals)
+### Task 5: Migrate the landing-page markup (15 literals)
 
 **Files:**
 - Modify: `index.html` — inline `style="…"` attributes inside `<div id="landingPage">`
@@ -529,12 +529,12 @@ git commit -m "Move the stylesheet onto colour tokens and drop the gradients"
 
 - [ ] **Step 1: Lower the budget**
 
-In `tools/brand.test.js`, change `const MAX_LITERALS = 59;` to `const MAX_LITERALS = 43;`.
+In `tools/brand.test.js`, change `const MAX_LITERALS = 60;` to `const MAX_LITERALS = 45;`.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL at about 59 against a budget of 43.
+Expected: FAIL at about 60 against a budget of 45.
 
 - [ ] **Step 3: Migrate the inline styles**
 
@@ -546,7 +546,7 @@ Replace each inline colour in the landing markup with the matching token, using 
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `node --test tools/brand.test.js`
-Expected: PASS at 43 or fewer.
+Expected: PASS at 45 or fewer.
 
 - [ ] **Step 5: Commit**
 
@@ -557,7 +557,7 @@ git commit -m "Move the landing page markup onto colour tokens"
 
 ---
 
-### Task 6: Migrate the app markup and script colours (43 literals)
+### Task 6: Migrate the app markup and script colours (45 literals)
 
 **Files:**
 - Modify: `index.html` — inline styles in the app markup, and colours set from JavaScript (search for `.style.color`, `.style.background`, `fillStyle`, `strokeStyle`)
@@ -585,7 +585,7 @@ test('no gradient text remains', () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL on all three: about 43 literals, some gradients, some gradient text.
+Expected: FAIL on all three: about 45 literals, some gradients, some gradient text.
 
 - [ ] **Step 3: Migrate the remaining markup and script colours**
 
