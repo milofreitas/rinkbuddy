@@ -219,6 +219,19 @@ coaches**: it resolves the circumvention question completely (the only party wit
 standing has consented), gives a warranty of title that CC BY explicitly refuses,
 and comes with authoritative labels attached.
 
+### Two loose ends worth a look
+
+- **`Mercity/Figure-Skating-Classification-Data`** on Hugging Face: 5,405
+  skeleton sequences across 64 figure-skating element classes, in the same
+  COCO 17-keypoint format we'd use, tagged MIT. It is the closest public thing to
+  our task carrying a permissive tag. Treat the tag with suspicion — the
+  provenance is undocumented and it looks derived from FSD-10 or MMFS skeletons,
+  which an uploader cannot MIT-license. Evaluate it technically; don't rely on
+  the label legally.
+- A correction worth knowing because it is widely repeated: **FSD-10 is not CC BY
+  4.0.** That string is its Jekyll blog theme's footer, covering the blog posts.
+  The dataset carries no licence at all.
+
 **Two questions for a lawyer before we scale:** whether skeletons derived from
 copyrighted footage are themselves encumbered — load-bearing for every skating
 dataset in existence — and whether ShareAlike attaches to model weights, which
