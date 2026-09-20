@@ -24,6 +24,10 @@ Read this, then `research/README.md` (8 research reports + converging plan).
 - `FILMING-GUIDE.md` = what batch 1 taught us (framing, clothing, shot list). Keep it updated after every batch.
 - Batch 1 yield: ~3 s of labelable skill from ~8 min of footage. Two clean forward-swizzle sequences in IMG_1791.
 
+## Decisions
+- 2026-09-19: target BOTH kids (parents pay) and teens. The demand-test page gets a parent variant and a teen variant, same product, same $59/yr founding pre-order. Adults stay a secondary audience. Rationale in research/08 (video self-modelling works best ~ages 9-17; under-13 needs COPPA consent; parents spend ~$1,016/child/yr).
+- 2026-09-19: clips of Milo in clips/ are committed to the PUBLIC repo (he approved). sessions/ is gitignored.
+
 ## Next up (from research)
 1. Phone checks by Milo: camera shows 60 fps? Imported iPhone Slo-Mo shows "Slo-mo 240 fps" (if 30 → Photos picker is transcoding).
 2. AI v1: motion-peak bursts at 12–15 fps + skater crop + cached guide + "unsure" output (research/03 §v1). Cuts cost ~$0.75–1.30 → ~$0.25–0.45/min.

@@ -1,0 +1,1089 @@
+{
+ "foundations": [
+  {
+   "id": "f-fall-getup",
+   "name": "Falling & Getting Up",
+   "type": "balance",
+   "level": "beginner",
+   "prereqs": []
+  },
+  {
+   "id": "f-march",
+   "name": "Marching on Ice",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-fall-getup"
+   ]
+  },
+  {
+   "id": "f-2ft-glide",
+   "name": "Two-Foot Glide",
+   "type": "balance",
+   "level": "beginner",
+   "prereqs": [
+    "f-march"
+   ]
+  },
+  {
+   "id": "f-1ft-glide",
+   "name": "One-Foot Glide",
+   "type": "balance",
+   "level": "beginner",
+   "prereqs": [
+    "f-2ft-glide"
+   ]
+  },
+  {
+   "id": "f-dip",
+   "name": "Dip",
+   "type": "balance",
+   "level": "beginner",
+   "prereqs": [
+    "f-2ft-glide"
+   ]
+  },
+  {
+   "id": "f-fwd-swizzle",
+   "name": "Forward Swizzles",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-2ft-glide"
+   ]
+  },
+  {
+   "id": "f-bwd-swizzle",
+   "name": "Backward Swizzles",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-swizzle"
+   ]
+  },
+  {
+   "id": "f-fwd-stroke",
+   "name": "Forward Stroking/Skating",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-swizzle"
+   ]
+  },
+  {
+   "id": "f-snowplow",
+   "name": "Snowplow Stop",
+   "type": "stop",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-stroke"
+   ]
+  },
+  {
+   "id": "f-bwd-2ft-glide",
+   "name": "Backward Two-Foot Glide",
+   "type": "balance",
+   "level": "beginner",
+   "prereqs": [
+    "f-bwd-swizzle"
+   ]
+  },
+  {
+   "id": "f-2ft-hop",
+   "name": "Two-Foot Hop",
+   "type": "balance",
+   "level": "beginner",
+   "prereqs": [
+    "f-dip"
+   ]
+  },
+  {
+   "id": "f-rocking-horse",
+   "name": "Rocking Horse",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-swizzle",
+    "f-bwd-swizzle"
+   ]
+  },
+  {
+   "id": "f-bwd-stroke",
+   "name": "Backward Stroking/Skating",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-bwd-2ft-glide"
+   ]
+  },
+  {
+   "id": "f-fwd-crossover",
+   "name": "Forward Crossover",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-stroke"
+   ]
+  },
+  {
+   "id": "f-bwd-crossover",
+   "name": "Backward Crossover",
+   "type": "locomotion",
+   "level": "beginner",
+   "prereqs": [
+    "f-bwd-stroke"
+   ]
+  },
+  {
+   "id": "f-t-stop",
+   "name": "T-Stop",
+   "type": "stop",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-stroke"
+   ]
+  },
+  {
+   "id": "f-fwd-outside-edge",
+   "name": "Forward Outside Edge",
+   "type": "edge",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "f-fwd-inside-edge",
+   "name": "Forward Inside Edge",
+   "type": "edge",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "f-bwd-outside-edge",
+   "name": "Backward Outside Edge",
+   "type": "edge",
+   "level": "intermediate",
+   "prereqs": [
+    "f-bwd-crossover"
+   ]
+  },
+  {
+   "id": "f-bwd-inside-edge",
+   "name": "Backward Inside Edge",
+   "type": "edge",
+   "level": "intermediate",
+   "prereqs": [
+    "f-bwd-crossover"
+   ]
+  },
+  {
+   "id": "f-edge-control",
+   "name": "Edge Control",
+   "type": "edge",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-outside-edge",
+    "f-fwd-inside-edge"
+   ]
+  },
+  {
+   "id": "f-fwd-slalom",
+   "name": "Forward Slalom",
+   "type": "locomotion",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-stroke"
+   ]
+  },
+  {
+   "id": "f-2ft-spin",
+   "name": "Beginning Two-Foot Spin",
+   "type": "spin",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "f-hockey-stop",
+   "name": "Hockey Stop",
+   "type": "stop",
+   "level": "intermediate",
+   "prereqs": [
+    "f-snowplow",
+    "f-fwd-stroke"
+   ]
+  },
+  {
+   "id": "f-transition",
+   "name": "Forward to Backward Transition",
+   "type": "turn",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-stroke",
+    "f-bwd-stroke"
+   ]
+  },
+  {
+   "id": "f-fwd-outside-3turn",
+   "name": "Forward Outside Three-Turn",
+   "type": "turn",
+   "level": "advanced",
+   "prereqs": [
+    "f-fwd-outside-edge"
+   ]
+  },
+  {
+   "id": "f-fwd-inside-3turn",
+   "name": "Forward Inside Three-Turn",
+   "type": "turn",
+   "level": "advanced",
+   "prereqs": [
+    "f-fwd-inside-edge"
+   ]
+  },
+  {
+   "id": "f-fwd-spiral",
+   "name": "Forward Spiral",
+   "type": "balance",
+   "level": "advanced",
+   "prereqs": [
+    "f-fwd-outside-edge"
+   ]
+  },
+  {
+   "id": "f-bwd-stroking-adv",
+   "name": "Backward Stroking (Advanced)",
+   "type": "locomotion",
+   "level": "advanced",
+   "prereqs": [
+    "f-bwd-outside-edge",
+    "f-bwd-inside-edge"
+   ]
+  },
+  {
+   "id": "f-1ft-spin",
+   "name": "One-Foot Spin",
+   "type": "spin",
+   "level": "advanced",
+   "prereqs": [
+    "f-2ft-spin"
+   ]
+  },
+  {
+   "id": "f-lunge",
+   "name": "Lunge",
+   "type": "balance",
+   "level": "advanced",
+   "prereqs": [
+    "f-fwd-stroke",
+    "f-dip"
+   ]
+  },
+  {
+   "id": "f-shoot-the-duck",
+   "name": "Shoot the Duck",
+   "type": "balance",
+   "level": "advanced",
+   "prereqs": [
+    "f-dip",
+    "f-fwd-outside-edge"
+   ]
+  }
+ ],
+ "figure": [
+  {
+   "id": "2ft-spin",
+   "name": "Two-Foot Spin",
+   "type": "spin",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "3turn",
+   "name": "Three Turn",
+   "type": "step",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "mohawk",
+   "name": "Mohawk",
+   "type": "step",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-crossover",
+    "f-bwd-crossover"
+   ]
+  },
+  {
+   "id": "waltz",
+   "name": "Waltz Jump",
+   "type": "jump",
+   "level": "intermediate",
+   "prereqs": [
+    "3turn"
+   ]
+  },
+  {
+   "id": "toe",
+   "name": "Toe Loop",
+   "type": "jump",
+   "level": "intermediate",
+   "prereqs": [
+    "3turn",
+    "f-bwd-crossover"
+   ]
+  },
+  {
+   "id": "sal",
+   "name": "Salchow",
+   "type": "jump",
+   "level": "intermediate",
+   "prereqs": [
+    "3turn"
+   ]
+  },
+  {
+   "id": "loop",
+   "name": "Loop",
+   "type": "jump",
+   "level": "intermediate",
+   "prereqs": [
+    "toe",
+    "sal"
+   ]
+  },
+  {
+   "id": "uspin",
+   "name": "Upright Spin",
+   "type": "spin",
+   "level": "intermediate",
+   "prereqs": [
+    "2ft-spin"
+   ]
+  },
+  {
+   "id": "sspin",
+   "name": "Sit Spin",
+   "type": "spin",
+   "level": "intermediate",
+   "prereqs": [
+    "uspin"
+   ]
+  },
+  {
+   "id": "bracket",
+   "name": "Forward Bracket",
+   "type": "step",
+   "level": "intermediate",
+   "prereqs": [
+    "3turn"
+   ]
+  },
+  {
+   "id": "flip",
+   "name": "Flip",
+   "type": "jump",
+   "level": "advanced",
+   "prereqs": [
+    "toe",
+    "3turn"
+   ]
+  },
+  {
+   "id": "lutz",
+   "name": "Lutz",
+   "type": "jump",
+   "level": "advanced",
+   "prereqs": [
+    "flip"
+   ]
+  },
+  {
+   "id": "axel",
+   "name": "Axel",
+   "type": "jump",
+   "level": "advanced",
+   "prereqs": [
+    "waltz",
+    "loop"
+   ]
+  },
+  {
+   "id": "cspin",
+   "name": "Camel Spin",
+   "type": "spin",
+   "level": "advanced",
+   "prereqs": [
+    "uspin"
+   ]
+  },
+  {
+   "id": "combospin",
+   "name": "Combination Spin",
+   "type": "spin",
+   "level": "advanced",
+   "prereqs": [
+    "uspin",
+    "sspin",
+    "cspin"
+   ]
+  },
+  {
+   "id": "stseq",
+   "name": "Step Sequence",
+   "type": "step",
+   "level": "advanced",
+   "prereqs": [
+    "3turn",
+    "mohawk"
+   ]
+  },
+  {
+   "id": "layback",
+   "name": "Layback Spin",
+   "type": "spin",
+   "level": "advanced",
+   "prereqs": [
+    "uspin"
+   ]
+  },
+  {
+   "id": "spread-eagle",
+   "name": "Spread Eagle",
+   "type": "move",
+   "level": "advanced",
+   "prereqs": [
+    "3turn",
+    "mohawk"
+   ]
+  },
+  {
+   "id": "ina-bauer",
+   "name": "Ina Bauer",
+   "type": "move",
+   "level": "advanced",
+   "prereqs": [
+    "spread-eagle"
+   ]
+  },
+  {
+   "id": "2toe",
+   "name": "Double Toe Loop",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "toe"
+   ]
+  },
+  {
+   "id": "2sal",
+   "name": "Double Salchow",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "sal"
+   ]
+  },
+  {
+   "id": "2loop",
+   "name": "Double Loop",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "loop"
+   ]
+  },
+  {
+   "id": "2flip",
+   "name": "Double Flip",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "flip"
+   ]
+  },
+  {
+   "id": "2lutz",
+   "name": "Double Lutz",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "lutz"
+   ]
+  },
+  {
+   "id": "2axel",
+   "name": "Double Axel",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "axel"
+   ]
+  },
+  {
+   "id": "fspin",
+   "name": "Flying Spin",
+   "type": "spin",
+   "level": "expert",
+   "prereqs": [
+    "sspin",
+    "cspin"
+   ]
+  },
+  {
+   "id": "fcamel",
+   "name": "Flying Camel",
+   "type": "spin",
+   "level": "expert",
+   "prereqs": [
+    "cspin",
+    "fspin"
+   ]
+  },
+  {
+   "id": "biellmann",
+   "name": "Biellmann Spin",
+   "type": "spin",
+   "level": "expert",
+   "prereqs": [
+    "layback"
+   ]
+  },
+  {
+   "id": "chsq",
+   "name": "Choreo Sequence",
+   "type": "step",
+   "level": "expert",
+   "prereqs": [
+    "stseq"
+   ]
+  },
+  {
+   "id": "3toe",
+   "name": "Triple Toe Loop",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "2toe"
+   ]
+  },
+  {
+   "id": "3sal",
+   "name": "Triple Salchow",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "2sal"
+   ]
+  },
+  {
+   "id": "3loop",
+   "name": "Triple Loop",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "2loop"
+   ]
+  },
+  {
+   "id": "3flip",
+   "name": "Triple Flip",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "2flip"
+   ]
+  },
+  {
+   "id": "3lutz",
+   "name": "Triple Lutz",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "2lutz"
+   ]
+  },
+  {
+   "id": "3axel",
+   "name": "Triple Axel",
+   "type": "jump",
+   "level": "expert",
+   "prereqs": [
+    "2axel"
+   ]
+  }
+ ],
+ "hockey": [
+  {
+   "id": "h-ready-stance",
+   "name": "Hockey Ready Stance",
+   "type": "skating",
+   "level": "beginner",
+   "prereqs": []
+  },
+  {
+   "id": "h-fall-recovery",
+   "name": "Falling & Recovery (with Gear)",
+   "type": "skating",
+   "level": "beginner",
+   "prereqs": [
+    "h-ready-stance"
+   ]
+  },
+  {
+   "id": "h-v-start",
+   "name": "V-Start",
+   "type": "start",
+   "level": "beginner",
+   "prereqs": [
+    "h-ready-stance"
+   ]
+  },
+  {
+   "id": "h-hockey-stop",
+   "name": "Hockey Stop",
+   "type": "stop",
+   "level": "intermediate",
+   "prereqs": [
+    "f-snowplow",
+    "f-fwd-stroke"
+   ]
+  },
+  {
+   "id": "h-bwd-cross",
+   "name": "Backward Crossover",
+   "type": "skating",
+   "level": "intermediate",
+   "prereqs": [
+    "f-bwd-stroke",
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "h-tight-turn",
+   "name": "Tight Turns",
+   "type": "skating",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "h-1ft-stop",
+   "name": "One-Foot Stop",
+   "type": "stop",
+   "level": "intermediate",
+   "prereqs": [
+    "h-hockey-stop"
+   ]
+  },
+  {
+   "id": "h-power-start",
+   "name": "Power Start",
+   "type": "start",
+   "level": "intermediate",
+   "prereqs": [
+    "h-v-start",
+    "f-fwd-stroke"
+   ]
+  },
+  {
+   "id": "h-bwd-snowplow-stop",
+   "name": "Backward Snowplow Stop",
+   "type": "stop",
+   "level": "intermediate",
+   "prereqs": [
+    "f-bwd-stroke"
+   ]
+  },
+  {
+   "id": "h-crossover-start",
+   "name": "Crossover Start",
+   "type": "start",
+   "level": "intermediate",
+   "prereqs": [
+    "f-fwd-crossover",
+    "h-power-start"
+   ]
+  },
+  {
+   "id": "h-fwd-bwd-pivot",
+   "name": "Forward-to-Backward Pivot",
+   "type": "skating",
+   "level": "intermediate",
+   "prereqs": [
+    "f-transition"
+   ]
+  },
+  {
+   "id": "h-bwd-fwd-pivot",
+   "name": "Backward-to-Forward Pivot",
+   "type": "skating",
+   "level": "intermediate",
+   "prereqs": [
+    "h-fwd-bwd-pivot"
+   ]
+  },
+  {
+   "id": "h-mohawk",
+   "name": "Mohawk Turn",
+   "type": "skating",
+   "level": "advanced",
+   "prereqs": [
+    "f-transition"
+   ]
+  },
+  {
+   "id": "h-power-stop",
+   "name": "Power Slide Stop",
+   "type": "stop",
+   "level": "advanced",
+   "prereqs": [
+    "h-hockey-stop"
+   ]
+  },
+  {
+   "id": "h-edge-work",
+   "name": "Inside/Outside Edges",
+   "type": "skating",
+   "level": "advanced",
+   "prereqs": [
+    "h-tight-turn"
+   ]
+  },
+  {
+   "id": "h-lateral",
+   "name": "Lateral Movement",
+   "type": "skating",
+   "level": "advanced",
+   "prereqs": [
+    "f-fwd-crossover",
+    "h-bwd-cross"
+   ]
+  },
+  {
+   "id": "h-quick-feet",
+   "name": "Quick Feet Agility",
+   "type": "skating",
+   "level": "advanced",
+   "prereqs": [
+    "h-power-start"
+   ]
+  },
+  {
+   "id": "h-spin-move",
+   "name": "Spin-o-rama",
+   "type": "skating",
+   "level": "advanced",
+   "prereqs": [
+    "h-mohawk",
+    "f-transition"
+   ]
+  },
+  {
+   "id": "h-gap-control",
+   "name": "Gap Control",
+   "type": "defensive",
+   "level": "advanced",
+   "prereqs": [
+    "h-bwd-cross",
+    "h-lateral"
+   ]
+  },
+  {
+   "id": "h-angling",
+   "name": "Angling",
+   "type": "defensive",
+   "level": "advanced",
+   "prereqs": [
+    "h-lateral",
+    "h-hockey-stop"
+   ]
+  },
+  {
+   "id": "h-top-speed",
+   "name": "Top Speed Sprint",
+   "type": "skating",
+   "level": "expert",
+   "prereqs": [
+    "h-power-start",
+    "h-quick-feet"
+   ]
+  },
+  {
+   "id": "h-backwards-cross-full",
+   "name": "Full-Speed Backward",
+   "type": "skating",
+   "level": "expert",
+   "prereqs": [
+    "h-bwd-cross",
+    "h-lateral"
+   ]
+  },
+  {
+   "id": "h-1ft-edges",
+   "name": "One-Foot Edge Work",
+   "type": "skating",
+   "level": "expert",
+   "prereqs": [
+    "h-edge-work"
+   ]
+  },
+  {
+   "id": "h-euro-step",
+   "name": "Euro Step",
+   "type": "skating",
+   "level": "expert",
+   "prereqs": [
+    "h-mohawk",
+    "h-quick-feet"
+   ]
+  },
+  {
+   "id": "h-mirror-skating",
+   "name": "Mirror Skating",
+   "type": "defensive",
+   "level": "expert",
+   "prereqs": [
+    "h-gap-control",
+    "h-backwards-cross-full"
+   ]
+  },
+  {
+   "id": "h-closeout",
+   "name": "Close-Out Skating",
+   "type": "defensive",
+   "level": "expert",
+   "prereqs": [
+    "h-angling",
+    "h-top-speed"
+   ]
+  },
+  {
+   "id": "h-box-out",
+   "name": "Box-Out Positioning",
+   "type": "defensive",
+   "level": "expert",
+   "prereqs": [
+    "h-lateral",
+    "h-angling"
+   ]
+  },
+  {
+   "id": "h-stick-grip",
+   "name": "Stick Grip & Stance",
+   "type": "stick",
+   "level": "beginner",
+   "prereqs": []
+  },
+  {
+   "id": "h-stationary-puck",
+   "name": "Stationary Puck Control",
+   "type": "stick",
+   "level": "beginner",
+   "prereqs": [
+    "h-stick-grip"
+   ]
+  },
+  {
+   "id": "h-fwd-dribble",
+   "name": "Forward Dribble",
+   "type": "stick",
+   "level": "beginner",
+   "prereqs": [
+    "f-fwd-stroke",
+    "h-stationary-puck"
+   ]
+  },
+  {
+   "id": "h-wrist-shot",
+   "name": "Wrist Shot",
+   "type": "stick",
+   "level": "beginner",
+   "prereqs": [
+    "h-stick-grip"
+   ]
+  },
+  {
+   "id": "h-forehand-pass",
+   "name": "Forehand Pass",
+   "type": "stick",
+   "level": "intermediate",
+   "prereqs": [
+    "h-wrist-shot"
+   ]
+  },
+  {
+   "id": "h-backhand-pass",
+   "name": "Backhand Pass",
+   "type": "stick",
+   "level": "intermediate",
+   "prereqs": [
+    "h-forehand-pass"
+   ]
+  },
+  {
+   "id": "h-receiving",
+   "name": "Receiving Passes",
+   "type": "stick",
+   "level": "intermediate",
+   "prereqs": [
+    "h-forehand-pass"
+   ]
+  },
+  {
+   "id": "h-skating-dribble",
+   "name": "Skating with Puck",
+   "type": "stick",
+   "level": "intermediate",
+   "prereqs": [
+    "h-fwd-dribble",
+    "f-fwd-crossover"
+   ]
+  },
+  {
+   "id": "h-snap-shot",
+   "name": "Snap Shot",
+   "type": "stick",
+   "level": "intermediate",
+   "prereqs": [
+    "h-wrist-shot"
+   ]
+  },
+  {
+   "id": "h-slap-shot",
+   "name": "Slap Shot",
+   "type": "stick",
+   "level": "intermediate",
+   "prereqs": [
+    "h-wrist-shot"
+   ]
+  },
+  {
+   "id": "h-toe-drag",
+   "name": "Toe Drag",
+   "type": "stick",
+   "level": "advanced",
+   "prereqs": [
+    "h-skating-dribble"
+   ]
+  },
+  {
+   "id": "h-deke",
+   "name": "Forehand-Backhand Deke",
+   "type": "stick",
+   "level": "advanced",
+   "prereqs": [
+    "h-skating-dribble",
+    "h-backhand-pass"
+   ]
+  },
+  {
+   "id": "h-one-timer",
+   "name": "One-Timer",
+   "type": "stick",
+   "level": "advanced",
+   "prereqs": [
+    "h-slap-shot",
+    "h-receiving"
+   ]
+  },
+  {
+   "id": "h-saucer-pass",
+   "name": "Saucer Pass",
+   "type": "stick",
+   "level": "advanced",
+   "prereqs": [
+    "h-forehand-pass"
+   ]
+  },
+  {
+   "id": "h-protect-puck",
+   "name": "Puck Protection",
+   "type": "stick",
+   "level": "advanced",
+   "prereqs": [
+    "h-skating-dribble",
+    "h-lateral"
+   ]
+  },
+  {
+   "id": "h-shooting-stride",
+   "name": "Shooting in Stride",
+   "type": "stick",
+   "level": "advanced",
+   "prereqs": [
+    "h-wrist-shot",
+    "h-skating-dribble"
+   ]
+  },
+  {
+   "id": "h-between-legs",
+   "name": "Between the Legs",
+   "type": "stick",
+   "level": "expert",
+   "prereqs": [
+    "h-toe-drag",
+    "h-deke"
+   ]
+  },
+  {
+   "id": "h-michigan",
+   "name": "The Michigan (Lacrosse)",
+   "type": "stick",
+   "level": "expert",
+   "prereqs": [
+    "h-toe-drag"
+   ]
+  },
+  {
+   "id": "h-no-look-pass",
+   "name": "No-Look Pass",
+   "type": "stick",
+   "level": "expert",
+   "prereqs": [
+    "h-saucer-pass",
+    "h-skating-dribble"
+   ]
+  },
+  {
+   "id": "h-backhand-shelf",
+   "name": "Backhand Top Shelf",
+   "type": "stick",
+   "level": "expert",
+   "prereqs": [
+    "h-deke",
+    "h-backhand-pass"
+   ]
+  },
+  {
+   "id": "h-quick-release",
+   "name": "Quick Release Shot",
+   "type": "stick",
+   "level": "expert",
+   "prereqs": [
+    "h-snap-shot",
+    "h-shooting-stride"
+   ]
+  },
+  {
+   "id": "h-deflection",
+   "name": "Deflection / Tip-In",
+   "type": "stick",
+   "level": "expert",
+   "prereqs": [
+    "h-receiving",
+    "h-one-timer"
+   ]
+  }
+ ]
+}
