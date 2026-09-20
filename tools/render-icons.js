@@ -86,7 +86,36 @@ function ios() {
   }
 }
 
-const TARGETS = { web, ios };
+const ANDROID = 'android/app/src/main/res';
+const DENSITIES = [
+  { name: 'mdpi', legacy: 48, foreground: 108 },
+  { name: 'hdpi', legacy: 72, foreground: 162 },
+  { name: 'xhdpi', legacy: 96, foreground: 216 },
+  { name: 'xxhdpi', legacy: 144, foreground: 324 },
+  { name: 'xxxhdpi', legacy: 192, foreground: 432 },
+];
+const SPLASHES = [
+  ['drawable', 480, 320], ['drawable-land-mdpi', 480, 320], ['drawable-land-hdpi', 800, 480],
+  ['drawable-land-xhdpi', 1280, 720], ['drawable-land-xxhdpi', 1600, 960], ['drawable-land-xxxhdpi', 1920, 1280],
+  ['drawable-port-mdpi', 320, 480], ['drawable-port-hdpi', 480, 800], ['drawable-port-xhdpi', 720, 1280],
+  ['drawable-port-xxhdpi', 960, 1600], ['drawable-port-xxxhdpi', 1280, 1920],
+];
+
+function android() {
+  for (const d of DENSITIES) {
+    for (const name of ['ic_launcher.png', 'ic_launcher_round.png']) {
+      render({ out: `${ANDROID}/mipmap-${d.name}/${name}`, width: d.legacy, height: d.legacy, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.74 });
+    }
+    // Adaptive foreground: transparent, mark inside the 66dp safe circle (61% of the canvas).
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_foreground.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: 0.58, transparent: true });
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_monochrome.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: 0.58, transparent: true });
+  }
+  for (const [dir, w, h] of SPLASHES) {
+    render({ out: `${ANDROID}/${dir}/splash.png`, width: w, height: h, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.3 });
+  }
+}
+
+const TARGETS = { web, ios, android };
 
 const target = process.argv[2] || 'all';
 if (target === 'all') Object.values(TARGETS).forEach(fn => fn());

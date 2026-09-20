@@ -255,3 +255,25 @@ test('the iOS launch screen uses the brand navy', () => {
   const storyboard = fs.readFileSync(path.join(REPO, 'ios/App/App/Base.lproj/LaunchScreen.storyboard'), 'utf8');
   assert.match(storyboard, /red="0\.058/, 'launch screen background is not navy #0F2338');
 });
+
+const ANDROID_RES = path.join(REPO, 'android/app/src/main/res');
+const DENSITIES = [['mdpi', 48, 108], ['hdpi', 72, 162], ['xhdpi', 96, 216], ['xxhdpi', 144, 324], ['xxxhdpi', 192, 432]];
+
+test('every Android launcher icon exists at its density size', () => {
+  for (const [density, legacy, foreground] of DENSITIES) {
+    for (const name of ['ic_launcher.png', 'ic_launcher_round.png']) {
+      const info = pngInfo(fs.readFileSync(path.join(ANDROID_RES, `mipmap-${density}`, name)));
+      assert.strictEqual(info.width, legacy, `${density}/${name}`);
+    }
+    const fg = pngInfo(fs.readFileSync(path.join(ANDROID_RES, `mipmap-${density}`, 'ic_launcher_foreground.png')));
+    assert.strictEqual(fg.width, foreground, `${density}/ic_launcher_foreground.png`);
+    assert.strictEqual(fg.hasAlpha, true, 'the adaptive foreground must be transparent');
+  }
+});
+
+test('the adaptive icon background is brand navy and a monochrome layer is declared', () => {
+  const colour = fs.readFileSync(path.join(ANDROID_RES, 'values/ic_launcher_background.xml'), 'utf8');
+  assert.match(colour, /#0F2338/i);
+  const adaptive = fs.readFileSync(path.join(ANDROID_RES, 'mipmap-anydpi-v26/ic_launcher.xml'), 'utf8');
+  assert.match(adaptive, /<monochrome/);
+});
