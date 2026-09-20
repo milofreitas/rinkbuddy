@@ -962,6 +962,8 @@
             AI Scan
           </button>
           <button class="btn btn-sm btn-primary" id="tagSkillBtn" onclick="openTagModal()">+ Tag Skill</button>
+          <button class="btn btn-sm btn-secondary" id="importScanBtn" onclick="document.getElementById('scanFileInput').click()" title="Load detections from a .json file">Import scan</button>
+          <input type="file" id="scanFileInput" accept="application/json,.json" style="display:none" onchange="importScanFile(this)">
           <button class="btn btn-sm btn-secondary" id="speedBtn" onclick="cycleSpeed()">1x</button>
         </div>
         <div id="intentPrompt"></div>
@@ -2971,22 +2973,30 @@ const ClipDB = {
 };
 
 // Play the segment through a canvas and record it. Real time, so a 2 s attempt
-// takes ~2 s; runs in the background while the user keeps tagging.
+// takes ~2 s. Driven by a timer rather than requestAnimationFrame, because a
+// backgrounded tab pauses rAF and the trim would never finish.
 function trimSegment(src, tStart, tEnd, maxW) {
   return new Promise((resolve, reject) => {
     if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) return reject(new Error('unsupported'));
     const vid = document.createElement('video');
     vid.muted = true; vid.playsInline = true; vid.preload = 'auto';
-    let own = false;
+    let own = false, done = false, timer = null, rec = null, guard = null;
     vid.src = (src instanceof Blob) ? (own = true, URL.createObjectURL(src)) : src;
-    const cleanup = () => { if (own) URL.revokeObjectURL(vid.src); };
-    const fail = e => { cleanup(); reject(e instanceof Error ? e : new Error('trim failed')); };
-    vid.onerror = fail;
-    setTimeout(() => { if (!done) fail(new Error('trim timeout')); }, (tEnd - tStart) * 1000 + 15000);
-    let done = false;
+
+    const finish = () => {
+      if (done) return; done = true;
+      clearInterval(timer); clearTimeout(guard);
+      try { vid.pause(); } catch (e) {}
+      if (rec && rec.state !== 'inactive') { try { rec.stop(); return; } catch (e) {} }   // resolves in onstop
+      cleanup(); reject(new Error('trim produced nothing'));
+    };
+    const cleanup = () => { clearInterval(timer); clearTimeout(guard); if (own) URL.revokeObjectURL(vid.src); };
+    const fail = e => { if (done) return; done = true; cleanup(); reject(e instanceof Error ? e : new Error('trim failed')); };
+
+    vid.onerror = () => fail(new Error('video load failed'));
     vid.onloadedmetadata = () => { vid.currentTime = Math.max(0, tStart); };
     vid.onseeked = () => {
-      if (done || vid._started) return;
+      if (vid._started) return;
       vid._started = true;
       const scale = Math.min(1, (maxW || 640) / vid.videoWidth);
       const c = document.createElement('canvas');
@@ -2994,18 +3004,19 @@ function trimSegment(src, tStart, tEnd, maxW) {
       c.height = Math.round(vid.videoHeight * scale / 2) * 2;
       const ctx = c.getContext('2d');
       const type = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
-      const rec = new MediaRecorder(c.captureStream(30), { mimeType: type, videoBitsPerSecond: 2500000 });
       const chunks = [];
+      rec = new MediaRecorder(c.captureStream(30), { mimeType: type, videoBitsPerSecond: 2500000 });
       rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
-      rec.onstop = () => { done = true; cleanup(); resolve(new Blob(chunks, { type: 'video/webm' })); };
+      rec.onstop = () => { const blob = new Blob(chunks, { type: 'video/webm' }); cleanup(); blob.size ? resolve(blob) : reject(new Error('empty clip')); };
       rec.start();
-      const draw = () => {
+      timer = setInterval(() => {
         if (done) return;
-        ctx.drawImage(vid, 0, 0, c.width, c.height);
-        if (vid.currentTime >= tEnd || vid.ended) { vid.pause(); try { rec.stop(); } catch (e) { fail(e); } return; }
-        requestAnimationFrame(draw);
-      };
-      vid.play().then(draw).catch(fail);
+        try { ctx.drawImage(vid, 0, 0, c.width, c.height); } catch (e) { return fail(e); }
+        if (vid.currentTime >= tEnd || vid.ended) finish();
+      }, 33);
+      // hard stop: never hang, and keep whatever was captured
+      guard = setTimeout(finish, (tEnd - tStart) * 1000 + 8000);
+      vid.play().catch(fail);
     };
   });
 }
@@ -3049,9 +3060,10 @@ function syncTagsToApp(v) {
       tagId: a.tagId, skillId: a.element, skillName: a.elementName,
       date: a.date || todayStr(), createdAt: a.createdAt || Date.now(),
       quality: a.quality, note: a.note || '', source: a.source || 'manual',
-      aiSkillId: a.aiSkillId || null, videoId: v.id, videoName: v.name,
+      videoId: v.id, videoName: v.name,
       time: a.time, tStart: a.tStart != null ? a.tStart : null, tEnd: a.tEnd != null ? a.tEnd : null,
       repIndex: a.repIndex || null, repCount: a.repCount || null,
+      aiSkillId: a.aiSkillId || null, aiFamily: a.family || null, corrected: !!(a.source === 'ai' && a.aiSkillId !== a.element),
       fps: v.fps || null, thumb: a.thumb || null, hasClip: !!a.hasClip
     });
   });
@@ -3155,9 +3167,10 @@ function saveAnnotation() {
   if (idxStr !== '') {
     const a = v.annotations[parseInt(idxStr)];
     uncountTag(a);
-    if (a.source === 'ai' && !a.aiSkillId) a.aiSkillId = a.element; // remember what the AI said (training label)
+    a.needsLabel = false;
+    a.date = a.date || todayStr(); a.createdAt = a.createdAt || Date.now(); ensureTagId(a);
     Object.assign(a, fields, { status: 'confirmed' });
-    countTag(a);
+    countTag(a); captureTagThumb(v, a); saveEvidenceClip(v, a);
     showToast('Tag updated');
   } else {
     const a = Object.assign({ time: videoPlayer.currentTime, source: 'manual', status: 'confirmed',
@@ -3172,7 +3185,7 @@ function saveAnnotation() {
 
 function confirmTag(i) {
   const v = videoFiles[activeVideoIdx], a = v.annotations[i];
-  a.status = 'confirmed'; if (!a.aiSkillId) a.aiSkillId = a.element;
+  a.status = 'confirmed';
   a.date = a.date || todayStr(); a.createdAt = a.createdAt || Date.now(); ensureTagId(a);
   countTag(a); captureTagThumb(v, a); saveEvidenceClip(v, a); persistTags(v); showToast('Confirmed: ' + a.elementName);
 }
@@ -3465,6 +3478,24 @@ async function analyzeFramesWithAI(frames, skillNames, onProgress) {
 //    repIndex, repCount, confidence, status: confident|unsure, cue }
 //  The old {timestamp, skillId, confidence, note} shape still parses.
 // ═══════════════════════════════════════════
+function importScanFile(input) {
+  const f = input.files && input.files[0];
+  input.value = '';
+  if (!f) return;
+  if (activeVideoIdx < 0) return showToast('Select a video first');
+  f.text().then(txt => {
+    let data;
+    try { data = JSON.parse(txt); } catch (e) { return showToast('That file is not valid JSON'); }
+    const dets = normalizeDetections(data);
+    if (!dets.length) return showToast('No detections in that file');
+    const v = videoFiles[activeVideoIdx];
+    const over = dets.filter(d => v.duration && d.tEnd > v.duration + 0.5).length;
+    if (over) showToast(over + ' detection' + (over > 1 ? 's fall' : ' falls') + ' past the end of this video — wrong clip?');
+    document.getElementById('scanProgress').style.display = 'block';
+    showScanResults(data, v);
+  });
+}
+
 function normalizeDetections(data) {
   if (Array.isArray(data?.detections)) return data.detections;
   const legacy = Array.isArray(data) ? data : (data?.skills || []);
@@ -3518,6 +3549,7 @@ function acceptScanResults() {
       element: sk ? sk.id : '', elementName: sk ? sk.name : (d.family ? 'Unidentified (' + d.family + ')' : 'Unidentified'),
       quality: 3, confidence: d.confidence, note: d.cue || '',
       repIndex: d.repIndex, repCount: d.repCount, family: d.family || null,
+      aiSkillId: d.skillId || null,          // what the scan said, frozen at creation
       source: 'ai', status: 'suggested', needsLabel: !sk || d.status === 'unsure',
       date: todayStr(), createdAt: Date.now()
     };

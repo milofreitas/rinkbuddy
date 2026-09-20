@@ -1,0 +1,84 @@
+{
+  "clip": "session_1791_swizzles.mp4",
+  "source": "IMG_1791.MOV @119s",
+  "mode": "declared",
+  "declaredSkill": "f-fwd-swizzle",
+  "detections": [
+    {
+      "id": "d1",
+      "skillId": "f-fwd-swizzle",
+      "skillName": "Forward Swizzles",
+      "family": "locomotion",
+      "tStart": 2.55,
+      "tEnd": 3.3,
+      "tPeak": 2.95,
+      "repIndex": 1,
+      "repCount": 4,
+      "confidence": 0.78,
+      "status": "confident",
+      "cue": "feet open into a lemon then close; knees lightly bent"
+    },
+    {
+      "id": "d2",
+      "skillId": "f-fwd-swizzle",
+      "skillName": "Forward Swizzles",
+      "family": "locomotion",
+      "tStart": 3.3,
+      "tEnd": 4.05,
+      "tPeak": 3.6,
+      "repIndex": 2,
+      "repCount": 4,
+      "confidence": 0.75,
+      "status": "confident",
+      "cue": "feet open into a lemon then close; knees lightly bent"
+    },
+    {
+      "id": "d3",
+      "skillId": "f-fwd-swizzle",
+      "skillName": "Forward Swizzles",
+      "family": "locomotion",
+      "tStart": 4.05,
+      "tEnd": 4.7,
+      "tPeak": 4.2,
+      "repIndex": 3,
+      "repCount": 4,
+      "confidence": 0.72,
+      "status": "confident",
+      "cue": "feet open into a lemon then close; knees lightly bent"
+    },
+    {
+      "id": "d4",
+      "skillId": "f-fwd-swizzle",
+      "skillName": "Forward Swizzles",
+      "family": "locomotion",
+      "tStart": 4.7,
+      "tEnd": 5.35,
+      "tPeak": 4.9,
+      "repIndex": 4,
+      "repCount": 4,
+      "confidence": 0.69,
+      "status": "confident",
+      "cue": "feet open into a lemon then close; knees lightly bent"
+    },
+    {
+      "id": "d5",
+      "skillId": null,
+      "skillName": "",
+      "family": "turn",
+      "tStart": 5.6,
+      "tEnd": 6.3,
+      "tPeak": 5.9,
+      "repIndex": 1,
+      "repCount": 1,
+      "confidence": 0.38,
+      "status": "unsure",
+      "cue": "body rotates as he closes on the camera \u2014 could be a turn or just stopping"
+    }
+  ],
+  "scan": {
+    "fps": 12,
+    "windows": 1,
+    "model": "claude-in-chat",
+    "costUsd": 0
+  }
+}

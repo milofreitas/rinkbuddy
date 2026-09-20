@@ -1,0 +1,56 @@
+{
+  "clip": "session_1792_stroking.mp4",
+  "source": "IMG_1792.MOV @56.5s (rotation corrected)",
+  "mode": "open",
+  "declaredSkill": null,
+  "detections": [
+    {
+      "id": "d1",
+      "skillId": "f-fwd-stroke",
+      "skillName": "Forward Stroking/Skating",
+      "family": "locomotion",
+      "tStart": 1.6,
+      "tEnd": 3.4,
+      "tPeak": 2.4,
+      "repIndex": 1,
+      "repCount": 2,
+      "confidence": 0.74,
+      "status": "confident",
+      "cue": "side-on: free leg extends behind each push, knee bends through it"
+    },
+    {
+      "id": "d2",
+      "skillId": "f-fwd-stroke",
+      "skillName": "Forward Stroking/Skating",
+      "family": "locomotion",
+      "tStart": 11.6,
+      "tEnd": 13.5,
+      "tPeak": 12.4,
+      "repIndex": 2,
+      "repCount": 2,
+      "confidence": 0.66,
+      "status": "confident",
+      "cue": "same drill further out; shorter strokes, less extension"
+    },
+    {
+      "id": "d3",
+      "skillId": null,
+      "skillName": "",
+      "family": "turn",
+      "tStart": 3.4,
+      "tEnd": 4.2,
+      "tPeak": 3.7,
+      "repIndex": 1,
+      "repCount": 1,
+      "confidence": 0.35,
+      "status": "unsure",
+      "cue": "turns to face the camera \u2014 unclear whether this is a two-foot turn or a step-around"
+    }
+  ],
+  "scan": {
+    "fps": 12,
+    "windows": 2,
+    "model": "claude-in-chat",
+    "costUsd": 0
+  }
+}
