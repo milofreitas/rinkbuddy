@@ -129,3 +129,64 @@ test('crop boxes follow the tracked subject and keep the whole body', () => {
       `crop ${JSON.stringify(c)} does not contain the subject at ${cx.toFixed(2)},${cy.toFixed(2)}`);
   }
 });
+
+// ── camera motion ───────────────────────────────────────────────────────────
+// A textured background so a shift estimator has something to lock onto.
+const texture = (seed = 1) => {
+  const f = new Uint8Array(W * H);
+  let s = seed;
+  for (let k = 0; k < f.length; k++) { s = (s * 1103515245 + 12345) & 0x7fffffff; f[k] = 40 + (s % 160); }
+  return f;
+};
+const shiftFrame = (base, dx, dy) => {
+  const f = new Uint8Array(W * H);
+  for (let j = 0; j < H; j++) {
+    for (let i = 0; i < W; i++) {
+      const si = i - dx, sj = j - dy;
+      f[j * W + i] = (si >= 0 && si < W && sj >= 0 && sj < H) ? base[sj * W + si] : 0;
+    }
+  }
+  return f;
+};
+const paste = (frame, x, y, w, h, v = 235) => {
+  const f = Uint8Array.from(frame);
+  for (let j = y; j < y + h; j++) {
+    for (let i = x; i < x + w; i++) if (i >= 0 && i < W && j >= 0 && j < H) f[j * W + i] = v;
+  }
+  return f;
+};
+
+test('the shift between two frames is recovered', () => {
+  const { estimateShift } = require('./scan-core.js');
+  const base = texture(7);
+  for (const [dx, dy] of [[0, 0], [3, 0], [-4, 2], [6, -3]]) {
+    const s = estimateShift(base, shiftFrame(base, dx, dy), W, H, { maxShift: 8 });
+    assert.equal(s.dx, dx, `dx for ${dx},${dy} came back ${s.dx}`);
+    assert.equal(s.dy, dy, `dy for ${dx},${dy} came back ${s.dy}`);
+  }
+});
+
+test('a panning camera alone produces almost no motion once compensated', () => {
+  const base = texture(11);
+  const frames = seq([0, 3, 6, 9, 12].map(dx => shiftFrame(base, dx, 0)));
+  const s = motionSeries(frames, { compensate: true });
+  assert.ok(s.slice(1).every(f => f.energy < 0.02), `energies: ${s.map(f => f.energy.toFixed(3))}`);
+  assert.ok(s.slice(1).every(f => f.cameraMoving), 'the pan itself should still be reported');
+});
+
+test('while panning, a skater moving differently is still found', () => {
+  const base = texture(13);
+  // background pans 3px/frame; the skater moves 8px/frame, so it stands out
+  const frames = seq([0, 1, 2, 3, 4].map(i => paste(shiftFrame(base, i * 3, 0), 10 + i * 8, 12, 10, 12)));
+  const plain = motionSeries(frames, { compensate: false });
+  const comp = motionSeries(frames, { compensate: true });
+  assert.ok(plain[3].energy > comp[3].energy * 2,
+    `compensation should cut the pan out: plain ${plain[3].energy.toFixed(3)} vs compensated ${comp[3].energy.toFixed(3)}`);
+  assert.ok(comp[3].energy > 0.005, `the skater should survive compensation: ${comp[3].energy.toFixed(4)}`);
+  const c = comp[3].centroid;
+  assert.ok(c && c.x > 0.15 && c.x < 0.75, `centroid should sit on the skater, got ${JSON.stringify(c)}`);
+});
+
+// Note: a rolling local threshold was tried here and removed — see the comment
+// above activityWindows in scan-core.js. It passed a synthetic loud-half /
+// quiet-half case but found nothing extra on real footage.

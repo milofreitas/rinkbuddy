@@ -22,9 +22,84 @@
 const CAMERA_MOVING = 'camera-moving';
 
 const DEFAULTS = {
-  diffThreshold: 24,     // per-pixel change (0-255) that counts as movement
-  cameraFraction: 0.35,  // more of the frame than this changing = the camera moved
+  diffThreshold: 24,      // per-pixel change (0-255) that counts as movement
+  cameraFraction: 0.35,   // more of the frame than this changing = the camera moved
+  compensate: true,       // undo the camera's own movement before measuring
+  compensateAbove: 0.08,  // only bother when this much of the frame disagrees
+  compensateGain: 0.75,   // and only keep the shift if it explains this much away
+  cameraShiftPx: 1.5,     // a shift this big means the phone moved, not the skater
 };
+
+// ── camera movement ─────────────────────────────────────────────────────────
+// Handheld footage moves the whole frame, which swamps the skater's own motion:
+// on batch 1 and 2 every missed attempt was in a panning clip. Estimating the
+// frame-to-frame shift and differencing against the shifted frame puts handheld
+// clips back on the same footing as a phone propped on the boards.
+
+function downsample2(data, W, H) {
+  const w = W >> 1, h = H >> 1;
+  const out = new Uint8Array(w * h);
+  for (let j = 0; j < h; j++) {
+    for (let i = 0; i < w; i++) {
+      const k = (j * 2) * W + i * 2;
+      out[j * w + i] = (data[k] + data[k + 1] + data[k + W] + data[k + W + 1]) >> 2;
+    }
+  }
+  return { data: out, W: w, H: h };
+}
+
+// Sum of absolute differences over a fixed inner region, so every candidate
+// shift is judged on the same pixels.
+function searchSAD(prev, cur, W, H, range, cx = 0, cy = 0, stride = 2) {
+  const m = Math.max(2, Math.abs(cx) + range + 1, Math.abs(cy) + range + 1);
+  if (W - 2 * m < 4 || H - 2 * m < 4) return { dx: cx, dy: cy, sad: Infinity };
+  let best = { dx: cx, dy: cy, sad: Infinity };
+  for (let dy = cy - range; dy <= cy + range; dy++) {
+    for (let dx = cx - range; dx <= cx + range; dx++) {
+      let sad = 0, n = 0;
+      for (let j = m; j < H - m; j += stride) {
+        const row = j * W, srow = (j - dy) * W;
+        for (let i = m; i < W - m; i += stride) {
+          sad += Math.abs(cur[row + i] - prev[srow + i - dx]);
+          n++;
+        }
+      }
+      const mean = n ? sad / n : Infinity;
+      if (mean < best.sad) best = { dx, dy, sad: mean };
+    }
+  }
+  return best;
+}
+
+/** How far the whole picture moved between two frames, in pixels. */
+function estimateShift(prev, cur, W, H, opts = {}) {
+  const maxShift = opts.maxShift ?? Math.max(4, Math.round(W * 0.08));
+  const p2 = downsample2(prev, W, H), c2 = downsample2(cur, W, H);
+  const coarse = searchSAD(p2.data, c2.data, p2.W, p2.H, Math.ceil(maxShift / 2), 0, 0, 1);
+  const fine = searchSAD(prev, cur, W, H, 2, coarse.dx * 2, coarse.dy * 2, 2);
+  return { dx: fine.dx, dy: fine.dy, sad: fine.sad };
+}
+
+// One difference pass: cur(i,j) against prev(i-dx, j-dy).
+function diffAt(prev, cur, W, H, dx, dy, threshold) {
+  const mask = new Uint8Array(W * H);
+  const x0 = Math.max(0, dx), x1 = Math.min(W, W + dx);
+  const y0 = Math.max(0, dy), y1 = Math.min(H, H + dy);
+  let changed = 0, compared = 0, sx = 0, sy = 0;
+  let minX = W, minY = H, maxX = -1, maxY = -1;
+  for (let j = y0; j < y1; j++) {
+    const row = j * W, srow = (j - dy) * W;
+    for (let i = x0; i < x1; i++) {
+      compared++;
+      if (Math.abs(cur[row + i] - prev[srow + i - dx]) > threshold) {
+        mask[row + i] = 1; changed++; sx += i; sy += j;
+        if (i < minX) minX = i; if (i > maxX) maxX = i;
+        if (j < minY) minY = j; if (j > maxY) maxY = j;
+      }
+    }
+  }
+  return { mask, changed, compared, sx, sy, minX, minY, maxX, maxY };
+}
 
 // ── 1. motion ───────────────────────────────────────────────────────────────
 // Each frame is compared with the one before it, not with a running background.
@@ -46,26 +121,31 @@ function motionSeries(frames, opts = {}) {
     }
     const bg = prev;
 
-    const mask = new Uint8Array(W * H);
-    let changed = 0, sx = 0, sy = 0;
-    let minX = W, minY = H, maxX = -1, maxY = -1;
-    for (let j = 0; j < H; j++) {
-      for (let i = 0; i < W; i++) {
-        const k = j * W + i;
-        if (Math.abs(data[k] - bg[k]) > o.diffThreshold) {
-          mask[k] = 1; changed++; sx += i; sy += j;
-          if (i < minX) minX = i; if (i > maxX) maxX = i;
-          if (j < minY) minY = j; if (j > maxY) maxY = j;
-        }
+    let d = diffAt(bg, data, W, H, 0, 0, o.diffThreshold);
+    const rawEnergy = d.changed / Math.max(1, d.compared);
+    let shift = { dx: 0, dy: 0 };
+
+    // Only hunt for a camera shift when the frame looks globally different —
+    // otherwise a lone moving skater on plain ice is the best "shift" there is,
+    // and compensating would erase the very thing we're looking for.
+    if (o.compensate && rawEnergy >= o.compensateAbove) {
+      const s = estimateShift(bg, data, W, H, { maxShift: o.maxShift });
+      if (s.dx || s.dy) {
+        const alt = diffAt(bg, data, W, H, s.dx, s.dy, o.diffThreshold);
+        const altEnergy = alt.changed / Math.max(1, alt.compared);
+        if (altEnergy < rawEnergy * o.compensateGain) { d = alt; shift = { dx: s.dx, dy: s.dy }; }
       }
     }
 
-    const energy = changed / (W * H);
-    const cameraMoving = energy > o.cameraFraction;
+    const energy = d.changed / Math.max(1, d.compared);
+    const panned = Math.hypot(shift.dx, shift.dy) >= o.cameraShiftPx;
+    const cameraMoving = panned || rawEnergy > o.cameraFraction;
     out.push({
-      t, energy, changed, mask, width: W, height: H,
-      centroid: changed ? { x: (sx / changed) / W, y: (sy / changed) / H } : null,
-      box: changed ? { x: minX / W, y: minY / H, w: (maxX - minX + 1) / W, h: (maxY - minY + 1) / H } : null,
+      t, energy, changed: d.changed, mask: d.mask, width: W, height: H, shift, rawEnergy,
+      centroid: d.changed ? { x: (d.sx / d.changed) / W, y: (d.sy / d.changed) / H } : null,
+      box: d.changed
+        ? { x: d.minX / W, y: d.minY / H, w: (d.maxX - d.minX + 1) / W, h: (d.maxY - d.minY + 1) / H }
+        : null,
       cameraMoving, reason: cameraMoving ? CAMERA_MOVING : null,
     });
 
@@ -90,10 +170,17 @@ function autoThreshold(energies, floor = 0.008) {
   return Math.max(floor, quiet + 0.25 * (busy - quiet));
 }
 
+// Tried and rejected: judging each frame against a rolling local baseline
+// instead of one threshold for the clip. It sounds right — a clip can hold both
+// a camera being carried across the rink and a skater working quietly at a
+// distance — but measured against the hand labels it found no extra attempt and
+// asked to send 3% more of every clip. The reason is in the footage: in a busy
+// handheld clip the skater's own motion sits inside the ambient level, so no
+// threshold, local or global, separates them. That needs a person detector.
 function activityWindows(series, opts = {}) {
-  const { minGap = 0.5, minLength = 0.3, pad = 0.1, threshold } = opts;
+  const { minGap = 0.5, minLength = 0.3, pad = 0.1, threshold, floor = 0.008 } = opts;
   if (!series.length) return [];
-  const thr = threshold ?? autoThreshold(series.map(f => f.energy));
+  const thr = threshold ?? autoThreshold(series.map(f => f.energy), floor);
 
   const runs = [];
   let cur = null;
@@ -275,6 +362,6 @@ function evidencePlan(windows, opts = {}) {
 }
 
 module.exports = {
-  motionSeries, activityWindows, trackSubject, evidencePlan,
+  motionSeries, activityWindows, trackSubject, evidencePlan, estimateShift,
   autoThreshold, cropFor, CAMERA_MOVING, DEFAULTS,
 };
