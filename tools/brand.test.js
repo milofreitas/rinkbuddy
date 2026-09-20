@@ -1,7 +1,7 @@
 // node --test tools/brand.test.js
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { contrastRatio, parseThemes, colourLiterals, colourGradients, pngInfo } = require('./brand.js');
+const { contrastRatio, parseThemes, colourLiterals, colourGradients, pngInfo, stripTokenBlocks } = require('./brand.js');
 
 test('contrast ratio matches known WCAG values', () => {
   assert.strictEqual(Math.round(contrastRatio('#FFFFFF', '#000000')), 21);
@@ -93,6 +93,8 @@ const TOKENS = [
   '--bg', '--surface', '--surface2', '--border', '--text', '--text-dim',
   '--accent', '--accent-wash', '--accent-text', '--on-accent',
   '--success', '--warning', '--danger', '--radius',
+  '--success-wash', '--success-text', '--warning-wash', '--warning-text',
+  '--danger-wash', '--danger-text', '--neutral-wash', '--neutral-text',
 ];
 
 test('both themes define exactly the same token names', () => {
@@ -109,6 +111,8 @@ test('every text-on-background pair passes WCAG AA in both themes', () => {
     ['--on-accent', '--accent'], ['--accent-text', '--accent-wash'],
     ['--success', '--bg'], ['--warning', '--bg'], ['--danger', '--bg'],
     ['--success', '--surface'], ['--warning', '--surface'], ['--danger', '--surface'],
+    ['--success-text', '--success-wash'], ['--warning-text', '--warning-wash'],
+    ['--danger-text', '--danger-wash'], ['--neutral-text', '--neutral-wash'],
   ];
   for (const [name, theme] of Object.entries(themes)) {
     for (const [fg, bg] of pairs) {
@@ -135,17 +139,59 @@ test('the app header has a theme toggle wired to setTheme', () => {
 //   Google's four brand hues and its button chrome — Google's guidelines require them
 //   #F5F8FA / #0B1826 — the theme-color <meta> cannot reference a CSS variable, and
 //     setTheme must write a literal into it
-//   #000 / #fff and rgba(0,0,0,a) — theme-neutral structure: video letterbox, scrims,
-//     shadows. White alpha washes are NOT exempt: they vanish on a light surface.
+//   rgba(0,0,0,a) — theme-neutral structure: video letterbox, scrims, shadows.
+//     White alpha washes are NOT exempt: they vanish on a light surface.
+// #000/#fff are deliberately NOT in this flat list — see whiteBlackOffenders() below.
+// They are scoped to background-only, not flattened into an always-allowed value, because
+// a bare "#fff is fine" entry is exactly what hid the Fix-1 bug: index.html:1417 shipped
+// color:#fff on an accent background and measured 2.04:1 once dark theme's --accent went
+// light blue. A value-only allowlist can't tell "background:#fff" from "color:#fff" apart;
+// only checking where the literal sits in the source can.
 const ALLOWED_LITERALS = [
   '#4285f4', '#34a853', '#fbbc05', '#ea4335',
   '#333', '#ddd', '#f5f5f5', '#bbb',
   '#F5F8FA', '#0B1826',
-  '#000', '#fff',
 ];
 const BLACK_ALPHA = /^rgba?\(\s*0\s*,\s*0\s*,\s*0\b/i;
-const remainingLiterals = () =>
-  colourLiterals(INDEX, ALLOWED_LITERALS).filter(v => !BLACK_ALPHA.test(v));
+
+// #000/#fff are allowed only where they establish theme-neutral BACKGROUND structure
+// (video letterbox, scrims) — never as a text/foreground colour, full stop.
+const WHITE_BLACK_HEX = /#(?:fff(?:fff)?|000(?:000)?)\b/gi;
+const AS_BACKGROUND = /background(?:-color)?\s*:\s*$/i;
+// The one glyph that is legitimately white-as-a-fill rather than white-as-text: the
+// play-button triangle drawn over a fixed rgba(0,0,0,0.55) scrim on a video thumbnail
+// (index.html, playEvidence thumbnails). The scrim is theme-neutral by the same rule as
+// the exemption above; the glyph on top of it is exempt for the identical reason. This is
+// named narrowly on purpose — it is not a general licence for icon fills, only this one
+// glyph sitting on this one theme-neutral scrim. Reported in the Fix-1 writeup rather than
+// folded into a broader "fill is fine" rule.
+const PLAY_ICON_FILL = /rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\.55\s*\)[\s\S]{0,200}?fill="\s*$/i;
+
+function whiteBlackOffenders(html) {
+  const body = stripTokenBlocks(html);
+  const offenders = [];
+  let m;
+  WHITE_BLACK_HEX.lastIndex = 0;
+  while ((m = WHITE_BLACK_HEX.exec(body))) {
+    const before = body.slice(Math.max(0, m.index - 260), m.index);
+    if (AS_BACKGROUND.test(before)) continue;
+    if (PLAY_ICON_FILL.test(before)) continue;
+    offenders.push(m[0]);
+  }
+  return offenders;
+}
+
+// #fff/#000 are excluded here and checked exclusively by whiteBlackOffenders() above,
+// which knows WHERE each one sits; colourLiterals only knows what value it is, so leaving
+// them in this generic pass would flag every legitimate background:#000 video placeholder
+// right alongside the one that matters.
+const IS_WHITE_OR_BLACK = /^#(?:fff(?:fff)?|000(?:000)?)$/i;
+const remainingLiterals = () => [
+  ...colourLiterals(INDEX, ALLOWED_LITERALS)
+    .filter(v => !BLACK_ALPHA.test(v))
+    .filter(v => !IS_WHITE_OR_BLACK.test(v)),
+  ...whiteBlackOffenders(INDEX),
+];
 
 // Ratchet: this number only ever goes down. Task 4 → 119, Task 5 → 49, Task 6 → 0.
 const MAX_LITERALS = 0;
@@ -174,6 +220,55 @@ test('no CSS named colours are used for colour-bearing properties', () => {
   const found = [...INDEX.matchAll(NAMED_COLOUR)].map(m => `${m[1]}=${m[2]}`);
   assert.deepStrictEqual(found, [],
     `named colours left: ${found.slice(0, 10).join(', ')}`);
+});
+
+// The tinted-badge bug: background: color-mix(in srgb, var(--X) N%, transparent) paired
+// with color: var(--X) in the same rule (or the same inline style="" attribute). Composited
+// against a real parent this lands anywhere from 3.5:1 to 4.4:1 depending on theme and
+// parent — it cannot be judged correct by reading the source. Rather than compositing every
+// rule against its actual DOM parent, this walks each declaration block and flags the
+// pattern itself: a tint of --X standing behind text coloured --X. The fix is always the
+// same shape — swap both onto an opaque --X-wash / --X-text pair (see the accent one, and
+// the success/warning/danger/neutral ones added alongside it) so contrast no longer depends
+// on what happens to be behind the badge.
+//
+// One deliberate exemption: .nav-btn.active's background is a barely-there 5% accent wash
+// behind the active nav tab, not a status/label badge — it measures 5.35:1 (light) / 6.60:1
+// (dark) against its real parent (--surface) and turning it into an opaque wash would make
+// the active tab a solid chip, which is a bigger visual change than this pattern warrants.
+const BADGE_BUG_EXEMPT = new Set(['.nav-btn.active']);
+
+function tintedBadgeOffenders(html) {
+  const offenders = [];
+  const mixRe = /background(?:-color)?\s*:\s*color-mix\(in srgb,\s*var\((--[a-z0-9-]+)\)[^)]*\)/gi;
+  function scan(block, label) {
+    let m;
+    mixRe.lastIndex = 0;
+    while ((m = mixRe.exec(block))) {
+      const token = m[1];
+      // negative lookbehind keeps "border-color:"/"background-color:" from matching as "color:"
+      const colorRe = new RegExp(`(?<![a-zA-Z-])color\\s*:\\s*var\\(${token}\\)`, 'i');
+      if (colorRe.test(block)) offenders.push(`${label}: ${token}`);
+    }
+  }
+  const styleTag = /<style>([\s\S]*?)<\/style>/.exec(html);
+  if (styleTag) {
+    for (const rule of styleTag[1].match(/[^{}]+\{[^{}]*\}/g) || []) {
+      const selector = rule.slice(0, rule.indexOf('{')).trim();
+      if (BADGE_BUG_EXEMPT.has(selector)) continue;
+      scan(rule, selector);
+    }
+  }
+  for (const m of html.matchAll(/style\s*=\s*"([^"]*)"/g)) {
+    scan(m[1], 'inline style');
+  }
+  return offenders;
+}
+
+test('no badge-style rule pairs text colour with a color-mix of that same token as its background', () => {
+  const found = tintedBadgeOffenders(INDEX);
+  assert.deepStrictEqual(found, [],
+    `the tinted-badge bug is back (use the matching -wash/-text token pair instead): ${found.join(', ')}`);
 });
 
 const REPO = path.join(__dirname, '..');
@@ -251,9 +346,21 @@ test('the iOS splash images are 2732 square', () => {
   }
 });
 
-test('the iOS launch screen uses the brand navy', () => {
+test('the iOS launch screen sets navy on the view itself, not just the IB design-time cache', () => {
   const storyboard = fs.readFileSync(path.join(REPO, 'ios/App/App/Base.lproj/LaunchScreen.storyboard'), 'utf8');
-  assert.match(storyboard, /red="0\.058/, 'launch screen background is not navy #0F2338');
+  // <resources><systemColor name="systemBackgroundColor"> is an Interface Builder
+  // design-time preview cache. At runtime, systemColor="systemBackgroundColor" on the view
+  // resolves through the dynamic UIColor.systemBackground (white in light mode, black in
+  // dark) instead, ignoring that cache entirely. Asserting on the whole file — as this test
+  // used to — would keep passing even if the view still pointed at the dynamic colour, as
+  // long as the unused <resources> cache still had navy in it. It has to be checked on the
+  // view's own element.
+  const view = /<imageView key="view"[\s\S]*?<\/imageView>/.exec(storyboard);
+  assert.ok(view, "could not find the launch screen's root view");
+  assert.doesNotMatch(view[0], /systemColor="systemBackgroundColor"/,
+    'the view still resolves its background through the dynamic UIColor.systemBackground, not a fixed navy');
+  assert.match(view[0], /<color key="backgroundColor"[^>]*\bred="0\.058/,
+    "the view's own backgroundColor is not navy #0F2338");
 });
 
 const ANDROID_RES = path.join(REPO, 'android/app/src/main/res');

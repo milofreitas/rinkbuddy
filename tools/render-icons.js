@@ -70,11 +70,34 @@ const WEB = [
   { out: 'og-image.png', width: 1200, height: 630, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.42 },
 ];
 
+// favicon.svg has to stay a vector (browsers prefer it over the PNG favicons), but the
+// brand/rinkbuddy-skate-simple.svg master is frost-on-transparent — it's meant to be
+// composited onto a navy surface by whatever uses it, the same way the PNG favicons get
+// their navy field from render()'s `background` box. Copying the master verbatim skipped
+// that compositing step, so the tab icon was frost-on-nothing: invisible on a light tab
+// strip (1.02-1.14:1). This builds the same navy-field-plus-mark treatment as the PNGs,
+// as a small SVG document instead of a raster, reusing markScale from the favicon-32 job
+// above so the vector and raster favicons read as the same icon.
+function faviconSvg() {
+  const master = fs.readFileSync(path.join(BRAND, 'rinkbuddy-skate-simple.svg'), 'utf8');
+  const viewBox = /viewBox="([^"]+)"/.exec(master);
+  const inner = /<svg[^>]*>([\s\S]*)<\/svg>/.exec(master);
+  if (!viewBox || !inner) throw new Error('rinkbuddy-skate-simple.svg is not the shape faviconSvg() expects');
+  const markScale = WEB.find(j => j.out === 'favicon-32.png').markScale;
+  const size = 100;
+  const markSize = size * markScale;
+  const offset = (size - markSize) / 2;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">\n` +
+    `<rect width="${size}" height="${size}" fill="${NAVY}"/>\n` +
+    `<svg x="${offset}" y="${offset}" width="${markSize}" height="${markSize}" viewBox="${viewBox[1]}">${inner[1]}</svg>\n` +
+    `</svg>\n`;
+  fs.writeFileSync(path.join(REPO, 'favicon.svg'), svg);
+  console.log('wrote favicon.svg (navy field + frost mark, not a copy of the master)');
+}
+
 function web() {
   for (const job of WEB) render(job);
-  // favicon.svg is the master, copied rather than rasterised
-  fs.copyFileSync(path.join(BRAND, 'rinkbuddy-skate-simple.svg'), path.join(REPO, 'favicon.svg'));
-  console.log('wrote favicon.svg');
+  faviconSvg();
 }
 
 const IOS = 'ios/App/App/Assets.xcassets';

@@ -54,7 +54,7 @@ Generated with Nano Banana 2 from prompts built on real skate references (Wikime
 ### Rules
 
 - **Clear space:** at least 12% of the mark's width on every side.
-- **Minimum sizes:** the detailed cut at 24px and above; the simplified cut below 24px. Under 24px the lace gaps fill in and the detailed cut reads as a blob.
+- **Minimum sizes:** the simplified cut at 32px and below; the detailed cut above 32px. Under 24px the lace gaps fill in and the detailed cut reads as a blob — and favicon-32.png measured better with the simplified cut too, so the line sits at 32px rather than 24px; a measured legibility call, not an oversight.
 - **Backgrounds:** frost on navy, navy on white or ice. Never frost on ice or navy on navy.
 - **Never:** recolour to a third hue, add gradients, outline it, rotate it, or stretch it.
 - **Lockup:** mark then wordmark, gap equal to 25% of the mark's width, optically centred on the x-height.

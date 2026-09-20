@@ -110,4 +110,5 @@ function pngInfo(buffer) {
 
 module.exports = {
   luminance, contrastRatio, parseThemes, colourLiterals, colourGradients, pngInfo,
+  stripTokenBlocks,
 };
