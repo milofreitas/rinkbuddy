@@ -2,7 +2,7 @@
 
 const HEX = /(?<![&\w])#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\b/g;
 const RGBA = /\brgba?\([^)]*\)/g;
-const GRADIENT = /(?:linear|radial|conic)-gradient\((?:[^()]|\([^()]*\))*\)/g;
+const GRADIENT_START = /(?:linear|radial|conic)-gradient\(/g;
 
 function srgbToLinear(channel) {
   const c = channel / 255;
@@ -69,8 +69,30 @@ function colourLiterals(html, allowlist = []) {
   return found.filter(v => !allowed.has(v.toLowerCase()));
 }
 
+// Finds every linear-/radial-/conic-gradient(...) call via a balanced-paren scan from
+// each opener, so a nested function call (color-mix(), var(), another gradient — any
+// depth) can't hide the rest of the argument list from the scan. A regex with a fixed
+// nesting allowance (e.g. "one level of (...)") looks right until something nests one
+// level deeper than it expects, then it silently stops matching that gradient at all.
 function colourGradients(html) {
-  return (html.match(GRADIENT) || []).filter(g => /var\(--|#[0-9a-fA-F]{3,6}\b/.test(g));
+  const found = [];
+  GRADIENT_START.lastIndex = 0;
+  let m;
+  while ((m = GRADIENT_START.exec(html))) {
+    const start = m.index;
+    let depth = 0;
+    let i = start + m[0].length - 1; // index of the opening '(' itself
+    for (; i < html.length; i++) {
+      if (html[i] === '(') depth++;
+      else if (html[i] === ')') {
+        depth--;
+        if (depth === 0) { i++; break; }
+      }
+    }
+    found.push(html.slice(start, i));
+    GRADIENT_START.lastIndex = i;
+  }
+  return found.filter(g => /var\(--|#[0-9a-fA-F]{3,6}\b/.test(g));
 }
 
 function pngInfo(buffer) {

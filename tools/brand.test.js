@@ -48,6 +48,18 @@ test('colourGradients flags brand-coloured gradients but allows alpha scrims', (
   assert.match(found[0], /var\(--accent\)/);
 });
 
+test('colourGradients catches a brand hue nested two levels deep (color-mix(var()))', () => {
+  // This exact shape (radial-gradient wrapping color-mix wrapping var()) fooled the old
+  // single-nesting regex: it nests one level deeper than "(?:[^()]|\([^()]*\))*" tolerates,
+  // so the whole gradient silently failed to match and passed as "clean".
+  const html = `.a{background:radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 60%)}
+                .b{background:linear-gradient(to top, rgba(0,0,0,0.7), transparent)}`;
+  const found = colourGradients(html);
+  assert.strictEqual(found.length, 1);
+  assert.match(found[0], /var\(--accent\)/);
+  assert.match(found[0], /^radial-gradient\(/);
+});
+
 test('pngInfo reads dimensions and colour type from the IHDR chunk', () => {
   // 1x1 opaque red PNG, colour type 2 (RGB, no alpha)
   const png = Buffer.from(
