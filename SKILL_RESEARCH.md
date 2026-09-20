@@ -1,3 +1,12 @@
+> ⚠️ **SUPERSEDED — DO NOT USE FOR LEVELS.** This file transcribes the **2016**
+> Learn to Skate USA curriculum, which was revised in 2020. Auditing against it in
+> September 2026 produced 173 wrong levels and prerequisites across the three trees.
+>
+> Authoritative now: `research/09-audit-foundations.md`, `research/10-audit-figure.md`,
+> `research/11-audit-hockey.md` (each element checked against the live official source,
+> with URLs), and `research/12-skill-tree-edits.md` for the combined edit list.
+> Kept only for the element descriptions and coaching notes.
+
 # RinkBuddy Skill Research — Comprehensive Catalog
 
 ## Sources
