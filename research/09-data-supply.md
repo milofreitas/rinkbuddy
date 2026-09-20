@@ -367,6 +367,120 @@ so there's room to fund a second rink for body-type diversity instead.
 
 Cheaper per usable clip than anything licensable, and the only version we own.
 
-## D. Footage people will give us
+## D. Footage people will give us — and the size of that pool, counted
 
-*Pending.*
+Somebody actually counted this instead of hand-waving, by censusing the Reddit
+archive over the year to 2026-09-20.
+
+**About 521 distinct adults a year — 43 a month — already film themselves
+skating and post it publicly asking for feedback.** That is the entire organic
+supply, nationally, across every skating subreddit. It is a real channel and a
+small one.
+
+| Sub | Subscribers | Self-filmed critique posts/mo | Distinct people/yr | Median comments |
+|---|---|---|---|---|
+| r/FigureSkating | 73,007 | ~15–20 | 223 | 6 |
+| r/iceskating | 11,814 | **18.7** | 151 | **8** |
+| r/hockeyplayers | 274,978 | 16.5 | 147 | **29** |
+
+Real examples, all adult beginners filming themselves: *"My crossover is so bad
+that I don't know where to start fixing"* (53 comments), *"Back 3 turns 😭 I'm
+desperate for tips"* (61), *"Started skating mid-March, no coach. How's my
+technique?"* (47).
+
+### The channel is r/iceskating, and it is not the obvious one
+
+| Sub | Builder posts/mo | Median score | Removed by mods |
+|---|---|---|---|
+| r/hockeyplayers | **7.6** | **0** | 2% |
+| r/FigureSkating | 3.6 | 1 | **47%** |
+| **r/iceskating** | **0.5** | **4** | 17% |
+
+r/hockeyplayers permits promotion and is therefore saturated — roughly two app
+launches a week, median zero upvotes. r/FigureSkating removes nearly half of all
+builder posts and carries documented anti-AI sentiment. **r/iceskating is the
+only skating channel that is simultaneously high-intent, unsaturated and
+tolerant**, and it runs a weekly *"what did you do this week?"* thread that is a
+standing, rule-free slot.
+
+What survives there is problem-first and gift-first. *"Beta testers wanted"*
+dies; the top builder post of the year in r/hockeyplayers was *"I got tired of
+chasing e-transfers for subs in my beer league, so I built a tool. Roast me"*
+(74 comments). And **"first N get lifetime access" works even from a zero-upvote
+post** — one such post scored 0 and still drew 33 comments claiming the offer.
+
+One user stated the demand in their own words: the feature they'd most want is
+*"showing what is wrong then using ai to show how it should look like"* —
+diagnosis plus a correct reference. That is exactly the demo-clip work.
+
+### One rink beats every online channel combined
+
+Adopting a single adult learn-to-skate class and filming it weekly yields an
+estimated **300–1,200 clips a month**. The entire national Reddit supply is ~43
+contributors a month. It is also precisely what the comparable products did:
+
+- **HomeCourt** filmed themselves and local teams. (Their instructive failure:
+  Stanford's players broke the model — the shots went through the net too
+  cleanly to register.)
+- **OOFSkate** tested **almost weekly at one rink**, the Skating Club of Boston.
+- **Carv** had ski-association examiners score a bank of 4,000 videos from 500+
+  skiers.
+- **SwingVision** shipped an Apple Watch app three years before the video
+  product — audience first, model second.
+- **Hudl** had two customers for about two years.
+
+**Collect the ugly ones first.** That is the inverse of HomeCourt's Stanford
+problem, and it is what our own eval set needs.
+
+### The organisational doors, with dates
+
+- **US Figure Skating Adult Nationals, 7–10 April 2027** — ~400 adult athletes,
+  four days, one release process, and the bid RFP **reserves up to four vendor
+  slots at no cost**. Contact `events@usfigureskating.org`, cc
+  `usfsadultskating@gmail.com`.
+- **USA Hockey Adult Nationals, April 2027, Wesley Chapel FL** — 183,116
+  registered adult players nationally and no skill-feedback tool.
+  `Josh.Holmes@usahockey.org`.
+- **ISI** — a $395 Builder/Supplier membership is an instant, transactional front
+  door: directory listing, a free New Products announcement, member ad rates.
+  The national partnership is a 12–18-month low-probability play; the membership
+  plus direct rink pilots is a 2–4 month high-probability one.
+
+**The precedent that makes the ask normal:** USFS signed **OOFSkate** — an AI
+phone-video app — in December 2025, and contributed a National Team video
+library rather than cash. OOFSkate owns elite jumps. The Adult 1–6 beginner band
+is the gap they left open, and it is exactly where we are.
+
+### Consent is the unfinished piece, and it blocks collection
+
+Four items must close before the first stranger's clip is accepted:
+
+1. **The AI-training clause wording** for the Terms, benchmarked against the
+   versions that caused public backlash (Zoom 2023, Dropbox 2023, Adobe 2024) so
+   we avoid their phrasing.
+2. **Whether pose extraction is a biometric identifier under Illinois BIPA**, and
+   what its written-policy and written-consent sections require.
+3. **Bystander capture** — public-session footage contains minors in the
+   background. This is the highest-risk unresolved item and it is unavoidable at
+   a rink.
+4. **Defensible adults-only enforcement** — age gate wording, "actual knowledge"
+   under COPPA, and the 2025–26 state app-store age-verification laws.
+
+`RELEASE-FORMS.md` covers the shoot-day case. It does not cover a stranger
+uploading from the internet.
+
+---
+
+## The answer, in one paragraph
+
+There is no hidden reservoir. Openly-licensed skating video amounts to about ten
+minutes; nothing rights-cleared is purchasable at our budget; the rink camera
+networks own their footage but can't clear the skaters and one of them is now a
+competitor. What the search *did* find is worth more than a reservoir: **11,671
+labelled skating skeletons we can use today**, a **research group with clean
+title who have already built our product**, the fact that **US competition
+footage is already music-free**, a **free vendor slot at Adult Nationals in
+April**, and the measurement that **one adult learn-to-skate class filmed weekly
+out-yields every online channel in the country combined**. And the methods half
+says we need ~200 labeled clips, not thousands — so the supply problem was
+smaller than it looked, and the labelling problem is the real one.
