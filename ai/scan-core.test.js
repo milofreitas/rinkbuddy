@@ -190,3 +190,102 @@ test('while panning, a skater moving differently is still found', () => {
 // Note: a rolling local threshold was tried here and removed — see the comment
 // above activityWindows in scan-core.js. It passed a synthetic loud-half /
 // quiet-half case but found nothing extra on real footage.
+
+// ── tap-to-select: track the person the skater pointed at ───────────────────
+const { trackFrom, subjectActivity, subjectWindows } = require('./scan-core.js');
+
+test('tracking follows the seeded subject, not a bigger thing crossing in front', () => {
+  // target: 8x12, drifting right. distractor: 20x24, sweeping the other way.
+  const frames = [];
+  for (let i = 0; i < 10; i++) {
+    let f = blank(30);
+    f = paste(f, 8 + i * 3, 16, 8, 12, 215);        // the skater we seeded
+    f = paste(f, 46 - i * 4, 6, 20, 24, 240);       // someone closer to the camera
+    frames.push(f);
+  }
+  const s = motionSeries(seq(frames));
+  const seed = { t: 0.1, box: { x: 11 / W, y: 16 / H, w: 8 / W, h: 12 / H } };
+  const track = trackFrom(s, seed);
+  assert.equal(track.length, s.length);
+  const boxes = track.filter(Boolean);
+  assert.ok(boxes.length >= 8, `expected the subject to be held most frames, got ${boxes.length}`);
+  for (let i = 2; i < track.length; i++) {
+    const b = track[i];
+    if (!b) continue;
+    const cx = (b.x + b.w / 2) * W;
+    const expected = 8 + i * 3 + 4;
+    assert.ok(Math.abs(cx - expected) < 7,
+      `frame ${i}: box centre ${cx.toFixed(1)} should be near the skater at ${expected}, not the distractor`);
+  }
+});
+
+test('a subject who stops moving keeps their box instead of vanishing', () => {
+  const frames = [];
+  for (let i = 0; i < 5; i++) frames.push(paste(blank(30), 10 + i * 4, 14, 8, 12, 215));
+  for (let i = 0; i < 5; i++) frames.push(paste(blank(30), 26, 14, 8, 12, 215));   // parked
+  const s = motionSeries(seq(frames));
+  const track = trackFrom(s, { t: 0.1, box: { x: 14 / W, y: 14 / H, w: 8 / W, h: 12 / H } });
+  assert.ok(track[9], 'the box should still exist once the subject stops');
+  const cx = (track[9].x + track[9].w / 2) * W;
+  assert.ok(Math.abs(cx - 30) < 6, `held box should stay on the parked skater, got ${cx.toFixed(1)}`);
+});
+
+test('subject activity ignores commotion outside the subject box', () => {
+  const still = [];
+  for (let i = 0; i < 8; i++) {
+    let f = blank(30);
+    f = paste(f, 26, 14, 8, 12, 215);                      // our skater: parked
+    f = paste(f, 2 + (i % 2) * 5, 2, 14, 16, 245);          // someone else thrashing about, well clear
+    still.push(f);
+  }
+  const s = motionSeries(seq(still));
+  const track = trackFrom(s, { t: 0.1, box: { x: 26 / W, y: 14 / H, w: 8 / W, h: 12 / H } });
+  const act = subjectActivity(s, track);
+  assert.equal(act.length, s.length);
+  assert.ok(act.slice(2).every(a => a.activity < 0.25),
+    `a parked subject should read as quiet: ${act.map(a => a.activity.toFixed(2)).join(',')}`);
+});
+
+test('subject windows open when the subject moves, not when the frame is busy', () => {
+  const frames = [];
+  const other = (f, i) => paste(f, 2 + (i % 2) * 4, 2, 14, 14, 245);   // constant background churn, clear of the subject
+  for (let i = 0; i < 10; i++) frames.push(other(paste(blank(30), 26, 16, 8, 12, 215), i));     // parked
+  for (let i = 0; i < 10; i++) frames.push(other(paste(blank(30), 26 + i * 2, 16, 8, 12, 215), i)); // skating
+  for (let i = 0; i < 8; i++) frames.push(other(paste(blank(30), 44, 16, 8, 12, 215), i));      // parked
+  const s = motionSeries(seq(frames));
+  const track = trackFrom(s, { t: 0.1, box: { x: 26 / W, y: 16 / H, w: 8 / W, h: 12 / H } });
+  const w = subjectWindows(s, track, { minGap: 0.4, minLength: 0.3, pad: 0.1 });
+  assert.ok(w.length >= 1, 'expected a window while the subject was moving');
+  const moving = w.find(x => x.end > 1.0 && x.start < 2.0);
+  assert.ok(moving, `expected a window over 1.0-1.9s, got ${JSON.stringify(w.map(x => [x.start, x.end]))}`);
+  assert.ok(w.every(x => x.start > 0.6), `nothing should open while the subject was parked: ${JSON.stringify(w)}`);
+});
+
+test('a lookalike crossing the subject does not steal the track', () => {
+  // subject: dark, moving right slowly. interloper: bright, sweeping across and
+  // passing right through the subject's position, as happens at a public session.
+  const frames = [];
+  for (let i = 0; i < 14; i++) {
+    let f = blank(150);
+    f = paste(f, 14 + i, 16, 8, 12, 40);          // the seeded skater (dark)
+    f = paste(f, 40 - i * 3, 14, 9, 14, 250);     // someone bright crossing through
+    frames.push(f);
+  }
+  const s = motionSeries(seq(frames));
+  const track = trackFrom(s, { t: 0.1, box: { x: 15 / W, y: 16 / H, w: 8 / W, h: 12 / H } });
+  const last = track[13];
+  assert.ok(last, 'the subject should still be tracked at the end');
+  const cx = (last.x + last.w / 2) * W;
+  assert.ok(Math.abs(cx - (14 + 13 + 4)) < 8,
+    `box should have stayed with the dark skater near x=31, ended at ${cx.toFixed(1)}`);
+});
+
+test('when the subject leaves, the track goes empty instead of adopting someone else', () => {
+  const frames = [];
+  for (let i = 0; i < 6; i++) frames.push(paste(blank(150), 10 + i * 3, 16, 8, 12, 40));   // ours, dark
+  for (let i = 0; i < 10; i++) frames.push(paste(blank(150), 34 + i, 6, 10, 16, 250));     // only a stranger, bright
+  const s = motionSeries(seq(frames));
+  const track = trackFrom(s, { t: 0.1, box: { x: 11 / W, y: 16 / H, w: 8 / W, h: 12 / H } });
+  const after = track.slice(10);
+  assert.ok(after.every(b => !b), `track should be empty once the subject is gone: ${JSON.stringify(after.map(b => b && +(b.x * W).toFixed(0)))}`);
+});

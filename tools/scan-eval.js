@@ -19,7 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { motionSeries, activityWindows, trackSubject, evidencePlan } = require('../ai/scan-core.js');
+const { motionSeries, activityWindows, trackSubject, evidencePlan, trackFrom, subjectWindows } = require('../ai/scan-core.js');
 
 const ROOT = path.join(__dirname, '..');
 const FOOTAGE = path.join(ROOT, 'footage');
@@ -37,6 +37,7 @@ const WIDTH = +flag('width', 160);
 const TILES = +flag('tiles', 12);
 const ROT = flag('rotate', null);
 const SHEET_AT = flag('sheet', null);
+const SEED_FROM = flag('seed-from', null);
 const only = args.filter(a => !a.startsWith('--') && args[args.indexOf(a) - 1]?.startsWith('--') !== true)[0];
 
 function probe(file) {
@@ -96,8 +97,28 @@ function grade(clipName, opts = {}) {
   const t0 = Date.now();
   const { frames, info } = decode(file, rotate);
   const series = motionSeries(frames);
-  const windows = activityWindows(series, { minGap: 0.6, minLength: 0.4, pad: 0.25 });
-  const track = trackSubject(series);
+  let windows = activityWindows(series, { minGap: 0.6, minLength: 0.4, pad: 0.25 });
+  let track = trackSubject(series);
+  let mode = 'whole frame';
+
+  // With a seed — the tap the skater would give us — follow THAT body and judge
+  // the clip by what it does, instead of by whatever changed the most pixels.
+  const seedSpec = opts.seedFrom ?? (label.subject_seed ? label.subject_seed.t : null);
+  if (seedSpec !== null && seedSpec !== undefined) {
+    const at = +seedSpec;
+    const i = series.reduce((b, f, k) => Math.abs(f.t - at) < Math.abs(series[b].t - at) ? k : b, 0);
+    const box = (label.subject_seed && label.subject_seed.box)
+      ? { x: label.subject_seed.box[0], y: label.subject_seed.box[1],
+          w: label.subject_seed.box[2], h: label.subject_seed.box[3] }
+      : track[i];
+    if (box) {
+      track = trackFrom(series, { t: series[i].t, box });
+      windows = subjectWindows(series, track, { minGap: 0.6, minLength: 0.4, pad: 0.25 });
+      mode = `seeded at ${series[i].t.toFixed(1)}s`;
+    } else {
+      console.log('  (no subject visible at the seed time — falling back to whole-frame)');
+    }
+  }
   const plan = evidencePlan(windows, { tiles: TILES, track, series });
   const secs = (Date.now() - t0) / 1000;
 
@@ -111,7 +132,7 @@ function grade(clipName, opts = {}) {
   const handheld = windows.filter(w => w.cameraMoving).length;
 
   console.log(`\n${path.basename(file)}  ${info.seconds.toFixed(0)}s  ${info.w}x${info.h}` +
-    `${rotate ? `  rotate ${rotate}` : ''}  scanned in ${secs.toFixed(1)}s`);
+    `${rotate ? `  rotate ${rotate}` : ''}  ${mode}  scanned in ${secs.toFixed(1)}s`);
   console.log(`  windows ${windows.length} (${handheld} flagged camera-moving)` +
     `   airtime ${airtime.toFixed(1)}s = ${(airtime / info.seconds * 100).toFixed(0)}% of the clip` +
     `   tiles ${plan.reduce((n, p) => n + p.tiles, 0)}`);
@@ -166,7 +187,7 @@ const clips = only
 
 let found = 0, total = 0, air = 0, dur = 0;
 for (const c of clips) {
-  const r = grade(c, { rotate: ROT, verbose: !!only });
+  const r = grade(c, { rotate: ROT, verbose: !!only, seedFrom: SEED_FROM });
   if (!r) continue;
   found += r.found; total += r.total; air += r.airtime; dur += r.info.seconds;
   if (only && SHEET_AT) drawSheet(r, +SHEET_AT);
