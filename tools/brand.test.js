@@ -277,3 +277,11 @@ test('the adaptive icon background is brand navy and a monochrome layer is decla
   const adaptive = fs.readFileSync(path.join(ANDROID_RES, 'mipmap-anydpi-v26/ic_launcher.xml'), 'utf8');
   assert.match(adaptive, /<monochrome/);
 });
+
+test('build.sh copies every web asset the app serves', () => {
+  const build = fs.readFileSync(path.join(REPO, 'build.sh'), 'utf8');
+  for (const [file] of WEB_ICONS) {
+    assert.ok(build.includes(file), `build.sh does not copy ${file}`);
+  }
+  assert.ok(build.includes('favicon.svg'), 'build.sh does not copy favicon.svg');
+});
