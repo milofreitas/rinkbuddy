@@ -105,7 +105,7 @@ Generated with Nano Banana 2 from prompts built on real skate references (Wikime
 - **Gradients on buttons and surfaces go too** — flat fills only. This is the single biggest visual difference from the old look.
 - **Ice is for measurement** (progress bars, the radar chart, data). **Amber is for encouragement and caution** (streaks, warnings). Never swap them; that separation is what stops the UI turning into confetti.
 - Every text-on-background pair ships at AA or better. Any new pair gets checked before it lands.
-- No colour literals in component CSS. Every value resolves to a token.
+- No colour literals in component CSS. Every value resolves to a token, except: Google's brand hues and button chrome (their guidelines require them), the two theme-color values a `<meta>` tag cannot express as a variable, and theme-neutral `#000`/`#fff`/`rgba(0,0,0,a)` structure such as the video letterbox and drop shadows. A white alpha wash is never exempt: it vanishes on a light surface.
 
 ## 5. Typography
 

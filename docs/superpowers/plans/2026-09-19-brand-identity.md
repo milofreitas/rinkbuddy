@@ -17,7 +17,7 @@
 - `--radius: 12px` stays in both themes, unchanged.
 - **Brand constants:** night navy `#0F2338`, ice `#4FC3E8`, deep ice `#0F6E92`, frost `#E8F1F7`.
 - **Every text-on-background pair ships at 4.5:1 or better.** No exceptions, no "it's decorative".
-- **No colour literals** in `index.html` outside the two token blocks, except Google's sign-in button colours (`#4285f4`, `#34a853`, `#fbbc05`, `#ea4335`), which are Google's brand and must not be tokenised.
+- **No colour literals** in `index.html` outside the two token blocks, except the documented exceptions in `ALLOWED_LITERALS` (Task 4's test): Google's brand hues and button chrome, the two theme-color pins a `<meta>` cannot express as a variable, and theme-neutral `#000`/`#fff`/`rgba(0,0,0,a)` structure. White alpha washes are not exempt — they disappear on a light surface.
 - **No colour gradients.** Alpha-only scrims over video (`rgba(0,0,0,…)` to `transparent`) are allowed; anything carrying a brand hue is not.
 - **Ice is for measurement** (progress bars, the radar chart, data readouts). **Amber is for encouragement and caution** (streaks, warnings). Never swap them.
 - **The mark:** detailed cut at 24px and above, simplified cut below 24px. Frost on navy, navy on white or ice. Never recoloured, outlined, rotated or stretched.
@@ -162,11 +162,14 @@ function contrastRatio(a, b) {
 }
 
 function blockAfter(html, selector) {
-  const start = html.indexOf(selector);
-  if (start === -1) return '';
-  const open = html.indexOf('{', start);
+  // Whitespace-tolerant: index.html writes most rules compact (`.x{…}`), so the
+  // token blocks must be found whether or not they carry a space before the brace.
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = new RegExp(escaped + '\\s*\\{').exec(html);
+  if (!m) return '';
+  const open = m.index + m[0].length - 1;
   const close = html.indexOf('}', open);
-  if (open === -1 || close === -1) return '';
+  if (close === -1) return '';
   return html.slice(open + 1, close);
 }
 
@@ -180,14 +183,14 @@ function parseTokens(block) {
 
 function parseThemes(html) {
   return {
-    light: parseTokens(blockAfter(html, ':root {')),
-    dark: parseTokens(blockAfter(html, ':root[data-theme="dark"] {')),
+    light: parseTokens(blockAfter(html, ':root')),
+    dark: parseTokens(blockAfter(html, ':root[data-theme="dark"]')),
   };
 }
 
 function stripTokenBlocks(html) {
   let out = html;
-  for (const selector of [':root {', ':root[data-theme="dark"] {']) {
+  for (const selector of [':root', ':root[data-theme="dark"]']) {
     const block = blockAfter(out, selector);
     if (block) out = out.replace(block, '');
   }
@@ -439,7 +442,7 @@ git commit -m "Add a light and dark toggle to the app header"
 
 ---
 
-### Task 4: Migrate the stylesheet colours (179 literals)
+### Task 4: Migrate the stylesheet colours (91 literals in the style block)
 
 **Files:**
 - Modify: `index.html` — the `<style>` block, from `*{margin:0` down to the end of the landing-page CSS
@@ -454,12 +457,27 @@ git commit -m "Add a light and dark toggle to the app header"
 Append to `tools/brand.test.js`:
 
 ```js
-const GOOGLE_BRAND = ['#4285f4', '#34a853', '#fbbc05', '#ea4335'];
-// Ratchet: this number only ever goes down. Task 4 → 60, Task 5 → 45, Task 6 → 0.
-const MAX_LITERALS = 60;
+// Documented exceptions, each for a structural reason, not convenience:
+//   Google's four brand hues and its button chrome — Google's guidelines require them
+//   #F5F8FA / #0B1826 — the theme-color <meta> cannot reference a CSS variable, and
+//     setTheme must write a literal into it
+//   #000 / #fff and rgba(0,0,0,a) — theme-neutral structure: video letterbox, scrims,
+//     shadows. White alpha washes are NOT exempt: they vanish on a light surface.
+const ALLOWED_LITERALS = [
+  '#4285f4', '#34a853', '#fbbc05', '#ea4335',
+  '#333', '#ddd', '#f5f5f5', '#bbb',
+  '#F5F8FA', '#0B1826',
+  '#000', '#fff',
+];
+const BLACK_ALPHA = /^rgba?\(\s*0\s*,\s*0\s*,\s*0\b/i;
+const remainingLiterals = () =>
+  colourLiterals(INDEX, ALLOWED_LITERALS).filter(v => !BLACK_ALPHA.test(v));
+
+// Ratchet: this number only ever goes down. Task 4 → 119, Task 5 → 49, Task 6 → 0.
+const MAX_LITERALS = 119;
 
 test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
-  const found = colourLiterals(INDEX, GOOGLE_BRAND);
+  const found = remainingLiterals();
   assert.ok(found.length <= MAX_LITERALS,
     `${found.length} literals left, budget is ${MAX_LITERALS}. First ten: ${found.slice(0, 10).join(', ')}`);
 });
@@ -468,7 +486,7 @@ test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL — about 239 literals against a budget of 60.
+Expected: FAIL — about 218 literals against a budget of 119.
 
 - [ ] **Step 3: Migrate the stylesheet**
 
@@ -502,7 +520,7 @@ Rules while migrating:
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `node --test tools/brand.test.js`
-Expected: PASS at 60 or fewer literals.
+Expected: PASS at 119 or fewer literals. The `<style>` block itself should reach zero non-exempt literals; the remainder lives in markup and scripts, which Tasks 5 and 6 own.
 
 - [ ] **Step 5: Look at every screen in both themes**
 
@@ -517,7 +535,7 @@ git commit -m "Move the stylesheet onto colour tokens and drop the gradients"
 
 ---
 
-### Task 5: Migrate the landing-page markup (15 literals)
+### Task 5: Migrate the landing-page markup (70 literals)
 
 **Files:**
 - Modify: `index.html` — inline `style="…"` attributes inside `<div id="landingPage">`
@@ -529,12 +547,12 @@ git commit -m "Move the stylesheet onto colour tokens and drop the gradients"
 
 - [ ] **Step 1: Lower the budget**
 
-In `tools/brand.test.js`, change `const MAX_LITERALS = 60;` to `const MAX_LITERALS = 45;`.
+In `tools/brand.test.js`, change `const MAX_LITERALS = 119;` to `const MAX_LITERALS = 49;`.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL at about 60 against a budget of 45.
+Expected: FAIL at about 119 against a budget of 49.
 
 - [ ] **Step 3: Migrate the inline styles**
 
@@ -546,7 +564,7 @@ Replace each inline colour in the landing markup with the matching token, using 
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `node --test tools/brand.test.js`
-Expected: PASS at 45 or fewer.
+Expected: PASS at 49 or fewer.
 
 - [ ] **Step 5: Commit**
 
@@ -557,7 +575,7 @@ git commit -m "Move the landing page markup onto colour tokens"
 
 ---
 
-### Task 6: Migrate the app markup and script colours (45 literals)
+### Task 6: Migrate the app markup and script colours (49 literals)
 
 **Files:**
 - Modify: `index.html` — inline styles in the app markup, and colours set from JavaScript (search for `.style.color`, `.style.background`, `fillStyle`, `strokeStyle`)
@@ -585,7 +603,7 @@ test('no gradient text remains', () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL on all three: about 45 literals, some gradients, some gradient text.
+Expected: FAIL on all three: about 49 literals, some gradients, some gradient text.
 
 - [ ] **Step 3: Migrate the remaining markup and script colours**
 
