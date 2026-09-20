@@ -148,7 +148,7 @@ const remainingLiterals = () =>
   colourLiterals(INDEX, ALLOWED_LITERALS).filter(v => !BLACK_ALPHA.test(v));
 
 // Ratchet: this number only ever goes down. Task 4 → 119, Task 5 → 49, Task 6 → 0.
-const MAX_LITERALS = 119;
+const MAX_LITERALS = 49;
 
 test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
   const found = remainingLiterals();
