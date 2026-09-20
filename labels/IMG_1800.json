@@ -1,0 +1,19 @@
+{
+  "clip": "IMG_1800.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 120,
+    "resolution": "3840x2160",
+    "handheld": false,
+    "note": "phone propped on the boards, static for the whole clip; near-empty public session"
+  },
+  "subject_seed": {
+    "t": 41.7,
+    "box": [0.145, 0.69, 0.09, 0.28],
+    "note": "navy FREITAS 404 jersey, left of frame, full body visible — stands in for the skater's tap"
+  },
+  "events": [],
+  "notes": "Batch 3. Seed recorded; skills not yet labeled."
+}

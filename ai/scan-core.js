@@ -115,7 +115,7 @@ function motionSeries(frames, opts = {}) {
     const { data, width: W, height: H, t } = f;
     if (!prev) {
       prev = data;
-      out.push({ t, energy: 0, changed: 0, centroid: null, box: null, mask: null,
+      out.push({ t, energy: 0, changed: 0, centroid: null, box: null, mask: null, data,
                  width: W, height: H, cameraMoving: false, reason: null });
       continue;
     }
@@ -141,7 +141,7 @@ function motionSeries(frames, opts = {}) {
     const panned = Math.hypot(shift.dx, shift.dy) >= o.cameraShiftPx;
     const cameraMoving = panned || rawEnergy > o.cameraFraction;
     out.push({
-      t, energy, changed: d.changed, mask: d.mask, width: W, height: H, shift, rawEnergy,
+      t, energy, changed: d.changed, mask: d.mask, data, width: W, height: H, shift, rawEnergy,
       centroid: d.changed ? { x: (d.sx / d.changed) / W, y: (d.sy / d.changed) / H } : null,
       box: d.changed
         ? { x: d.minX / W, y: d.minY / H, w: (d.maxX - d.minX + 1) / W, h: (d.maxY - d.minY + 1) / H }
@@ -284,6 +284,205 @@ function trackSubject(series, opts = {}) {
   return out;
 }
 
+// ── 3b. tap-to-select: track the person the skater pointed at ───────────────
+// Picking the biggest moving blob fails on real rink footage in two ways, both
+// seen in Milo's batch 3: standing next to the phone beats skating twenty metres
+// away, and anyone passing closer to the lens steals the box. Once the skater
+// taps themselves, neither happens: we follow THAT body and measure ITS motion.
+//
+// The tracker is appearance plus motion. A small grayscale patch of the subject
+// is matched around where they were predicted to be, and blobs of movement that
+// overlap the match pull it into place. When the subject stands still there is
+// nothing to match against, so the box simply holds.
+
+function extractPatch(data, W, H, box, pw, ph) {
+  const patch = new Uint8Array(pw * ph);
+  const x0 = box.x * W, y0 = box.y * H, bw = box.w * W, bh = box.h * H;
+  for (let j = 0; j < ph; j++) {
+    const sy = Math.min(H - 1, Math.max(0, Math.round(y0 + (j + 0.5) * bh / ph)));
+    for (let i = 0; i < pw; i++) {
+      const sx = Math.min(W - 1, Math.max(0, Math.round(x0 + (i + 0.5) * bw / pw)));
+      patch[j * pw + i] = data[sy * W + sx];
+    }
+  }
+  return patch;
+}
+
+function patchCost(data, W, H, box, patch, pw, ph) {
+  const x0 = box.x * W, y0 = box.y * H, bw = box.w * W, bh = box.h * H;
+  if (x0 < -bw * 0.5 || y0 < -bh * 0.5 || x0 + bw > W + bw * 0.5 || y0 + bh > H + bh * 0.5) return Infinity;
+  let sum = 0;
+  for (let j = 0; j < ph; j++) {
+    const sy = Math.min(H - 1, Math.max(0, Math.round(y0 + (j + 0.5) * bh / ph)));
+    for (let i = 0; i < pw; i++) {
+      const sx = Math.min(W - 1, Math.max(0, Math.round(x0 + (i + 0.5) * bw / pw)));
+      sum += Math.abs(data[sy * W + sx] - patch[j * pw + i]);
+    }
+  }
+  return sum / (pw * ph);
+}
+
+/**
+ * Follow a subject from the frame and box the user tapped.
+ * seed: { t, box:{x,y,w,h} } in normalised units. Returns a box per frame.
+ */
+function trackFrom(series, seed, opts = {}) {
+  const {
+    patchW = 10, patchH = 14, searchPx = 10, blobPull = 0.45,
+    patchAlpha = 0.08, coastFrames = 25, stayPenalty = 0.45,
+    learnRatio = 1.8, learnFloor = 20, lostRatio = 4, lostFloor = 60, lostGrace = 4,
+  } = opts;
+  const out = new Array(series.length).fill(null);
+  if (!series.length || !seed || !seed.box) return out;
+
+  let seedIdx = 0, bestD = Infinity;
+  series.forEach((f, i) => { const d = Math.abs(f.t - seed.t); if (d < bestD) { bestD = d; seedIdx = i; } });
+
+  const run = (from, step) => {
+    const W = series[from].width, H = series[from].height;
+    let box = { ...seed.box };
+    let patch = extractPatch(frameData(series, from), W, H, box, patchW, patchH);
+    let vx = 0, vy = 0, missed = 0, costRef = null, lostRun = 0;
+
+    for (let i = from; i >= 0 && i < series.length; i += step) {
+      const f = series[i];
+      const data = frameData(series, i);
+      if (!data) { out[i] = { ...box }; continue; }
+
+      // where we expect them, then a small search around it
+      const pred = { ...box, x: box.x + vx * step, y: box.y + vy * step };
+      // A flat patch — a plain jersey, plain ice — matches equally well all over
+      // the search area, so without a nudge towards the prediction the box
+      // wanders and a parked skater looks like they are moving.
+      let best = { box: pred, raw: patchCost(data, W, H, pred, patch, patchW, patchH) };
+      best.cost = best.raw;
+      const stepPx = 2;
+      for (let dy = -searchPx; dy <= searchPx; dy += stepPx) {
+        for (let dx = -searchPx; dx <= searchPx; dx += stepPx) {
+          const cand = { ...pred, x: pred.x + dx / W, y: pred.y + dy / H };
+          const raw = patchCost(data, W, H, cand, patch, patchW, patchH);
+          const cost = raw + stayPenalty * Math.hypot(dx, dy);
+          if (cost < best.cost) best = { box: cand, cost, raw };
+        }
+      }
+
+      // Two levels of doubt. A mediocre match still moves the box — bodies
+      // change shape as they skate — but only a GOOD match is allowed to update
+      // the template. That distinction is what stops the tracker adopting
+      // whoever walked past: without it, one bad frame and it learns a stranger.
+      const ref = costRef === null ? best.raw : costRef;
+      const confident = best.raw <= Math.max(learnFloor, ref * learnRatio + 10);
+      const lost = best.raw > Math.max(lostFloor, ref * lostRatio + 40);
+      if (lost) best.box = pred;
+      lostRun = lost ? lostRun + 1 : 0;
+      // Saying "they left the frame" beats handing the box to a stranger: an
+      // empty track costs us a window, a wrong track costs us the whole clip.
+      const absent = lostRun > lostGrace;
+
+      // movement that overlaps the match pulls the box onto it, which keeps the
+      // tracker on a skater whose appearance changes as they turn
+      if (!lost && !absent && f.mask && f.changed) {
+        const blobs = components(f.mask, W, H, Math.max(4, 0.0008 * W * H));
+        const cx = best.box.x + best.box.w / 2, cy = best.box.y + best.box.h / 2;
+        // The blob has to be THIS body: its centre inside the tracked box (with
+        // a little slack), and a similar height. A blob merely nearby is
+        // somebody else — usually someone passing closer to the lens.
+        const padX = best.box.w * 0.35, padY = best.box.h * 0.35;
+        const near = blobs
+          .map(b => ({ b, d: Math.hypot((b.cx - cx) / Math.max(0.01, best.box.w),
+                                        (b.cy - cy) / Math.max(0.01, best.box.h)) }))
+          .filter(({ b }) => b.cx > best.box.x - padX && b.cx < best.box.x + best.box.w + padX &&
+                             b.cy > best.box.y - padY && b.cy < best.box.y + best.box.h + padY &&
+                             b.h < best.box.h * 1.8 && b.h > best.box.h * 0.5)
+          .sort((a, b) => a.d - b.d)[0];
+        if (near) {
+          best.box = {
+            x: best.box.x + (near.b.cx - near.b.w / 2 - best.box.x) * blobPull,
+            y: best.box.y + (near.b.cy - near.b.h / 2 - best.box.y) * blobPull,
+            w: best.box.w + (near.b.w - best.box.w) * 0.25,
+            h: best.box.h + (near.b.h - best.box.h) * 0.25,
+          };
+          missed = 0;
+        } else missed++;
+      } else missed++;
+
+      const nx = Math.min(Math.max(best.box.x, -best.box.w * 0.3), 1 - best.box.w * 0.7);
+      const ny = Math.min(Math.max(best.box.y, -best.box.h * 0.3), 1 - best.box.h * 0.7);
+      vx = (nx - box.x) * 0.6 / step + vx * 0.4;
+      vy = (ny - box.y) * 0.6 / step + vy * 0.4;
+      box = { ...best.box, x: nx, y: ny };
+      out[i] = absent ? null : { ...box, held: missed > 0, lost };
+
+      if (missed > coastFrames) { vx = 0; vy = 0; }        // stop drifting on a lost subject
+      if (confident) {
+        costRef = costRef === null ? best.raw : costRef + (best.raw - costRef) * 0.2;
+        if (!missed) {
+          const fresh = extractPatch(data, W, H, box, patchW, patchH);
+          for (let k = 0; k < patch.length; k++) patch[k] += (fresh[k] - patch[k]) * patchAlpha;
+        }
+      }
+    }
+  };
+
+  run(seedIdx, 1);
+  if (seedIdx > 0) run(seedIdx, -1);
+  return out;
+}
+
+// motionSeries keeps masks, not pixels, so the tracker needs the frames too.
+// They are attached by trackFrom's caller through attachFrames(), or read from
+// the series when the caller kept them there.
+function frameData(series, i) { return series[i] && (series[i].data || null); }
+function attachFrames(series, frames) {
+  frames.forEach((f, i) => { if (series[i]) series[i].data = f.data; });
+  return series;
+}
+
+/** How much the tracked subject is doing, frame by frame. */
+function subjectActivity(series, track, opts = {}) {
+  const { speedWeight = 2.2, pad = 0.15, speedDeadband = 0.06 } = opts;
+  return series.map((f, i) => {
+    const b = track[i];
+    if (!b || !f.mask) return { t: f.t, activity: 0, inside: 0, speed: 0 };
+    const W = f.width, H = f.height;
+    const x0 = Math.max(0, Math.round((b.x - b.w * pad) * W));
+    const x1 = Math.min(W, Math.round((b.x + b.w * (1 + pad)) * W));
+    const y0 = Math.max(0, Math.round((b.y - b.h * pad) * H));
+    const y1 = Math.min(H, Math.round((b.y + b.h * (1 + pad)) * H));
+    let changed = 0, area = Math.max(1, (x1 - x0) * (y1 - y0));
+    for (let j = y0; j < y1; j++) {
+      for (let i2 = x0; i2 < x1; i2++) if (f.mask[j * W + i2]) changed++;
+    }
+    const prev = track[i - 1];
+    const dt = i > 0 ? Math.max(0.001, f.t - series[i - 1].t) : 1;
+    const raw = prev
+      ? Math.hypot((b.x + b.w / 2) - (prev.x + prev.w / 2), (b.y + b.h / 2) - (prev.y + prev.h / 2)) / dt
+      : 0;
+    const speed = Math.max(0, raw - speedDeadband);   // tracker jitter is not skating
+    const inside = changed / area;
+    return { t: f.t, inside, speed, activity: inside + speedWeight * speed };
+  });
+}
+
+/**
+ * Windows built from the subject's own activity rather than the whole frame.
+ * On a propped phone, a "camera moving" frame means the lens was blocked or the
+ * phone was being handled — never something worth sending — so those frames are
+ * dropped when the clip is otherwise static. On genuinely handheld footage most
+ * frames carry the flag, and dropping them would leave nothing, so we don't.
+ */
+function subjectWindows(series, track, opts = {}) {
+  const act = subjectActivity(series, track, opts);
+  const camShare = series.filter(f => f.cameraMoving).length / Math.max(1, series.length);
+  const drop = opts.dropCameraMoving ?? (camShare < 0.3);
+  const proxy = series.map((f, i) => ({
+    t: f.t,
+    energy: (drop && f.cameraMoving) ? 0 : act[i].activity,
+    cameraMoving: f.cameraMoving,
+  }));
+  return activityWindows(proxy, { floor: 0.12, ...opts });
+}
+
 // ── 4. what to cut and send ─────────────────────────────────────────────────
 function nearestIndex(series, t) {
   let best = 0, bestD = Infinity;
@@ -363,5 +562,6 @@ function evidencePlan(windows, opts = {}) {
 
 module.exports = {
   motionSeries, activityWindows, trackSubject, evidencePlan, estimateShift,
+  trackFrom, subjectActivity, subjectWindows, attachFrames,
   autoThreshold, cropFor, CAMERA_MOVING, DEFAULTS,
 };
