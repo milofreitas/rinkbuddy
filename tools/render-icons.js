@@ -77,7 +77,16 @@ function web() {
   console.log('wrote favicon.svg');
 }
 
-const TARGETS = { web };
+const IOS = 'ios/App/App/Assets.xcassets';
+
+function ios() {
+  render({ out: `${IOS}/AppIcon.appiconset/AppIcon-512@2x.png`, width: 1024, height: 1024, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.78 });
+  for (const name of ['splash-2732x2732.png', 'splash-2732x2732-1.png', 'splash-2732x2732-2.png']) {
+    render({ out: `${IOS}/Splash.imageset/${name}`, width: 2732, height: 2732, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.26 });
+  }
+}
+
+const TARGETS = { web, ios };
 
 const target = process.argv[2] || 'all';
 if (target === 'all') Object.values(TARGETS).forEach(fn => fn());

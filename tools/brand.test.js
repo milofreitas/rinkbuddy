@@ -234,3 +234,24 @@ test('the service worker caches the icons it serves offline', () => {
   assert.match(sw, /icon-192\.png/);
   assert.match(sw, /rinkbuddy-v2/);
 });
+
+test('the iOS app icon is 1024 square with no alpha channel', () => {
+  const file = path.join(REPO, 'ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png');
+  const info = pngInfo(fs.readFileSync(file));
+  assert.strictEqual(info.width, 1024);
+  assert.strictEqual(info.height, 1024);
+  assert.strictEqual(info.hasAlpha, false, 'App Store rejects icons with an alpha channel');
+});
+
+test('the iOS splash images are 2732 square', () => {
+  for (const name of ['splash-2732x2732.png', 'splash-2732x2732-1.png', 'splash-2732x2732-2.png']) {
+    const info = pngInfo(fs.readFileSync(path.join(REPO, 'ios/App/App/Assets.xcassets/Splash.imageset', name)));
+    assert.strictEqual(info.width, 2732, name);
+    assert.strictEqual(info.height, 2732, name);
+  }
+});
+
+test('the iOS launch screen uses the brand navy', () => {
+  const storyboard = fs.readFileSync(path.join(REPO, 'ios/App/App/Base.lproj/LaunchScreen.storyboard'), 'utf8');
+  assert.match(storyboard, /red="0\.058/, 'launch screen background is not navy #0F2338');
+});
