@@ -317,6 +317,46 @@ copying outright: camera elevated above the boards at centre ice, skater head to
 toe in the centre of frame, 1080p60, one continuous unedited take, filename
 `Skater Name_Level_TestType`.
 
+### The back-catalogue route, and the clause that makes it work
+
+Competition videographers are one- and two-person businesses that already sell
+per-event downloads for around $59, and several have **multi-season back
+catalogues visibly for sale** — Coronado Productions (CA/AZ) lists Golden West,
+National Theatre on Ice, Copper State, Fiesta Skate, Sweetheart Classic and
+more. They can license the copyright in their own recordings.
+
+**And US figure-skating footage is already music-free.** Every 2026 USFS
+competition announcement carries the same clause: streaming and sale of footage
+*with* music playback is prohibited, and *"this prohibition does not apply to the
+distribution of footage that does not include music."* Vendors comply visibly —
+Coronado's own site says so. Embedded music sync and master rights are normally
+the single biggest hidden cost in licensing sports video, and in this sport the
+problem has already been removed at source.
+
+**What the videographer cannot sell is the skater.** Publicity and biometric
+rights were never theirs. The releases skaters sign run to the *local club*, in
+use-and-exhibit language ("distribute, broadcast and exhibit"), with no
+sublicence, no assignment and nothing resembling "create derivative works". Most
+subjects are children whose parent consented to a club, not to an AI company.
+
+So the deal has two halves, and the cheap half is the footage:
+
+1. a copyright licence from the videographer, with a warranty that they hold the
+   recording rights and an indemnity;
+2. **fresh, purpose-specific parental consent gathered through the host club**,
+   naming AI training. Budget most of the money — and the lawyer — for this half.
+
+**Two geographic rules:** avoid Illinois (BIPA carries a private right of action
+and statutory damages per violation, and face-geometry training has been
+litigated under it repeatedly) and Texas (CUBI, enforced hard by the AG). That
+alone argues for the California and New Jersey vendors over the otherwise
+excellent Chicago one.
+
+**And one move that sidesteps most of this:** ask for **pose-keypoint-only or
+face-blurred derivatives**. Our models need skeletal motion, not appearance. A
+de-identified derivative avoids the biometric statutes almost entirely and makes
+the parental conversation winnable instead of hopeless.
+
 ### What the money should actually do
 
 **Two lean rink shoots, about $2,400, ~12 subjects, 500–600 clips — roughly
