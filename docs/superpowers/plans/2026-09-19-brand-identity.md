@@ -17,13 +17,13 @@
 - `--radius: 12px` stays in both themes, unchanged.
 - **Brand constants:** night navy `#0F2338`, ice `#4FC3E8`, deep ice `#0F6E92`, frost `#E8F1F7`.
 - **Every text-on-background pair ships at 4.5:1 or better.** No exceptions, no "it's decorative".
-- **No colour literals** in `index.html` outside the two token blocks, except Google's sign-in button colours (`#4285f4`, `#34a853`, `#fbbc05`, `#ea4335`), which are Google's brand and must not be tokenised.
+- **No colour literals** in `index.html` outside the two token blocks, except the documented exceptions in `ALLOWED_LITERALS` (Task 4's test): Google's brand hues and button chrome, the two theme-color pins a `<meta>` cannot express as a variable, and theme-neutral `#000`/`#fff`/`rgba(0,0,0,a)` structure. White alpha washes are not exempt — they disappear on a light surface.
 - **No colour gradients.** Alpha-only scrims over video (`rgba(0,0,0,…)` to `transparent`) are allowed; anything carrying a brand hue is not.
 - **Ice is for measurement** (progress bars, the radar chart, data readouts). **Amber is for encouragement and caution** (streaks, warnings). Never swap them.
 - **The mark:** detailed cut at 24px and above, simplified cut below 24px. Frost on navy, navy on white or ice. Never recoloured, outlined, rotated or stretched.
 - **Tests run with** `node --test <file>`; CommonJS (`require`), `node:test` and `node:assert`, matching `ai/scan-core.test.js`.
 - **Never push.** Commit locally; Milo pushes.
-- Chrome path for rasterising: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
+- Chrome for rasterising is resolved at run time: `CHROME_PATH` if set, else the usual macOS and Linux install locations. Never hardcode one absolute path — regenerating the icons on another machine is the point of the script.
 
 ---
 
@@ -38,7 +38,7 @@
 | `tools/render-icons.js` | Generates every raster icon from the SVG masters via headless Chrome. |
 | `favicon.svg`, `favicon-32.png`, `favicon-16.png`, `apple-touch-icon-180.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `og-image.png` | Web and PWA icons, served from the repo root |
 
-**Modified:** `index.html` (tokens, theme switching, three inline logos, `generateIcon()` removal, 218 colour literals), `manifest.json`, `capacitor.config.json`, `sw.js`, `build.sh`, the iOS asset catalogue and `LaunchScreen.storyboard`, the Android mipmaps, splash drawables, `ic_launcher_background.xml` and `mipmap-anydpi-v26/ic_launcher.xml`.
+**Modified:** `index.html` (tokens, theme switching, three inline logos, `generateIcon()` removal, 247 colour literals), `manifest.json`, `capacitor.config.json`, `sw.js`, `build.sh`, the iOS asset catalogue and `LaunchScreen.storyboard`, the Android mipmaps, splash drawables, `ic_launcher_background.xml` and `mipmap-anydpi-v26/ic_launcher.xml`.
 
 **Deleted:** `icon-192.svg`, `icon-512.svg` (the old mark), and the same two files under `www/`.
 
@@ -133,7 +133,7 @@ Create `tools/brand.js`:
 ```js
 'use strict';
 
-const HEX = /(?<![&\w])#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\b(?!;)/g;
+const HEX = /(?<![&\w])#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\b/g;
 const RGBA = /\brgba?\([^)]*\)/g;
 const GRADIENT = /(?:linear|radial|conic)-gradient\((?:[^()]|\([^()]*\))*\)/g;
 
@@ -162,11 +162,14 @@ function contrastRatio(a, b) {
 }
 
 function blockAfter(html, selector) {
-  const start = html.indexOf(selector);
-  if (start === -1) return '';
-  const open = html.indexOf('{', start);
+  // Whitespace-tolerant: index.html writes most rules compact (`.x{…}`), so the
+  // token blocks must be found whether or not they carry a space before the brace.
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = new RegExp(escaped + '\\s*\\{').exec(html);
+  if (!m) return '';
+  const open = m.index + m[0].length - 1;
   const close = html.indexOf('}', open);
-  if (open === -1 || close === -1) return '';
+  if (close === -1) return '';
   return html.slice(open + 1, close);
 }
 
@@ -180,14 +183,14 @@ function parseTokens(block) {
 
 function parseThemes(html) {
   return {
-    light: parseTokens(blockAfter(html, ':root {')),
-    dark: parseTokens(blockAfter(html, ':root[data-theme="dark"] {')),
+    light: parseTokens(blockAfter(html, ':root')),
+    dark: parseTokens(blockAfter(html, ':root[data-theme="dark"]')),
   };
 }
 
 function stripTokenBlocks(html) {
   let out = html;
-  for (const selector of [':root {', ':root[data-theme="dark"] {']) {
+  for (const selector of [':root', ':root[data-theme="dark"]']) {
     const block = blockAfter(out, selector);
     if (block) out = out.replace(block, '');
   }
@@ -439,7 +442,7 @@ git commit -m "Add a light and dark toggle to the app header"
 
 ---
 
-### Task 4: Migrate the stylesheet colours (159 literals)
+### Task 4: Migrate the stylesheet colours (91 literals in the style block)
 
 **Files:**
 - Modify: `index.html` — the `<style>` block, from `*{margin:0` down to the end of the landing-page CSS
@@ -454,12 +457,27 @@ git commit -m "Add a light and dark toggle to the app header"
 Append to `tools/brand.test.js`:
 
 ```js
-const GOOGLE_BRAND = ['#4285f4', '#34a853', '#fbbc05', '#ea4335'];
-// Ratchet: this number only ever goes down. Task 4 → 59, Task 5 → 43, Task 6 → 0.
-const MAX_LITERALS = 59;
+// Documented exceptions, each for a structural reason, not convenience:
+//   Google's four brand hues and its button chrome — Google's guidelines require them
+//   #F5F8FA / #0B1826 — the theme-color <meta> cannot reference a CSS variable, and
+//     setTheme must write a literal into it
+//   #000 / #fff and rgba(0,0,0,a) — theme-neutral structure: video letterbox, scrims,
+//     shadows. White alpha washes are NOT exempt: they vanish on a light surface.
+const ALLOWED_LITERALS = [
+  '#4285f4', '#34a853', '#fbbc05', '#ea4335',
+  '#333', '#ddd', '#f5f5f5', '#bbb',
+  '#F5F8FA', '#0B1826',
+  '#000', '#fff',
+];
+const BLACK_ALPHA = /^rgba?\(\s*0\s*,\s*0\s*,\s*0\b/i;
+const remainingLiterals = () =>
+  colourLiterals(INDEX, ALLOWED_LITERALS).filter(v => !BLACK_ALPHA.test(v));
+
+// Ratchet: this number only ever goes down. Task 4 → 119, Task 5 → 49, Task 6 → 0.
+const MAX_LITERALS = 119;
 
 test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
-  const found = colourLiterals(INDEX, GOOGLE_BRAND);
+  const found = remainingLiterals();
   assert.ok(found.length <= MAX_LITERALS,
     `${found.length} literals left, budget is ${MAX_LITERALS}. First ten: ${found.slice(0, 10).join(', ')}`);
 });
@@ -468,7 +486,7 @@ test(`index.html carries at most ${MAX_LITERALS} colour literals`, () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL — about 214 literals against a budget of 59.
+Expected: FAIL — about 218 literals against a budget of 119.
 
 - [ ] **Step 3: Migrate the stylesheet**
 
@@ -502,7 +520,7 @@ Rules while migrating:
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `node --test tools/brand.test.js`
-Expected: PASS at 59 or fewer literals.
+Expected: PASS at 119 or fewer literals. The `<style>` block itself should reach zero non-exempt literals; the remainder lives in markup and scripts, which Tasks 5 and 6 own.
 
 - [ ] **Step 5: Look at every screen in both themes**
 
@@ -517,7 +535,7 @@ git commit -m "Move the stylesheet onto colour tokens and drop the gradients"
 
 ---
 
-### Task 5: Migrate the landing-page markup (16 literals)
+### Task 5: Migrate the landing-page markup (70 literals)
 
 **Files:**
 - Modify: `index.html` — inline `style="…"` attributes inside `<div id="landingPage">`
@@ -529,12 +547,12 @@ git commit -m "Move the stylesheet onto colour tokens and drop the gradients"
 
 - [ ] **Step 1: Lower the budget**
 
-In `tools/brand.test.js`, change `const MAX_LITERALS = 59;` to `const MAX_LITERALS = 43;`.
+In `tools/brand.test.js`, change `const MAX_LITERALS = 119;` to `const MAX_LITERALS = 49;`.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL at about 59 against a budget of 43.
+Expected: FAIL at about 119 against a budget of 49.
 
 - [ ] **Step 3: Migrate the inline styles**
 
@@ -546,7 +564,7 @@ Replace each inline colour in the landing markup with the matching token, using 
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `node --test tools/brand.test.js`
-Expected: PASS at 43 or fewer.
+Expected: PASS at 49 or fewer.
 
 - [ ] **Step 5: Commit**
 
@@ -557,7 +575,7 @@ git commit -m "Move the landing page markup onto colour tokens"
 
 ---
 
-### Task 6: Migrate the app markup and script colours (43 literals)
+### Task 6: Migrate the app markup and script colours (49 literals)
 
 **Files:**
 - Modify: `index.html` — inline styles in the app markup, and colours set from JavaScript (search for `.style.color`, `.style.background`, `fillStyle`, `strokeStyle`)
@@ -580,14 +598,29 @@ test('no brand-coloured gradients remain', () => {
 test('no gradient text remains', () => {
   assert.doesNotMatch(INDEX, /background-clip:\s*text/);
 });
+
+// The hex/rgba lint cannot see CSS named colours. `stroke="white"` on an icon is
+// invisible on a light surface just as surely as #fff is, and measured 2.0-2.3:1 in
+// dark theme where Task 5 found them.
+const NAMED_COLOUR = /(stroke|fill|color|background(?:-color)?)\s*[:=]\s*["']?\s*(white|black|red|blue|green|yellow|orange|purple|pink|gray|grey|silver|gold|navy|teal|cyan|magenta|lime|maroon|olive|aqua|fuchsia)\b/gi;
+
+test('no CSS named colours are used for colour-bearing properties', () => {
+  const found = [...INDEX.matchAll(NAMED_COLOUR)].map(m => `${m[1]}=${m[2]}`);
+  assert.deepStrictEqual(found, [],
+    `named colours left: ${found.slice(0, 10).join(', ')}`);
+});
 ```
+
+Note: `transparent`, `currentColor`, `none` and `inherit` are not colours in this sense and are not matched.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
 Run: `node --test tools/brand.test.js`
-Expected: FAIL on all three: about 43 literals, some gradients, some gradient text.
+Expected: FAIL on all four: about 49 literals, some gradients, some gradient text, and nine named colours (seven `color=white`, one `stroke=white`, one `fill=red`).
 
 - [ ] **Step 3: Migrate the remaining markup and script colours**
+
+The nine named colours go the same way as the literals: `white` used as text or an icon on an accent fill becomes `var(--on-accent)`; `white` on a surface becomes `var(--text)`; `red` becomes `var(--danger)`.
 
 The canvas drawings need live token values rather than hard-coded ones. Add this helper next to the chart code and use it for every `fillStyle` and `strokeStyle`:
 
@@ -689,7 +722,27 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+// Resolved lazily so importing this file never throws, and overridable because the
+// whole point of generating icons from a script is that anyone can regenerate them.
+let chromePath = null;
+function chrome() {
+  if (chromePath) return chromePath;
+  const candidates = [
+    process.env.CHROME_PATH,
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ].filter(Boolean);
+  chromePath = candidates.find(c => fs.existsSync(c));
+  if (!chromePath) {
+    throw new Error(
+      'Chrome or Chromium not found, so the icons cannot be rendered.\n' +
+      'Set CHROME_PATH to the binary. Tried:\n  ' + candidates.join('\n  '));
+  }
+  return chromePath;
+}
 const REPO = path.join(__dirname, '..');
 const BRAND = path.join(REPO, 'brand');
 const NAVY = '#0F2338';
@@ -713,7 +766,7 @@ function render({ out, width, height, background, mark, markScale, transparent =
   ];
   if (transparent) args.push('--default-background-color=00000000');
   args.push(tmp);
-  execFileSync(CHROME, args, { stdio: 'ignore' });
+  execFileSync(chrome(), args, { stdio: 'ignore' });
   fs.unlinkSync(tmp);
   console.log(`wrote ${out} (${width}x${height})`);
 }
@@ -1094,6 +1147,10 @@ const DENSITIES = [
   { name: 'xxhdpi', legacy: 144, foreground: 324 },
   { name: 'xxxhdpi', legacy: 192, foreground: 432 },
 ];
+// Measured, not guessed: at 0.58 the farthest opaque pixel sat 155.6px from centre on a
+// 432px canvas, past both the 132px safe radius and the 144px visible radius. Scale down
+// by 132/155.6 and verify by re-measuring after rendering.
+const ADAPTIVE_SCALE = 0.49;
 const SPLASHES = [
   ['drawable', 480, 320], ['drawable-land-mdpi', 480, 320], ['drawable-land-hdpi', 800, 480],
   ['drawable-land-xhdpi', 1280, 720], ['drawable-land-xxhdpi', 1600, 960], ['drawable-land-xxxhdpi', 1920, 1280],
@@ -1106,9 +1163,14 @@ function android() {
     for (const name of ['ic_launcher.png', 'ic_launcher_round.png']) {
       render({ out: `${ANDROID}/mipmap-${d.name}/${name}`, width: d.legacy, height: d.legacy, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.74 });
     }
-    // Adaptive foreground: transparent, mark inside the 66dp safe circle (61% of the canvas).
-    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_foreground.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: 0.58, transparent: true });
-    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_monochrome.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: 0.58, transparent: true });
+    // Adaptive foreground: transparent, and scaled so the mark's INK fits the 66dp safe
+    // CIRCLE. Do not reason from the bounding box: markScale sizes the artwork's square
+    // box, and a square of side 58% still pushes its diagonal corners outside a circle of
+    // diameter 61%, which is how the blade's toe ended up clipped by Pixel's round mask.
+    // Derive the scale from the measured ink radius: render, find the farthest opaque
+    // pixel from centre, and scale until that radius is <= 132px on the 432px canvas.
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_foreground.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: ADAPTIVE_SCALE, transparent: true });
+    render({ out: `${ANDROID}/mipmap-${d.name}/ic_launcher_monochrome.png`, width: d.foreground, height: d.foreground, background: 'transparent', mark: 'rinkbuddy-skate.svg', markScale: ADAPTIVE_SCALE, transparent: true });
   }
   for (const [dir, w, h] of SPLASHES) {
     render({ out: `${ANDROID}/${dir}/splash.png`, width: w, height: h, background: NAVY, mark: 'rinkbuddy-skate.svg', markScale: 0.3 });

@@ -10,8 +10,10 @@ cp index.html www/
 cp manifest.json www/
 cp sw.js www/
 cp skill-diagrams.js www/
-[ -f icon-192.svg ] && cp icon-192.svg www/
-[ -f icon-512.svg ] && cp icon-512.svg www/
+for asset in favicon.svg favicon-32.png favicon-16.png apple-touch-icon-180.png \
+             icon-192.png icon-512.png icon-maskable-512.png og-image.png; do
+  cp "$asset" www/
+done
 
 echo "🔄 Syncing Capacitor..."
 npx cap sync
