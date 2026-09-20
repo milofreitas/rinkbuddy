@@ -237,9 +237,95 @@ copyrighted footage are themselves encumbered — load-bearing for every skating
 dataset in existence — and whether ShareAlike attaches to model weights, which
 Creative Commons itself declines to answer.
 
-## C. Footage we can buy, and rink camera networks
+## C. What money can buy — almost nothing, and the window just closed
 
-*Pending.*
+Thirteen stock libraries, eight rink camera networks and fifteen data vendors
+were checked. **A rights-cleared, skill-labelled skating dataset does not exist
+for sale at any price we could pay.** Every retail licence — Shutterstock, Getty,
+Adobe, Storyblocks, Vecteezy, Alamy, Artlist, Motion Array, Freepik — expressly
+prohibits ML training. Adobe has the deepest library (66,953 ice-skating clips)
+and the hardest ban, added October 2025: *"Our products are meant to support
+creativity and productivity, not to create AI training datasets."*
+
+Two structural facts decide it:
+
+1. **Rights and consent live in different places.** A videographer or a camera
+   network can license the copyright in a recording. Only the skater can license
+   their likeness. Every consent document found runs skater → federation, or
+   skater → provider, and **stops there**.
+2. **The window closed in 2025–26.** Hudl, FloSports and Veo all added or
+   hardened AI-training bans in the last 18 months. Pond5's licence is silent
+   only because it was last updated in January 2024 — silence is not permission.
+
+### The rink camera networks are a dead end, and one is now a competitor
+
+**LiveBarn** is the only one that legally could sell us anything: its venue
+agreement makes it *"the exclusive owner of all rights in and to the Content"*
+across 4,000+ playing surfaces. But its terms restrict use to personal and
+non-commercial, and in March 2026 it was bought by GTCR for $400M+, then
+launched **LiveBarn Analytics** in July 2026 on Sportlogiq's computer vision.
+We would be asking a competitor for our training data.
+
+Its consent chain also fails: posted-notice implied waiver, no parental consent
+step, and a search of its consumer terms finds **zero** occurrences of *minor,
+parent, consent, likeness, biometric* or *machine learning*.
+
+**One genuinely useful clause, though:** LiveBarn's venue exclusivity covers only
+**unmanned** cameras — devices that need no operator or track the action
+automatically. A person holding a phone is outside it. **Filming our own footage
+at a LiveBarn rink does not put the rink in breach**, which removes the first
+objection a rink manager will raise.
+
+### Three things that are free and worth taking this week
+
+| | What | Why it's free |
+|---|---|---|
+| **MMFS skeletons** | 11,671 clips, **256 element classes**, 2D skeletons, **MIT licensed** | The authors gate the RGB (broadcast-derived) but release the skeletons. Our classifier trains on skeletons; our pose estimator is off-the-shelf. That is the whole reason this is usable. |
+| **Shutterstock VC Partner Program** | Research Pack: 30M+ images, 3M videos, explicit AI-training rights, 60–90 days | *"No program fees."* Needs a VC to nominate us. |
+| **Storyblocks sample dataset** | 336 figure-skating clips, 59 jump clips, productised as *"cleared for machine learning"* | Free sample on request. |
+
+### The academic route is the sleeper
+
+**FS-Jump3D and AthletePose3D come from Keisuke Fujii's group at Nagoya**, and
+unlike every other skating dataset they hold **clean title** — their own motion
+capture, at a university rink, with consenting skaters. Non-commercial *today*,
+but they can dual-license, and a sponsored-research agreement at a few thousand
+dollars is an ordinary transaction for a Japanese lab.
+
+The same group published *"Automatic Edge Error Judgment in Figure Skating Using
+3D Pose Estimation from a Monocular Camera and IMUs"* — a smartphone camera,
+83% accuracy on unseen skaters. That is our product, already half-built, by
+people who would be collaborators rather than competitors.
+
+Contact: **fujii@i.nagoya-u.ac.jp**. Costs an email.
+
+### Adult competitions solve the consent problem by construction
+
+Test-session archives don't exist — USFS rule 4605(B) requires deletion 30 days
+after results. But **adult competitions have all-adult fields**, which deletes
+the minors problem entirely, and their videographers are tiny operations:
+Pro-Mix charges ~$3 per program at flight rates and shot the 2026 Pacific Coast
+Adult Sectionals; a one-man Ontario operation charges $20 for the first skate
+and $10 after.
+
+**The videographer is the route in, not the counterparty.** The real ask is an
+introduction to the organising committee, so an opt-in AI-training line can go on
+the entry form — which is the only place consent can legitimately attach.
+
+And USFS's **virtual-test filming spec** is a natively labelled format worth
+copying outright: camera elevated above the boards at centre ice, skater head to
+toe in the centre of frame, 1080p60, one continuous unedited take, filename
+`Skater Name_Level_TestType`.
+
+### What the money should actually do
+
+**Two lean rink shoots, about $2,400, ~12 subjects, 500–600 clips — roughly
+$4.30 a clip**, with signed releases and unambiguous title. Verified rates:
+private ice $105–440/hr, freestyle admission $16–17 per skater, coaching
+$36–110/hr. Our COACH-SHOOT offer of $300–500 per 90 minutes is about 3× market,
+so there's room to fund a second rink for body-type diversity instead.
+
+Cheaper per usable clip than anything licensable, and the only version we own.
 
 ## D. Footage people will give us
 
