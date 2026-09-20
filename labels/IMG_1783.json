@@ -9,7 +9,7 @@
   "usable_windows": [[44, 52], [70, 79], [96, 118]],
   "unusable": [[0, 2], [7.5, 9], [37, 40], [75, 77], [113, 116]],
   "events": [
-    {"t_start": 103.0, "t_end": 105.5, "skill_id": "f-fwd-stroking", "skill": "Forward stroking / basic skating",
+    {"t_start": 103.0, "t_end": 105.5, "skill_id": "f-fwd-stroke", "skill": "Forward stroking / basic skating",
      "outcome": "clean", "quality": 3,
      "cues": "left-to-right travel, alternating pushes, moderate knee bend, upright posture, arms low and close to the body rather than extended",
      "labeled_by": "claude", "confidence": "medium",

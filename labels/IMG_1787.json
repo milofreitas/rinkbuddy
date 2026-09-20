@@ -29,7 +29,7 @@
     {
       "t_start": 10.4,
       "t_end": 11.7,
-      "skill_id": "f-2ft-turn",
+      "skill_id": "f-transition",
       "skill": "Two-foot turn / pivot (forward to backward)",
       "outcome": "clean",
       "quality": 3,
@@ -42,7 +42,7 @@
     {
       "t_start": 25.4,
       "t_end": 26.2,
-      "skill_id": "f-2ft-turn",
+      "skill_id": "f-transition",
       "skill": "Transition backward-to-forward facing",
       "outcome": "clean",
       "quality": 3,

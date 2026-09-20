@@ -70,7 +70,7 @@
     {
       "t_start": 25.6,
       "t_end": 26.3,
-      "skill_id": "f-fwd-stroking",
+      "skill_id": "f-fwd-stroke",
       "skill": "Forward skating toward camera",
       "outcome": "clean",
       "quality": 3,
@@ -82,7 +82,7 @@
     {
       "t_start": 26.3,
       "t_end": 27.0,
-      "skill_id": "f-2ft-turn",
+      "skill_id": "f-transition",
       "skill": "Turn away from camera (two-foot)",
       "outcome": "clean",
       "quality": 3,

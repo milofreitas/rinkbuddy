@@ -19,7 +19,7 @@
     {
       "t_start": 58.4,
       "t_end": 60.3,
-      "skill_id": "f-fwd-stroking",
+      "skill_id": "f-fwd-stroke",
       "skill": "Forward stroking",
       "outcome": "clean",
       "quality": 4,
@@ -31,7 +31,7 @@
     {
       "t_start": 68.4,
       "t_end": 70.3,
-      "skill_id": "f-fwd-stroking",
+      "skill_id": "f-fwd-stroke",
       "skill": "Forward stroking",
       "outcome": "clean",
       "quality": 3,
