@@ -23,7 +23,7 @@
 - **The mark:** detailed cut at 24px and above, simplified cut below 24px. Frost on navy, navy on white or ice. Never recoloured, outlined, rotated or stretched.
 - **Tests run with** `node --test <file>`; CommonJS (`require`), `node:test` and `node:assert`, matching `ai/scan-core.test.js`.
 - **Never push.** Commit locally; Milo pushes.
-- Chrome path for rasterising: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
+- Chrome for rasterising is resolved at run time: `CHROME_PATH` if set, else the usual macOS and Linux install locations. Never hardcode one absolute path — regenerating the icons on another machine is the point of the script.
 
 ---
 
@@ -722,7 +722,27 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+// Resolved lazily so importing this file never throws, and overridable because the
+// whole point of generating icons from a script is that anyone can regenerate them.
+let chromePath = null;
+function chrome() {
+  if (chromePath) return chromePath;
+  const candidates = [
+    process.env.CHROME_PATH,
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ].filter(Boolean);
+  chromePath = candidates.find(c => fs.existsSync(c));
+  if (!chromePath) {
+    throw new Error(
+      'Chrome or Chromium not found, so the icons cannot be rendered.\n' +
+      'Set CHROME_PATH to the binary. Tried:\n  ' + candidates.join('\n  '));
+  }
+  return chromePath;
+}
 const REPO = path.join(__dirname, '..');
 const BRAND = path.join(REPO, 'brand');
 const NAVY = '#0F2338';
@@ -746,7 +766,7 @@ function render({ out, width, height, background, mark, markScale, transparent =
   ];
   if (transparent) args.push('--default-background-color=00000000');
   args.push(tmp);
-  execFileSync(CHROME, args, { stdio: 'ignore' });
+  execFileSync(chrome(), args, { stdio: 'ignore' });
   fs.unlinkSync(tmp);
   console.log(`wrote ${out} (${width}x${height})`);
 }
