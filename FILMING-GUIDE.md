@@ -54,3 +54,32 @@ Hardest pairs, and therefore the most valuable to film: **hockey stop vs T-stop*
 
 ## Labels
 Say the skill out loud at the start of each clip, or name the file (`crossovers-ccw_01.mov`). Either gives ground truth for free — see `labels/README.md`.
+
+---
+
+## Batch 2 — 2026-09-19 evening (IMG_1792–1795, 5 min 40 s, all 4K 120 fps)
+
+Scanned every 2 s, plus a 2 fps pass over the parts where the skater is on screen.
+
+| Clip | Length | Result |
+|---|---|---|
+| IMG_1792 | 107 s | **Orientation tag wrong.** Best of the batch: Milo skating 48–78 s at 35–45% of frame. First 12 s lens-blocked |
+| IMG_1793 | 118 s | **Orientation tag wrong.** Handheld follow of the same public session; general skating, no drill |
+| IMG_1794 | 97 s | Handheld, mostly the class and bystanders |
+| IMG_1795 | 58 s | Unusable — lens blocked 0–4 s and 52–58 s, handheld pan across a kids' class, no identifiable skill |
+
+**Yield: a few seconds of plain forward stroking out of 5 min 40 s.** No repetitions, no drills, no single skill per clip.
+
+### New lesson: the phone tags the orientation wrong when it's propped
+IMG_1792 and 1793 carry a **90° rotation tag, but the picture is really landscape upside-down** (correct view = raw frame turned 180°). IMG_1794 and 1795 carry 180°, which is right. A phone lying near-flat, or propped on its back on the boards, leaves iOS guessing — and it guessed wrong on half this batch.
+
+Every player obeys that tag, so those clips play **sideways** in QuickTime, in the browser, and in RinkBuddy.
+
+- **When filming:** stand the phone up against something, camera lens at the top, and glance at the preview before you hit record. If the preview is sideways, rotate the phone and restart.
+- **When scanning:** `python3 tools/clips.py sheets IMG_1792.MOV --rotate 180` ignores the tag and turns the raw frame by hand. Check a clip's first sheet before labeling it.
+- **Product implication:** real users will hit this too, so the app needs a rotate control on an imported video, and the scan has to use that rotation.
+
+### The one change that matters more than all the rules
+Batches 1 and 2 are both **handheld footage of a public session**: the camera follows whoever is interesting, the skater is doing general skating, and there are no repetitions. Together that's 14 minutes of footage for roughly 3 seconds of labelable skill.
+
+**Prop the phone on the boards and skate the drill past it, 4–6 reps per clip, one skill per clip.** A 20-second propped clip of swizzles beats every handheld minute filmed so far.

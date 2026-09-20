@@ -1,0 +1,16 @@
+{
+  "clip": "IMG_1795.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 120,
+    "resolution": "3840x2160",
+    "angle": "follow",
+    "handheld": true,
+    "rotation_tag_wrong": false,
+    "correct_rotation": 180
+  },
+  "events": [],
+  "notes": "Scanned at 0.5 fps over all 58 s. Lens against clothing 0-4 s and 52-58 s; in between, a handheld pan across a kids' learn-to-skate class with nobody performing an identifiable skill. No events. Almost everyone in frame is a child, so this clip is not training material — keep it only as a negative example, or delete it."
+}

@@ -1,0 +1,17 @@
+{
+  "clip": "IMG_1794.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 120,
+    "resolution": "3840x2160",
+    "distance_m": 18,
+    "angle": "side",
+    "handheld": false,
+    "rotation_tag_wrong": false,
+    "correct_rotation": 180
+  },
+  "events": [],
+  "notes": "Scanned at 0.4 fps over all 97 s, plus 2 fps over 28-46 s. 25-45 s is the only STATIC-CAMERA footage in batches 1 and 2 — the phone was put down and Milo skates back and forth in front of it. Valuable for testing motion-based segmentation against a still background, but he is only 15-20% of frame height, so no individual skill can be identified honestly: no events. Lens blocked 0-3 s. Next time, same setup but 5-10 m from the phone instead of ~18."
+}

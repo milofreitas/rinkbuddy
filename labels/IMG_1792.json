@@ -1,0 +1,40 @@
+{
+  "clip": "IMG_1792.MOV",
+  "filmed": "2026-09-19",
+  "skater": "milo",
+  "discipline": "foundations",
+  "camera": {
+    "fps": 120,
+    "resolution": "3840x2160",
+    "distance_m": 8,
+    "angle": "follow",
+    "handheld": true,
+    "rotation_tag_wrong": true,
+    "correct_rotation": 180
+  },
+  "events": [
+    {
+      "t_start": 50.0,
+      "t_end": 54.0,
+      "skill_id": "f-fwd-stroke",
+      "skill": "Forward Stroking/Skating",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "alternating side pushes with glide between them, upright posture, moving left across frame",
+      "labeled_by": "claude",
+      "confidence": "medium"
+    },
+    {
+      "t_start": 56.0,
+      "t_end": 60.0,
+      "skill_id": "f-fwd-stroke",
+      "skill": "Forward Stroking/Skating",
+      "outcome": "clean",
+      "quality": 3,
+      "cues": "continues stroking across the frame, wider stance, camera panning with him",
+      "labeled_by": "claude",
+      "confidence": "medium"
+    }
+  ],
+  "notes": "Scanned at 0.5 fps over the whole clip and 2 fps over 48-72 s, with --rotate 180 (the file's 90 degree tag is wrong). Lens blocked 0-12 s. Busy public session with a kids' learn-to-skate class in frame throughout. This is general skating, not a drill: no repetitions of a named skill, so the boundaries above are approximate and both events need Milo's confirmation before they count as gold. Nothing else in this clip is labelable."
+}

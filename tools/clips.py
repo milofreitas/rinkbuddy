@@ -10,6 +10,9 @@ say "frame 14 (3.75s): takeoff" and we can jump straight back to that moment.
 
 Options: --fps 4  --cols 5 --rows 4  --width 640  --start 0 --end 30
          --crop x,y,w,h   (crop to the skater first — big accuracy win at distance)
+         --rotate 90|180|270  (ignore the file's orientation tag and turn the raw
+                               frame clockwise — iPhones propped on the boards
+                               often tag it wrong and every player shows it sideways)
 """
 import json, os, subprocess, sys, math
 from pathlib import Path
@@ -18,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FOOTAGE, WORK = ROOT / 'footage', ROOT / 'work'
 FONT = '/System/Library/Fonts/Supplemental/Arial.ttf'
 VIDEO_EXT = {'.mov', '.mp4', '.m4v', '.avi', '.webm', '.mkv'}
+ROTATE = {'0': '', '90': 'transpose=1', '180': 'hflip,vflip', '270': 'transpose=2'}
 
 
 def run(cmd):
@@ -52,15 +56,17 @@ def find_clip(name):
 
 
 def opts(argv):
-    o = {'fps': 4.0, 'cols': 5, 'rows': 4, 'width': 640, 'start': 0.0, 'end': None, 'crop': None}
+    o = {'fps': 4.0, 'cols': 5, 'rows': 4, 'width': 640, 'start': 0.0, 'end': None, 'crop': None, 'rotate': None}
     i = 0
     while i < len(argv):
         k = argv[i].lstrip('-')
         if k not in o:
             sys.exit(f"unknown option --{k}")
         v = argv[i + 1]
-        o[k] = v if k == 'crop' else (int(v) if k in ('cols', 'rows', 'width') else float(v))
+        o[k] = v if k in ('crop', 'rotate') else (int(v) if k in ('cols', 'rows', 'width') else float(v))
         i += 2
+    if o['rotate'] is not None and o['rotate'] not in ROTATE:
+        sys.exit('--rotate takes 0, 90, 180 or 270 (clockwise, applied to the raw frame)')
     return o
 
 
@@ -71,8 +77,16 @@ def extract(clip, o, outdir, fps, start, duration):
     vf = []
     if o['crop']:
         vf.append('crop=' + ':'.join(x.strip() for x in o['crop'].split(',')[2:] + o['crop'].split(',')[:2]))
+    if o['rotate'] is not None:
+        # iPhones propped on the boards often tag the wrong orientation, so every
+        # player shows the clip sideways. --rotate ignores the tag and turns the raw
+        # frame by hand. Check `clips.py list` for a clip whose picture looks wrong.
+        vf += [f for f in [ROTATE[o['rotate']]] if f]
     vf += [f"fps={fps}", f"scale={o['width']}:-2"]
-    cmd = ['ffmpeg', '-loglevel', 'error', '-ss', str(start)]
+    cmd = ['ffmpeg', '-loglevel', 'error']
+    if o['rotate'] is not None:
+        cmd.append('-noautorotate')
+    cmd += ['-ss', str(start)]
     if duration is not None:
         cmd += ['-t', str(duration)]
     cmd += ['-i', str(clip), '-vf', ','.join(vf), '-q:v', '3', str(outdir / 'f_%04d.jpg')]
