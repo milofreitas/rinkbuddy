@@ -2232,23 +2232,7 @@ function showSkillDetail(id) {
   // ── Full history ──
   if (!recs.length) {
     html += `<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.82rem;background:var(--surface2);border-radius:8px">
-      Nothing recorded yet. Record or upload yourself doing it, then tag the moment — every tag is kept here with its date.</div>`;
-  } else {
-    html += `<details style="margin-top:14px;background:var(--surface2);border-radius:8px">
-      <summary style="cursor:pointer;padding:10px 12px;font-size:0.82rem;font-weight:600">▸ History (${recs.length})</summary>
-      <div style="padding:0 12px 12px">` +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">' +
-      recs.slice().reverse().map(t => {
-        const gone = t.clipDeleted || !videoByRecord(t);
-        return `<div style="border-radius:8px;overflow:hidden;background:var(--surface2);cursor:${gone ? 'default' : 'pointer'}" ${gone ? '' : `onclick="playTagRecord('${t.tagId}')"`}>
-          ${thumb(t, '92px')}
-          <div style="padding:6px 8px">
-            <div style="font-size:0.72rem;font-weight:600">${fmtDate(t.date)}</div>
-            <div style="font-size:0.68rem;color:var(--text-dim);margin:2px 0">${dots(t.quality)} ${t.source === 'ai' ? '<span style="color:var(--success)">AI ✓</span>' : ''}</div>
-            ${t.note ? `<div style="font-size:0.68rem;color:var(--text-dim)">${escHtml(t.note)}</div>` : ''}
-            ${gone ? '<div style="font-size:0.64rem;color:var(--warning)">clip not on this device</div>' : ''}
-          </div></div>`;
-      }).join('') + '</div></div></details>';
+      Nothing recorded yet. Record or upload yourself doing it, then tag the moment.</div>`;
   }
 
   html += `<button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="practiceSkill('${id}')">Record / upload this skill</button>`;
