@@ -1,6 +1,6 @@
 # RinkBuddy research — 2026-09-19
 
-Nine reports; read this page first.
+Fifteen reports; read this page first.
 
 | # | File | One-line takeaway |
 |---|---|---|
@@ -13,6 +13,8 @@ Nine reports; read this page first.
 | 06 | 06-cross-domain-data-playbooks.md | Nobody starts with data: paid human "Coach Check" as gold labels + declare-then-verify tagging |
 | 07 | 07-phone-capture.md | Phones do 120/240 fps but web capture caps ~60; ask for 60 fps now, native module later; 120 fps @ 1/120s best at US rinks; distance > fps |
 | 08 | 08-video-teaching-platforms.md | Verified (3-vote) deep research: video self-modeling helps most ages ~9–17 but gains fade without repeated use; parents spend ~$1,016/child/yr; COPPA biometric rule; HLH hockey AI $79–99/mo |
+| 09–13 | *(audit, skill-tree, checking/goalie reports)* | Added by a separate session; not summarized here |
+| 14 | 14-app-feature-layer.md | Three verified passes. Side-by-side, not ghost overlay (overlay needs a static camera; users are handheld). Telestration is free in Kinovea = table stakes. Band $9.99–14.99/mo, $99.99–149.99/yr; no annual plan yet. **Streaks deepen the already-engaged and are measurably WORSE than a plain reminder at activation — and a daily cadence is wrong for rink-gated practice.** Human coach review still unevidenced after 3 passes |
 
 ## Converging plan
 1. **Positioning:** progress journal + feedback between lessons for adult learners (figure + hockey), not "AI coach". Coaches as distribution.
