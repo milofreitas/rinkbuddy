@@ -175,3 +175,30 @@ test('no CSS named colours are used for colour-bearing properties', () => {
   assert.deepStrictEqual(found, [],
     `named colours left: ${found.slice(0, 10).join(', ')}`);
 });
+
+const REPO = path.join(__dirname, '..');
+const WEB_ICONS = [
+  ['favicon-32.png', 32, 32],
+  ['favicon-16.png', 16, 16],
+  ['apple-touch-icon-180.png', 180, 180],
+  ['icon-192.png', 192, 192],
+  ['icon-512.png', 512, 512],
+  ['icon-maskable-512.png', 512, 512],
+  ['og-image.png', 1200, 630],
+];
+
+test('every web icon exists at its exact size', () => {
+  for (const [file, w, h] of WEB_ICONS) {
+    const full = path.join(REPO, file);
+    assert.ok(fs.existsSync(full), `missing ${file}`);
+    const info = pngInfo(fs.readFileSync(full));
+    assert.strictEqual(info.width, w, `${file} width`);
+    assert.strictEqual(info.height, h, `${file} height`);
+  }
+});
+
+test('favicon.svg exists and the old mark is gone', () => {
+  assert.ok(fs.existsSync(path.join(REPO, 'favicon.svg')));
+  assert.ok(!fs.existsSync(path.join(REPO, 'icon-192.svg')), 'old icon-192.svg still present');
+  assert.ok(!fs.existsSync(path.join(REPO, 'icon-512.svg')), 'old icon-512.svg still present');
+});
