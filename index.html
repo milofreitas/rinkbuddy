@@ -277,7 +277,7 @@
     /* Coach session items need relative positioning for delete btn */
     #lessonLogList .session-item{position:relative;padding-right:40px}
 
-    @media(max-width:600px){.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid .skill-card{width:130px;flex:0 0 130px}}
+    @media(max-width:600px){.discipline-toggle{display:flex;width:100%}.disc-btn{flex:1;padding:9px 6px;white-space:nowrap;text-align:center}.content{padding:10px}.card{padding:14px}.form-row{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr 1fr}.video-library{grid-template-columns:1fr 1fr}.onboard-cards{grid-template-columns:1fr}.skill-grid .skill-card{width:130px;flex:0 0 130px}}
     ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
@@ -888,10 +888,6 @@
     </div>
     <div class="card"><div class="card-title">What To Work On Next</div><div id="dashNextSkills"></div></div>
     <div class="card"><div class="card-title">Skills Radar</div><div class="radar-container"><canvas id="radarChart" width="260" height="260"></canvas></div></div>
-    <div class="card"><div class="card-title">Progress Timeline</div><div id="progressTimeline" style="min-height:120px"></div></div>
-    <div class="card"><div class="card-title">Achievements</div><div id="achievementsList"></div></div>
-    <div class="card"><div class="card-title">Weekly Challenge</div><div id="weeklyChallenge"></div></div>
-    <div class="card"><div class="card-title">Goals</div><div id="goalsList"></div>
       <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="openGoalModal()">+ Add Goal</button>
     </div>
     <div class="card"><div class="card-title">Recent Videos</div><div id="recentVideos"></div></div>
@@ -2183,7 +2179,6 @@ function showSkillDetail(id) {
   const guide = SKILL_GUIDES[id];
   const recs = tagRecords(id);                       // durable: survives losing the video
   const m = (APP.milestones || {})[id] || {};
-  const notes = (APP.skillNotes || {})[id] || {};
   const fmtDate = ds => ds ? new Date(ds + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
   const dots = q => { let o = ''; for (let i = 1; i <= 5; i++) o += `<span class="quality-dot ${i <= q ? (q >= 4 ? 'filled' : q >= 3 ? 'warn' : 'bad') : ''}"></span>`; return o; };
   const thumb = (t, h) => t.thumb
@@ -2228,21 +2223,21 @@ function showSkillDetail(id) {
       <ul style="font-size:0.78rem;color:var(--text-dim);padding-left:16px;margin-bottom:8px">${guide.focus.map(f => '<li>' + f + '</li>').join('')}</ul>
       ${guide.balance ? `<div style="font-size:0.75rem;padding:8px;background:rgba(251,191,36,0.1);border-radius:6px;border-left:3px solid var(--warning)"><strong style="color:var(--warning)">Balance:</strong> <span style="color:var(--text-dim)">${guide.balance}</span></div>` : ''}
     </div>`;
-    if (guide.yt) html += `<div style="margin-bottom:12px">
-      <div style="font-size:0.78rem;font-weight:600;color:var(--accent3);margin-bottom:8px">Tutorial</div>
-      <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:10px;overflow:hidden;background:#000">
-        <iframe src="https://www.youtube.com/embed/${guide.yt}?rel=0" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen loading="lazy"></iframe>
-      </div></div>`;
+    if (guide.yt) html += `<details style="margin-bottom:12px;background:var(--surface2);border-radius:8px" ontoggle="mountTutorial(this,'${guide.yt}')">
+      <summary style="cursor:pointer;padding:10px 12px;font-size:0.78rem;font-weight:600;color:var(--accent3)">▸ Watch the tutorial</summary>
+      <div style="padding:0 12px 12px"></div></details>`;
   }
   if (sk.tip) html += `<div style="font-size:0.82rem;color:var(--text-dim);padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);margin-bottom:12px"><strong>Tip:</strong> ${sk.tip}</div>`;
 
   // ── Full history ──
-  html += `<div style="font-size:0.82rem;font-weight:600;margin:14px 0 8px">History (${recs.length})</div>`;
   if (!recs.length) {
     html += `<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.82rem;background:var(--surface2);border-radius:8px">
       Nothing recorded yet. Record or upload yourself doing it, then tag the moment — every tag is kept here with its date.</div>`;
   } else {
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">' +
+    html += `<details style="margin-top:14px;background:var(--surface2);border-radius:8px">
+      <summary style="cursor:pointer;padding:10px 12px;font-size:0.82rem;font-weight:600">▸ History (${recs.length})</summary>
+      <div style="padding:0 12px 12px">` +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">' +
       recs.slice().reverse().map(t => {
         const gone = t.clipDeleted || !videoByRecord(t);
         return `<div style="border-radius:8px;overflow:hidden;background:var(--surface2);cursor:${gone ? 'default' : 'pointer'}" ${gone ? '' : `onclick="playTagRecord('${t.tagId}')"`}>
@@ -2253,24 +2248,22 @@ function showSkillDetail(id) {
             ${t.note ? `<div style="font-size:0.68rem;color:var(--text-dim)">${escHtml(t.note)}</div>` : ''}
             ${gone ? '<div style="font-size:0.64rem;color:var(--warning)">clip not on this device</div>' : ''}
           </div></div>`;
-      }).join('') + '</div>';
+      }).join('') + '</div></div></details>';
   }
-
-  // ── Notes: the part a person writes, and reads six months later ──
-  html += `<div style="margin-top:14px">
-    <div style="font-size:0.82rem;font-weight:600;margin-bottom:6px">My notes</div>
-    <textarea class="form-input" id="note-mine" rows="2" placeholder="What finally made it click?" style="resize:vertical">${escHtml(notes.mine || '')}</textarea>
-    <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="saveSkillNote('${id}','mine')">Save note</button>
-    <div style="font-size:0.82rem;font-weight:600;margin:12px 0 6px">Coach notes</div>
-    <textarea class="form-input" id="note-coach" rows="2" placeholder="What your coach told you to fix" style="resize:vertical">${escHtml(notes.coach || '')}</textarea>
-    <button class="btn btn-secondary btn-sm" style="margin-top:6px" onclick="saveSkillNote('${id}','coach')">Save note</button>
-  </div>`;
 
   html += `<button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="practiceSkill('${id}')">Record / upload this skill</button>`;
 
   document.getElementById('skillDetailTitle').textContent = sk.name;
   document.getElementById('skillDetailContent').innerHTML = html;
   document.getElementById('skillDetailModal').classList.add('active');
+}
+
+function mountTutorial(el, ytId) {
+  if (!el.open) return;
+  const box = el.querySelector('div');
+  if (box.childElementCount) return;
+  box.innerHTML = `<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:10px;overflow:hidden;background:#000">
+    <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div>`;
 }
 
 function saveSkillNote(id, which) {
@@ -3520,6 +3513,7 @@ function saveGoal() {
 }
 function renderGoals() {
   const c=document.getElementById('goalsList');
+  if (!c) return;
   if (!APP.goals.length) { c.innerHTML='<div class="empty-state"><p>Set a goal!</p></div>'; return; }
   c.innerHTML = APP.goals.map(g => { const pct=Math.min(100,Math.round((g.progress/g.target)*100));
     const color=pct>=100?'var(--success)':pct>=50?'var(--accent)':'var(--accent3)';
@@ -3643,7 +3637,7 @@ function renderDashboard() {
   document.getElementById('totalSkills').textContent = tracked;
   const wa = getSkills().filter(s=>getSkillData(s.id).attempts>0);
   if (wa.length) { const avg=wa.reduce((s,sk)=>{const d=getSkillData(sk.id);return s+(d.landed/d.attempts);},0)/wa.length; document.getElementById('avgSuccess').textContent=Math.round(avg*100)+'%'; }
-  renderRecentVideos(); renderNextSkills(); drawRadarChart(); renderProgressTimeline(); renderAchievements(); renderWeeklyChallenge();
+  renderRecentVideos(); renderNextSkills(); drawRadarChart();
 }
 
 function renderRecentVideos() {
