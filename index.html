@@ -1431,7 +1431,7 @@
       <div id="accSubscription" style="margin-top:14px;padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
         <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px">Subscription</div>
         <div id="accSubFree">
-          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong>Free</strong> plan. Upgrade to Pro for unlimited videos and AI skill suggestions.</p>
+          <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px">You're on the <strong>Free</strong> plan. Upgrade to Pro for AI Scan, syncing across devices and the coach tools.</p>
           <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;background:var(--warning)" onclick="doSubscribe()">Upgrade to Pro — $9.99/mo</button>
         </div>
         <div id="accSubPro" style="display:none">
@@ -2877,11 +2877,10 @@ const VideoDB = {
 // ── Local storage, no account needed ──
 // Videos and tags live in this browser (IndexedDB). Ask the browser to keep them
 // instead of evicting them, and show how much room is left on the device.
-function videoLimitReached(pending) {
-  if (isProUser()) return false;
-  if (!CloudAccount.getSession()) return false; // signed out = local only, so no cap
-  return videoFiles.length + (pending || 0) >= 3;
-}
+// Videos are stored in this browser, on this device — they cost us nothing to
+// keep, so there is no limit on them. Pro is for what actually costs us money
+// or runs on our servers: AI Scan, cloud sync and the coach tools.
+function videoLimitReached() { return false; }
 async function requestDurableStorage() {
   try {
     if (navigator.storage && navigator.storage.persist && navigator.storage.persisted
@@ -2921,10 +2920,6 @@ function renderUploadArea() {
   const area = document.getElementById('uploadArea');
   const hasVids = videoFiles.length > 0;
   // Free tier: show limit message
-  if (videoLimitReached()) {
-    area.innerHTML = `<div class="upgrade-banner" style="margin-top:10px"><div class="upgrade-banner-text"><strong>Video limit reached</strong> — Free plan allows 3 videos. Upgrade to Pro for unlimited uploads.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button></div>`;
-    return;
-  }
   area.innerHTML = `<div class="upload-zone${hasVids?' compact':''}" id="uploadZone">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:${hasVids?'20px':'48px'};height:${hasVids?'20px':'48px'}"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     <p>${hasVids?'Drop more videos here or <span class="highlight">browse</span>':'Drag & drop skating videos or <span class="highlight">browse</span>'}</p>
@@ -3058,21 +3053,11 @@ function isVideoFile(f) {
 }
 
 function addVideos(fl) {
-  // Free tier (signed in): max 3 videos. Signed out, everything is local only, so there is no cap.
-  if (videoLimitReached()) {
-    showToast('Free plan allows 3 videos. Upgrade to Pro for unlimited.');
-    return;
-  }
   const newEntries = [];
   let dupeCount = 0;
   const skipped = [];
   Array.from(fl).forEach(f => {
     if (!isVideoFile(f)) { skipped.push(f.name || 'file'); return; }
-    // Free tier: check per-file
-    if (videoLimitReached(newEntries.length)) {
-      showToast('Free plan allows 3 videos. Upgrade to Pro for unlimited.');
-      return;
-    }
     const cleanName = f.name.replace(/\.[^.]+$/, '');
     // Check for duplicate: same name + same size = same video
     const isDupe = videoFiles.some(v => v.name === cleanName && v.size === f.size);
@@ -4708,18 +4693,14 @@ function renderUpgradeBanners() {
     const banner = document.createElement('div');
     banner.className = 'upgrade-banner';
     banner.innerHTML = CloudAccount.isLoggedIn()
-      ? `<div class="upgrade-banner-text"><strong>Free Plan</strong> — You have limited access. Upgrade to Pro for unlimited videos and AI skill suggestions.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`
+      ? `<div class="upgrade-banner-text"><strong>Free Plan</strong> — Videos and tags stay on this device. Pro adds AI Scan, syncing across your devices and the coach tools.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="doSubscribe()">Upgrade to Pro</button>`
       : `<div class="upgrade-banner-text"><strong>Saved on this device</strong> — your videos, tags and progress stay in this browser. Create a free account to sync to your other devices and use AI Scan.</div><button class="btn btn-sm" style="background:var(--warning);color:var(--on-accent);white-space:nowrap" onclick="goToSignup()">Create account</button>`;
     dash.insertBefore(banner, dash.firstChild);
   }
 }
 
-// Gate: max 3 videos for free users
-function canUploadVideo() {
-  if (isProUser()) return true;
-  const count = typeof videoFiles !== 'undefined' ? videoFiles.length : 0;
-  return count < 3;
-}
+// Kept for callers that ask; local videos are never gated.
+function canUploadVideo() { return true; }
 
 // Gate: no training plans for free users
 function canAccessTrainingPlans() {
