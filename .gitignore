@@ -10,3 +10,6 @@ work/
 _test*.mp4
 _test*.mov
 sessions/
+
+# git worktrees for isolated task execution
+.worktrees/
