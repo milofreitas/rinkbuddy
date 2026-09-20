@@ -83,3 +83,46 @@ Every player obeys that tag, so those clips play **sideways** in QuickTime, in t
 Batches 1 and 2 are both **handheld footage of a public session**: the camera follows whoever is interesting, the skater is doing general skating, and there are no repetitions. Together that's 14 minutes of footage for roughly 3 seconds of labelable skill.
 
 **Prop the phone on the boards and skate the drill past it, 4–6 reps per clip, one skill per clip.** A 20-second propped clip of swizzles beats every handheld minute filmed so far.
+
+---
+
+## Batch 3 — 2026-09-20 (IMG_1800–1810, 19 min, all 4K 120 fps)
+
+**The capture problem is solved.** Every clip is propped and static, the ice is
+near-empty, and the navy 404 jersey separates from the ice at any distance. The
+only wasted footage is the two or three seconds at each end with the jersey over
+the lens.
+
+Measured on IMG_1800 with the tracker seeded on Milo:
+
+| | |
+|---|---|
+| Skater in shot | **100%** of the clip |
+| Median height in frame | **20%** |
+| Above 1/6 of frame (pose works at all) | 71% |
+| Above 1/3 of frame (what this guide asks for) | **7%** |
+
+### The one number to change: stand at 6 metres, not 11
+
+A phone's main camera has a 45.7° vertical field of view, so the frame spans
+**0.85 m for every metre of distance**. For a 1.8 m skater:
+
+| Skater fills | Distance from the phone |
+|---|---|
+| **1/3 of frame** — the target | **6.4 m** |
+| 1/4 — comfortable | 8.5 m |
+| 1/6 — the floor for pose estimation | 12.8 m |
+| 20% — what batch 3 actually was | 10.7 m |
+
+So batch 3 was filmed from about **11 m**, and everything wants **6–7 m**. That
+single change roughly doubles the pixels on the body, which is worth more than
+any processing we can do afterwards. Close enough to hear the blades, far enough
+that a whole crossover fits in frame.
+
+### Still worth fixing
+- **Don't linger next to the phone.** In IMG_1802 the loudest 16 seconds of the
+  clip is the jersey filling the lens. Prop it, skate away, come back at the end.
+- **One skill per clip, 4–6 repetitions.** The clips are still 1.5–3.5 minutes of
+  mixed skating, which means hand-labelling before anything can be measured.
+- **Say the skill out loud.** Nothing in batch 3 is slated, so what was practised
+  in each clip has to be reconstructed by eye.
