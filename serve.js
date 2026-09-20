@@ -20,7 +20,7 @@ const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const APP_URL = process.env.APP_URL || 'http://localhost:8080';
 
 const PORT = process.env.PORT || 8080;
-const HTTPS_PORT = 8443;
+const HTTPS_PORT = process.env.HTTPS_PORT || 8443;
 const DIR = path.dirname(__filename || __dirname);
 const ACCOUNTS_DIR = path.join(DIR, 'accounts');
 const accountsDirExisted = fs.existsSync(ACCOUNTS_DIR);
@@ -720,9 +720,28 @@ function handler(req, res) {
 }
 
 // HTTP server
-http.createServer(handler).listen(PORT, '0.0.0.0', () => {
+const servers = [];
+
+servers.push(http.createServer(handler).listen(PORT, '0.0.0.0', () => {
   console.log(`HTTP  → http://localhost:${PORT}`);
-});
+}));
+
+// Railway sends SIGTERM to the old container on every redeploy. Without this the
+// process dies mid-signal, npm exits non-zero and Railway reports "Deploy crashed"
+// (and emails about it) for what is a perfectly normal restart.
+let shuttingDown = false;
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} — closing servers`);
+  const done = () => { console.log('[shutdown] clean exit'); process.exit(0); };
+  const forced = setTimeout(() => { console.log('[shutdown] forced after 8s'); process.exit(0); }, 8000);
+  forced.unref();
+  let pending = servers.length;
+  if (!pending) return done();
+  servers.forEach(srv => srv.close(() => { if (--pending === 0) done(); }));
+}
+['SIGTERM', 'SIGINT'].forEach(sig => process.on(sig, () => shutdown(sig)));
 
 // HTTPS server (needed for camera access on iPhone over network)
 const certDir = path.join(DIR, '.certs');
@@ -736,12 +755,16 @@ try {
     console.log('Generated self-signed cert for HTTPS');
   }
   const opts = { key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) };
-  https.createServer(opts, handler).listen(HTTPS_PORT, '0.0.0.0', () => {
+  const httpsServer = https.createServer(opts, handler);
+  // a listen failure here is async: without this handler an in-use port kills the
+  // whole process, taking the HTTP server down with it
+  httpsServer.on('error', e => console.log(`HTTPS not started (${e.code}) — HTTP is unaffected`));
+  servers.push(httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
     const nets = require('os').networkInterfaces();
     const ips = Object.values(nets).flat().filter(n => n.family === 'IPv4' && !n.internal).map(n => n.address);
     console.log(`HTTPS → https://localhost:${HTTPS_PORT}`);
     if (ips.length) console.log(`\nOpen on iPhone → https://${ips[0]}:${HTTPS_PORT}\n(Accept the self-signed certificate warning, then camera will work)`);
-  });
+  }));
 } catch(e) {
   console.log('HTTPS not available (openssl not found). Camera requires localhost or HTTPS.');
 }
